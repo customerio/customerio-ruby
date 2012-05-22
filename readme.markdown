@@ -1,6 +1,6 @@
 # Customerio
 
-A Customer.io API client in Ruby using HTTParty.
+A ruby client for the [Customer.io](http://customer.io) [event API](https://app.customer.io/api/docs/index.html).
 
 ## Installation
 
@@ -35,11 +35,11 @@ your app, but there are several reasons why using the API client is useful:
 
 In the end, the decision on whether or not to use the API client or
 the JavaScript snippet should be based on what works best for you. 
-You'll be able to integrate fully with Customer.io with either approach.
+You'll be able to integrate fully with [Customer.io](http://customer.io) with either approach.
 
 ### Setup
 
-Create an instance of the client with your customer.io credentials
+Create an instance of the client with your [customer.io](http://customer.io) credentials
 which can be found in your [customer.io settings](https://app.customer.io/settings).
 
 If you're using Rails, create an initializer `config/initializers/customerio.rb`:
@@ -48,9 +48,9 @@ If you're using Rails, create an initializer `config/initializers/customerio.rb`
 
 ### Identify logged in customers
 
-Tracking data of logged in customers is a key part of Customer.io. In order to
+Tracking data of logged in customers is a key part of [Customer.io](http://customer.io). In order to
 send triggered emails, we must know the email address of the customer.  You can
-also specify any number of customer attributes which help tailor Customer.io to your
+also specify any number of customer attributes which help tailor [Customer.io](http://customer.io) to your
 business.
 
 Attributes you specify are useful in several ways:
@@ -65,7 +65,7 @@ set up triggers which are only sent to customers who have subscribed to a
 particular plan.
 
 You'll want indentify your customers when they sign up for your app and any time their
-key information changes. This keeps Customer.io up to date with your customer base.
+key information changes. This keeps [Customer.io](http://customer.io) up to date with your customer base.
 
     # Arguments
     # customer (required)   - a customer object which responds to a few key methods:
@@ -82,7 +82,7 @@ key information changes. This keeps Customer.io up to date with your customer ba
 
 ### Tracking a custom event
 
-Now that you're identifying your customers with Customer.io, you can now send events like
+Now that you're identifying your customers with [Customer.io](http://customer.io), you can now send events like
 "purchased" or "watchedIntroVideo".  These allow you to more specifically target your users
 with automated emails, and track conversions when you're sending automated emails to
 encourage your customers to perform an action.

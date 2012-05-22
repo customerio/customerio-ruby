@@ -4,8 +4,8 @@ require File.expand_path('../lib/customerio/version', __FILE__)
 Gem::Specification.new do |gem|
   gem.authors       = ["John Allison"]
   gem.email         = ["john@customer.io"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
+  gem.description   = "A ruby client for the Customer.io event API."
+  gem.summary       = "A ruby client for the Customer.io event API."
   gem.homepage      = "http://customer.io"
 
   gem.files         = `git ls-files`.split($\)
