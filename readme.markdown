@@ -2,6 +2,8 @@
 
 A ruby client for the [Customer.io](http://customer.io) [event API](https://app.customer.io/api/docs/index.html).
 
+[![Build Status](https://secure.travis-ci.org/customerio/customerio-ruby.png?branch=master)](http://travis-ci.org/customerio/customerio-ruby)
+
 ## Installation
 
 Add this line to your application's Gemfile:
