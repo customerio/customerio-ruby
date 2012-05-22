@@ -18,6 +18,27 @@ Or install it yourself as:
 
 ## Usage
 
+### Before we get started: API client vs. JavaScript snippet
+
+It's helpful to know that everything below can also be accomplished
+through the [Customer.io JavaScript snippet](http://customer.io/docs/basic-integration.html).
+
+In many cases, using the JavScript snippet will be easier to integrate with
+your app, but there are several reasons why using the API client is useful:
+
+* You're not planning on triggering emails based on how customers interact with
+  your website (e.g. users who haven't visited the site in X days)
+* You're using the javascript snippet, but have a few events you'd like to
+  send from your backend system.  They will work well together!
+* You'd rather not have another javascript snippet slowing down your frontend.
+  Our snippet is asynchronous and very small, but we understand.
+
+In the end, the decision on whether or not to use the API client or
+the JavaScript snippet should be based on what works best for you. 
+You'll be able to integrate fully with Customer.io with either approach.
+
+### Setup
+
 Create an instance of the client with your customer.io credentials
 which can be found in your [customer.io settings](https://app.customer.io/settings).
 
@@ -43,11 +64,12 @@ if you pass along the current subscription plan for your customers, you can
 set up triggers which are only sent to customers who have subscribed to a
 particular plan.
 
+You'll want indentify your customers when they sign up for your app and any time their
+key information changes. This keeps Customer.io up to date with your customer base.
+
     # Arguments
-    # customer (required)   - a customer object which responds to a few key
-    #                         methods about the customer:
-    # 
-    #                         customer.id - a unique identifier for the customer
+    # customer (required)   - a customer object which responds to a few key methods:
+    #                         id          - a unique identifier for the customer
     #                         email       - the customer's current email address
     #                         created_at  - a timestamp which represents when the
     #                                       customer was first created.
@@ -56,6 +78,7 @@ particular plan.
     #                         information that would be useful in your triggers.
 
     $customerio.identify(customer, first_name: "Bob", plan: "basic")
+
 
 ### Tracking a custom event
 
