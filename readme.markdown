@@ -99,7 +99,7 @@ encourage your customers to perform an action.
 ## Contributing
 
 1. Fork it
-2. Clone your fork into your computer (`git clone git@github.com:MY_USERNAME/customerio-ruby.git`) and go there (`cd customerio-ruby`)
+2. Clone your fork (`git clone git@github.com:MY_USERNAME/customerio-ruby.git && cd customerio-ruby`)
 3. Create your feature branch (`git checkout -b my-new-feature`)
 4. Commit your changes (`git commit -am 'Added some feature'`)
 5. Push to the branch (`git push origin my-new-feature`)
