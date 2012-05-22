@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Customerio::Client do
 	let(:client)   { Customerio::Client.new("SITE_ID", "API_KEY") }
-	let(:customer) { mock("Customer", id: 5, email: "customer@example.com", created_at: Time.now) }
+	let(:customer) { mock("Customer", :id => 5, :email => "customer@example.com", :created_at => Time.now) }
 
   describe ".base_uri" do
   	it "should be set to customer.io's api" do
@@ -18,8 +18,8 @@ describe Customerio::Client do
 
   	it "uses the site_id and api key for basic auth" do
   		Customerio::Client.should_receive(:put).with("/api/v1/customers/5", {
-  			basic_auth: { username: "SITE_ID", password: "API_KEY" },
-  			body: anything()
+  			:basic_auth => { :username => "SITE_ID", :password => "API_KEY" },
+  			:body => anything()
   		})
 
       client.identify(customer)
@@ -27,11 +27,11 @@ describe Customerio::Client do
 
   	it "sends the customer's id, email, and created_at timestamp" do
   		Customerio::Client.should_receive(:put).with("/api/v1/customers/5", {
-  			basic_auth: anything(),
-  			body: {
-  				id: 5,
-	        email: "customer@example.com",
-	        created_at: Time.now.to_i
+  			:basic_auth => anything(),
+  			:body => {
+  				:id => 5,
+	        :email => "customer@example.com",
+	        :created_at => Time.now.to_i
   			}
   		})
   		
@@ -40,17 +40,17 @@ describe Customerio::Client do
 
   	it "sends any optional attributes" do
   		Customerio::Client.should_receive(:put).with("/api/v1/customers/5", {
-  			basic_auth: anything(),
-  			body: {
-  				id: 5,
-	        email: "customer@example.com",
-	        created_at: Time.now.to_i,
-	        first_name: "Bob",
-	        plan: "basic"
+  			:basic_auth => anything(),
+  			:body => {
+  				:id => 5,
+	        :email => "customer@example.com",
+	        :created_at => Time.now.to_i,
+	        :first_name => "Bob",
+	        :plan => "basic"
   			}
   		})
   		
-      client.identify(customer, first_name: "Bob", plan: "basic")
+      client.identify(customer, :first_name => "Bob", :plan => "basic")
   	end
   end
 
@@ -73,8 +73,8 @@ describe Customerio::Client do
 
   	it "uses the site_id and api key for basic auth" do
   		Customerio::Client.should_receive(:post).with("/api/v1/customers/5/events", {
-  			basic_auth: { username: "SITE_ID", password: "API_KEY" },
-  			body: anything()
+  			:basic_auth => { :username => "SITE_ID", :password => "API_KEY" },
+  			:body => anything()
   		})
 
       client.track(customer, "purchase")
@@ -82,8 +82,8 @@ describe Customerio::Client do
 
   	it "sends the event name" do
   		Customerio::Client.should_receive(:post).with("/api/v1/customers/5/events", {
-  			basic_auth: anything(),
-  			body: { name: "purchase", data: {} }
+  			:basic_auth => anything(),
+  			:body => { :name => "purchase", :data => {} }
   		})
   		
       client.track(customer, "purchase")
@@ -91,14 +91,14 @@ describe Customerio::Client do
 
   	it "sends any optional event attributes" do
   		Customerio::Client.should_receive(:post).with("/api/v1/customers/5/events", {
-  			basic_auth: anything(),
-  			body: {
-  				name: "purchase",
-  			  data: { type: "socks", price: "13.99" }
+  			:basic_auth => anything(),
+  			:body => {
+  				:name => "purchase",
+  			  :data => { :type => "socks", :price => "13.99" }
   			}
   		})
   		
-      client.track(customer, "purchase", type: "socks", price: "13.99")
+      client.track(customer, "purchase", :type => "socks", :price => "13.99")
   	end
   end
 end

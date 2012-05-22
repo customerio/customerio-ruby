@@ -6,7 +6,7 @@ module Customerio
 	  base_uri 'https://app.customer.io'
 
 	  def initialize(site_id, secret_key)
-	    @auth = { username: site_id, password: secret_key }
+	    @auth = { :username => site_id, :password => secret_key }
 	  end
 
 	  def identify(customer, attributes = {})
@@ -22,17 +22,17 @@ module Customerio
 
 	  def create_or_update(customer, attributes = {})
 	    body = { 
-	      id:    customer.id,
-	      email: customer.email,
-	      created_at: customer.created_at.to_i
+	      :id => customer.id,
+	      :email => customer.email,
+	      :created_at => customer.created_at.to_i
 	    }.merge(attributes)
 
-	    self.class.put(customer_path(customer), options.merge(body: body))
+	    self.class.put(customer_path(customer), options.merge(:body => body))
 	  end
 
 	  def create_event(customer, event_name, attributes = {})
-	  	body = { name: event_name, data: attributes }
-	    self.class.post("#{customer_path(customer)}/events", options.merge(body: body))
+	  	body = { :name => event_name, :data => attributes }
+	    self.class.post("#{customer_path(customer)}/events", options.merge(:body => body))
 	  end
 
 	  def customer_path(customer)
@@ -40,7 +40,7 @@ module Customerio
 	  end
 
 	  def options
-	    { basic_auth: @auth }
+	    { :basic_auth => @auth }
 	  end
   end
 end
