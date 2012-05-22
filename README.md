@@ -44,7 +44,7 @@ which can be found in your [customer.io settings](https://app.customer.io/settin
 
 If you're using Rails, create an initializer `config/initializers/customerio.rb`:
 
-    $customerio = Customerio.new("YOUR SITE ID", "YOUR API SECRET KEY")
+    $customerio = Customerio::Client.new("YOUR SITE ID", "YOUR API SECRET KEY")
 
 ### Identify logged in customers
 
