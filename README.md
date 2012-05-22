@@ -43,19 +43,19 @@ if you pass along the current subscription plan for your customers, you can
 set up triggers which are only sent to customers who have subscribed to a
 particular plan.
 
-#### Arguments
+    # Arguments
+    # customer (required)   - a customer object which responds to a few key
+    #                         methods about the customer:
+    # 
+    #                         customer.id - a unique identifier for the customer
+    #                         email       - the customer's current email address
+    #                         created_at  - a timestamp which represents when the
+    #                                       customer was first created.
+    # 
+    # attributes (optional) - a hash of information about the customer. You can pass any
+    #                         information that would be useful in your triggers.
 
-* customer (required) - a customer object which responds to a few key methods
-about the customer:
-
-    customer.id # a unique identifier for the customer
-    email       # the customer's current email address
-    created_at  # a timestamp which represents when the customer was first created.
-
-* attributes (optional) - a hash of information about the customer. You can pass any
-information that would be useful in your triggers.
-
-    $cio.identify(customer, first_name: "Bob", plan: "basic")
+    $customerio.identify(customer, first_name: "Bob", plan: "basic")
 
 ### Tracking a custom event
 
@@ -64,15 +64,14 @@ Now that you're identifying your customers with Customer.io, you can now send ev
 with automated emails, and track conversions when you're sending automated emails to
 encourage your customers to perform an action.
 
-#### Arguments
+    # Arguments
+    # customer (required)   - the customer who you want to associate with the event.
+    # name (required)       - the name of the event you want to track.
+    # attributes (optional) - any related information you'd like to attach to this
+    #                         event. These attributes can be used in your triggers to control who should
+    #                         receive the triggered email. You can set any number of data values.
 
-* customer (required) - the customer who you want to associate with the event.
-* name (required) - the name of the event you want to track.
-* attributes (optional) - any related information you'd like to attach to this
-event. These attributes can be used in your triggers to control who should
-receive the triggered email. You can set any number of data values.
-
-    client.track(user, "purchase", type: "socks", price: "13.99")
+    $customerio.track(user, "purchase", type: "socks", price: "13.99")
 
 ## Contributing
 
