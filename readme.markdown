@@ -34,7 +34,7 @@ your app, but there are several reasons why using the API client is useful:
   Our snippet is asynchronous (doesn't affect initial page load) and very small, but we understand.
 
 In the end, the decision on whether or not to use the API client or
-the JavaScript snippet should be based on what works best for you. 
+the JavaScript snippet should be based on what works best for you.
 You'll be able to integrate **fully** with [Customer.io](http://customer.io) with either approach.
 
 ### Setup
@@ -73,7 +73,7 @@ key information changes. This keeps [Customer.io](http://customer.io) up to date
     #                         email       - the customer's current email address
     #                         created_at  - a timestamp which represents when the
     #                                       customer was first created.
-    # 
+    #
     # attributes (optional) - a hash of information about the customer. You can pass any
     #                         information that would be useful in your triggers.
 
@@ -99,7 +99,8 @@ encourage your customers to perform an action.
 ## Contributing
 
 1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Added some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+2. Clone your fork into your computer (`git clone git@github.com:MY_USERNAME/customerio-ruby.git`) and go there (`cd customerio-ruby`)
+3. Create your feature branch (`git checkout -b my-new-feature`)
+4. Commit your changes (`git commit -am 'Added some feature'`)
+5. Push to the branch (`git push origin my-new-feature`)
+6. Create new Pull Request
