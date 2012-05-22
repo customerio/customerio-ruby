@@ -31,7 +31,7 @@ your app, but there are several reasons why using the API client is useful:
 * You're using the javascript snippet, but have a few events you'd like to
   send from your backend system.  They will work well together!
 * You'd rather not have another javascript snippet slowing down your frontend.
-  Our snippet is asynchronous and very small, but we understand.
+  Our snippet is asynchronous (doesn't affect initial page load) and very small, but we understand.
 
 In the end, the decision on whether or not to use the API client or
 the JavaScript snippet should be based on what works best for you. 
