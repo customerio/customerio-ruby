@@ -12,7 +12,7 @@ And then execute:
 
     $ bundle
 
-Or install it yourself as:
+Or install it yourself:
 
     $ gem install customerio
 
@@ -23,7 +23,7 @@ Or install it yourself as:
 It's helpful to know that everything below can also be accomplished
 through the [Customer.io JavaScript snippet](http://customer.io/docs/basic-integration.html).
 
-In many cases, using the JavScript snippet will be easier to integrate with
+In many cases, using the JavaScript snippet will be easier to integrate with
 your app, but there are several reasons why using the API client is useful:
 
 * You're not planning on triggering emails based on how customers interact with
@@ -35,7 +35,7 @@ your app, but there are several reasons why using the API client is useful:
 
 In the end, the decision on whether or not to use the API client or
 the JavaScript snippet should be based on what works best for you. 
-You'll be able to integrate fully with [Customer.io](http://customer.io) with either approach.
+You'll be able to integrate **fully** with [Customer.io](http://customer.io) with either approach.
 
 ### Setup
 
@@ -60,12 +60,12 @@ the customer's name, you can personalize the triggered email by using it in the
 subject or body.
 
 * As a way to filter who should receive a triggered email.  For instance,
-if you pass along the current subscription plan for your customers, you can
+if you pass along the current subscription plan (free / basic / premium) for your customers, you can
 set up triggers which are only sent to customers who have subscribed to a
-particular plan.
+particular plan (e.g. "premium").
 
-You'll want indentify your customers when they sign up for your app and any time their
-key information changes. This keeps [Customer.io](http://customer.io) up to date with your customer base.
+You'll want to indentify your customers when they sign up for your app and any time their
+key information changes. This keeps [Customer.io](http://customer.io) up to date with your customer information.
 
     # Arguments
     # customer (required)   - a customer object which responds to a few key methods:
