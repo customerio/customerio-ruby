@@ -5,6 +5,16 @@ module Customerio
 	  include HTTParty
 	  base_uri 'https://app.customer.io'
 
+	  @@id_block = nil
+
+	  def self.id(&block)
+      @@id_block = block
+	  end
+
+	  def self.default_config
+	  	@@id_block = nil
+	  end
+
 	  def initialize(site_id, secret_key)
 	    @auth = { :username => site_id, :password => secret_key }
 	  end
@@ -21,8 +31,8 @@ module Customerio
 	  private
 
 	  def create_or_update(customer, attributes = {})
-	    body = { 
-	      :id => customer.id,
+	    body = {
+	      :id => id(customer),
 	      :email => customer.email,
 	      :created_at => customer.created_at.to_i
 	    }.merge(attributes)
@@ -36,7 +46,11 @@ module Customerio
 	  end
 
 	  def customer_path(customer)
-	    "/api/v1/customers/#{customer.id}"
+	    "/api/v1/customers/#{id(customer)}"
+	  end
+
+	  def id(customer)
+	  	@@id_block ? @@id_block.call(customer) : customer.id
 	  end
 
 	  def options
