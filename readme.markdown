@@ -48,6 +48,12 @@ If you're using Rails, create an initializer `config/initializers/customerio.rb`
 
     $customerio = Customerio::Client.new("YOUR SITE ID", "YOUR API SECRET KEY")
 
+By default, this gem identifies customers by just their `id`. However, a common approach is to use `production_2342` as the id attribute for the javascript snippet. You'll want to use the same format when using the gem:
+
+    Customerio::Client.id do |customer|
+      "#{Rails.env}_#{customer.id}"
+    end
+
 ### Identify logged in customers
 
 Tracking data of logged in customers is a key part of [Customer.io](http://customer.io). In order to
