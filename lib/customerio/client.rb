@@ -3,6 +3,8 @@ require 'httparty'
 module Customerio
   class Client
 	  include HTTParty
+    attr_accessor :auth
+
 	  base_uri 'https://app.customer.io'
 
 	  @@id_block = nil
@@ -15,8 +17,10 @@ module Customerio
 	  	@@id_block = nil
 	  end
 
-	  def initialize(site_id, secret_key)
-	    @auth = { :username => site_id, :password => secret_key }
+	  def initialize(site_id=nil, api_key=nil)
+      site_id = site_id || Customerio.configuration.site_id
+      api_key = api_key || Customerio.configuration.api_key
+	    @auth = { :username => site_id, :password => api_key }
 	  end
 
 	  def identify(customer, attributes = {})

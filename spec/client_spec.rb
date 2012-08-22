@@ -10,6 +10,26 @@ describe Customerio::Client do
   	end
   end
 
+  describe "initialization of client" do
+
+    it "by config object" do
+      Customerio.configure do |config|
+        config.api_key = "API_KEY"
+        config.site_id = "SITE_ID"
+      end
+      client = Customerio::Client.new
+      client.auth[:username].should eql("SITE_ID")
+      client.auth[:password].should eql("API_KEY")
+    end
+
+    it "by providing site_id and api_key directly" do
+      Customerio.configuration = nil
+      client = Customerio::Client.new("SITE_ID","API_KEY")
+      client.auth[:username].should eql("SITE_ID")
+      client.auth[:password].should eql("API_KEY")
+    end
+  end
+
   describe "#identify" do
   	it "sends a PUT request to customer.io's customer API" do
   		Customerio::Client.should_receive(:put).with("/api/v1/customers/5", anything())
