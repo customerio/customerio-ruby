@@ -17,6 +17,15 @@ describe Customerio do
       Customerio.configuration.site_id.should eql("SITE_ID")
     end
 
+    it "should reset configuration" do
+      Customerio.configure do |config|
+        config.api_key = "please_remove_me"
+      end
+      Customerio.configuration.api_key.should eql("please_remove_me")
+      Customerio.configuration = nil
+      Customerio.configuration.api_key.should be_nil
+    end
+
   end
 
 end

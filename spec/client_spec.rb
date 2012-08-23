@@ -74,23 +74,52 @@ describe Customerio::Client do
   	end
 
     context "client has customized identities" do
-      before do
-        Customerio::Client.id do |customer|
-          "production_#{customer.id}"
+      context "using deprecated, but still supported configuration" do
+        before do
+          Customerio::Client.id do |customer|
+            "production_#{customer.id}"
+          end
+        end
+
+        after do
+          Customerio::Client.default_config
+        end
+
+        it "identifies the customer with the identification method" do
+          Customerio::Client.should_receive(:put).with("/api/v1/customers/production_5", {
+            :basic_auth => anything(),
+            :body => {
+              :id => "production_5",
+              :email => "customer@example.com",
+              :created_at => Time.now.to_i
+            }
+          })
+
+          client.identify(customer)
         end
       end
 
-      it "identifies the customer with the identification method" do
-        Customerio::Client.should_receive(:put).with("/api/v1/customers/production_5", {
-          :basic_auth => anything(),
-          :body => {
-            :id => "production_5",
-            :email => "customer@example.com",
-            :created_at => Time.now.to_i
-          }
-        })
+      context "using preferred configuration" do
+        before do
+          Customerio.configure do |config|
+            config.customer_id do |customer|
+              "production_#{customer.id}"
+            end
+          end
+        end
 
-        client.identify(customer)
+        it "identifies the customer with the identification method" do
+          Customerio::Client.should_receive(:put).with("/api/v1/customers/production_5", {
+            :basic_auth => anything(),
+            :body => {
+              :id => "production_5",
+              :email => "customer@example.com",
+              :created_at => Time.now.to_i
+            }
+          })
+
+          client.identify(customer)
+        end
       end
     end
   end
@@ -144,8 +173,10 @@ describe Customerio::Client do
 
     context "client has customized identities" do
       before do
-        Customerio::Client.id do |customer|
-          "production_#{customer.id}"
+        Customerio.configure do |config|
+          config.customer_id do |customer|
+            "production_#{customer.id}"
+          end
         end
       end
 

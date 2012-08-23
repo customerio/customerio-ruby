@@ -19,6 +19,15 @@ describe Customerio::Configuration do
      config.site_id.should eql("some_random_string")
    end
 
+   it "should set customer_id" do
+     config.customer_id do |customer|
+       "alternate_id_#{customer.id}"
+     end
+     customer = double("customer", :id=>123)
+     config.customer_id.call(customer).should eql("alternate_id_123")
+   end
+
+
   end
 
 
