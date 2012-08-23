@@ -47,12 +47,17 @@ which can be found in your [customer.io settings](https://app.customer.io/settin
 
 If you're using Rails, create an initializer `config/initializers/customerio.rb`:
 
-    $customerio = Customerio::Client.new("YOUR SITE ID", "YOUR API SECRET KEY")
+    Customerio.configuration do |config|
+      config.site_id = "YOUR SITE ID"
+      config.api_key = "YOUR API SECRET KEY"
+    end
 
 By default, this gem identifies customers by just their `id`. However, a common approach is to use `production_2342` as the id attribute for the javascript snippet. You'll want to use the same format by customizing the id in `config/initializers/customerio.rb`:
 
-    Customerio::Client.id do |customer|
-      "#{Rails.env}_#{customer.id}"
+    Customerio.configuration do |config|
+      config.customer_id do |customer|
+        "#{Rails.env}_#{customer.id}"
+      end
     end
 
 ### Identify logged in customers
