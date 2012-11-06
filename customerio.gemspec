@@ -15,7 +15,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = Customerio::VERSION
 
-  gem.add_dependency('httparty', '~> 0.8.0')
+  gem.add_dependency('httparty', '~> 0.9.0')
 
   gem.add_development_dependency('rake')
   gem.add_development_dependency('rspec')
