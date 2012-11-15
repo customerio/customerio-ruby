@@ -23,9 +23,20 @@ module Customerio
 	    create_or_update(customer, attributes)
 	  end
 
-	  def track(customer, event_name, hash = {})
-	    identify(customer)
-	    create_event(customer, event_name, hash)
+	  def track(*args)
+      hash = args.last.is_a?(Hash) ? args.pop : {}
+
+      if args.length == 1
+        # Only passed in an event name, create an anonymous event
+        create_anonymous_event(args.first, hash)
+      else
+        # Passed in a customer and an event name.
+        # Track the event for the given customer
+        customer, event_name = args
+
+        identify(customer)
+        create_customer_event(customer, event_name, hash)
+      end
 	  end
 
 	  private
@@ -40,9 +51,17 @@ module Customerio
 	    self.class.put(customer_path(customer), options.merge(:body => body))
 	  end
 
-	  def create_event(customer, event_name, attributes = {})
+	  def create_customer_event(customer, event_name, attributes = {})
+      create_event("#{customer_path(customer)}/events", event_name, attributes)
+	  end
+
+    def create_anonymous_event(event_name, attributes = {})
+      create_event("/api/v1/events", event_name, attributes)
+    end
+
+	  def create_event(url, event_name, attributes = {})
 	  	body = { :name => event_name, :data => attributes }
-	    self.class.post("#{customer_path(customer)}/events", options.merge(:body => body))
+	    self.class.post(url, options.merge(:body => body))
 	  end
 
 	  def customer_path(customer)

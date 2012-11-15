@@ -138,5 +138,42 @@ describe Customerio::Client do
       client.track(customer, "purchase")
       end
     end
+
+    context "tracking an anonymous event" do
+      it "sends a POST request to the customer.io's anonymous event API" do
+        Customerio::Client.should_receive(:post).with("/api/v1/events", anything())
+        client.track("purchase")
+      end
+
+      it "uses the site_id and api key for basic auth" do
+        Customerio::Client.should_receive(:post).with("/api/v1/events", {
+          :basic_auth => { :username => "SITE_ID", :password => "API_KEY" },
+          :body => anything()
+        })
+
+        client.track("purchase")
+      end
+
+      it "sends the event name" do
+        Customerio::Client.should_receive(:post).with("/api/v1/events", {
+          :basic_auth => anything(),
+          :body => { :name => "purchase", :data => {} }
+        })
+
+        client.track("purchase")
+      end
+
+      it "sends any optional event attributes" do
+        Customerio::Client.should_receive(:post).with("/api/v1/events", {
+          :basic_auth => anything(),
+          :body => {
+            :name => "purchase",
+            :data => { :type => "socks", :price => "13.99" }
+          }
+        })
+
+        client.track("purchase", :type => "socks", :price => "13.99")
+      end
+    end
   end
 end
