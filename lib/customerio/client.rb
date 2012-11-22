@@ -9,6 +9,7 @@ module Customerio
     CustomerProxy = Struct.new("Customer", :id)
 
     class MissingIdAttributeError < RuntimeError; end
+    class InvalidResponse < RuntimeError; end
 
 	  @@id_block = nil
 
@@ -61,7 +62,7 @@ module Customerio
       url = customer_path(attributes[:id])
       attributes[:id] = custom_id(attributes[:id])
 
-	    self.class.put(url, options.merge(:body => attributes))
+	    verify_response(self.class.put(url, options.merge(:body => attributes)))
 	  end
 
 	  def create_customer_event(customer_id, event_name, attributes = {})
@@ -74,12 +75,20 @@ module Customerio
 
 	  def create_event(url, event_name, attributes = {})
 	  	body = { :name => event_name, :data => attributes }
-	    self.class.post(url, options.merge(:body => body))
+	    verify_response(self.class.post(url, options.merge(:body => body)))
 	  end
 
 	  def customer_path(id)
 	    "/api/v1/customers/#{custom_id(id)}"
 	  end
+
+    def verify_response(response)
+      if response.code >= 200 && response.code < 300
+        response
+      else
+        raise InvalidResponse.new("Customer.io API returned an invalid response: #{response.code}")
+      end
+    end
 
     def extract_attributes(args)
       HashWithIndifferentAccess.new(args.last.is_a?(Hash) ? args.pop : {})
