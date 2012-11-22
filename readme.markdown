@@ -49,12 +49,6 @@ If you're using Rails, create an initializer `config/initializers/customerio.rb`
 
     $customerio = Customerio::Client.new("YOUR SITE ID", "YOUR API SECRET KEY")
 
-By default, this gem identifies customers by just their `id`. However, a common approach is to use `production_2342` as the id attribute for the javascript snippet. You'll want to use the same format by customizing the id in `config/initializers/customerio.rb`:
-
-    Customerio::Client.id do |customer|
-      "#{Rails.env}_#{customer.id}"
-    end
-
 ### Identify logged in customers
 
 Tracking data of logged in customers is a key part of [Customer.io](http://customer.io). In order to
@@ -77,16 +71,17 @@ You'll want to indentify your customers when they sign up for your app and any t
 key information changes. This keeps [Customer.io](http://customer.io) up to date with your customer information.
 
     # Arguments
-    # customer (required)   - a customer object which responds to a few key methods:
-    #                         id          - a unique identifier for the customer
-    #                         email       - the customer's current email address
-    #                         created_at  - a timestamp which represents when the
-    #                                       customer was first created.
-    #
-    # attributes (optional) - a hash of information about the customer. You can pass any
-    #                         information that would be useful in your triggers.
+    # attributes (required) - a hash of information about the customer. You can pass any
+    #                         information that would be useful in your triggers. You 
+    #                         must at least pass in an id, email, and created_at timestamp.
 
-    $customerio.identify(customer, first_name: "Bob", plan: "basic")
+    $customerio.identify(
+      id: 5,
+      email: "bob@example.com,
+      created_at: customer.created_at.to_i,
+      first_name: "Bob",
+      plan: "basic"
+    )
 
 
 ### Tracking a custom event
@@ -97,13 +92,13 @@ with automated emails, and track conversions when you're sending automated email
 encourage your customers to perform an action.
 
     # Arguments
-    # customer (required)   - the customer who you want to associate with the event.
-    # name (required)       - the name of the event you want to track.
-    # attributes (optional) - any related information you'd like to attach to this
-    #                         event. These attributes can be used in your triggers to control who should
-    #                         receive the triggered email. You can set any number of data values.
+    # customer_id (required) - the id of the customer who you want to associate with the event.
+    # name (required)        - the name of the event you want to track.
+    # attributes (optional)  - any related information you'd like to attach to this
+    #                          event. These attributes can be used in your triggers to control who should
+    #                          receive the triggered email. You can set any number of data values.
 
-    $customerio.track(user, "purchase", type: "socks", price: "13.99")
+    $customerio.track(5, "purchase", type: "socks", price: "13.99")
 
 ## Contributing
 
