@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Customerio::Client do
 	let(:client)   { Customerio::Client.new("SITE_ID", "API_KEY") }
-	let(:customer) { mock("Customer", :id => 5, :email => "customer@example.com", :created_at => Time.now) }
+	let(:customer) { mock("Customer", id: 5, email: "customer@example.com", created_at: Time.now) }
 
   describe ".base_uri" do
   	it "should be set to customer.io's api" do
@@ -18,8 +18,8 @@ describe Customerio::Client do
 
     it "uses the site_id and api key for basic auth" do
       Customerio::Client.should_receive(:put).with("/api/v1/customers/5", {
-        :basic_auth => { :username => "SITE_ID", :password => "API_KEY" },
-        :body => anything()
+        basic_auth: { username: "SITE_ID", password: "API_KEY" },
+        body: anything()
       })
 
       client.identify(id: 5)
@@ -34,7 +34,7 @@ describe Customerio::Client do
           created_at: Time.now.to_i,
           first_name: "Bob",
           plan: "basic"
-        }
+        }.stringify_keys
       })
 
       client.identify(id: 5, email: "customer@example.com", created_at: Time.now.to_i, first_name: "Bob", plan: "basic")
@@ -52,7 +52,7 @@ describe Customerio::Client do
             id: 5,
             email: "customer@example.com",
             created_at: Time.now.to_i
-          }
+          }.stringify_keys
         })
 
         client.identify(customer)
@@ -67,7 +67,7 @@ describe Customerio::Client do
             created_at: Time.now.to_i,
             first_name: "Bob",
             plan: "basic"
-          }
+          }.stringify_keys
         })
 
         client.identify(customer, first_name: "Bob", plan: "basic")
@@ -88,7 +88,7 @@ describe Customerio::Client do
             id: "production_5",
             email: "customer@example.com",
             created_at: Time.now.to_i
-          }
+          }.stringify_keys
         })
 
         client.identify(customer)
@@ -101,7 +101,7 @@ describe Customerio::Client do
             id: "production_5",
             email: "customer@example.com",
             created_at: Time.now.to_i
-          }
+          }.stringify_keys
         })
 
         client.identify(id: 5, email: "customer@example.com", created_at: Time.now.to_i)
@@ -122,7 +122,7 @@ describe Customerio::Client do
 
   	it "calls identify with the user's attributes to ensure they've been properly identified" do
   		Customerio::Client.stub(:post) # don't send the request
-  		client.should_receive(:identify).with(id: 5, email: "customer@example.com", created_at: Time.now.to_i)
+  		client.should_receive(:identify).with({ id: 5, email: "customer@example.com", created_at: Time.now.to_i }.stringify_keys)
   		client.track(customer, "purchase")
   	end
 
@@ -149,11 +149,11 @@ describe Customerio::Client do
   			basic_auth: anything(),
   			body: {
   				name: "purchase",
-  			  data: { type: "socks", price: "13.99" }
+  			  data: { type: "socks", price: "13.99" }.stringify_keys
   			}
   		})
 
-      client.track(customer, "purchase", :type => "socks", :price => "13.99")
+      client.track(customer, "purchase", type: "socks", price: "13.99")
   	end
 
     it "allows tracking by customer id as well" do
@@ -161,11 +161,11 @@ describe Customerio::Client do
   			basic_auth: anything(),
   			body: {
   				name: "purchase",
-  			  data: { type: "socks", price: "13.99" }
+  			  data: { type: "socks", price: "13.99" }.stringify_keys
   			}
   		})
 
-      client.track(5, "purchase", :type => "socks", :price => "13.99")
+      client.track(5, "purchase", type: "socks", price: "13.99")
     end
 
     context "client has customized identities" do
@@ -223,7 +223,7 @@ describe Customerio::Client do
           basic_auth: anything(),
           body: {
             name: "purchase",
-            data: { type: "socks", price: "13.99" }
+            data: { type: "socks", price: "13.99" }.stringify_keys
           }
         })
 

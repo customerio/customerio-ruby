@@ -1,4 +1,5 @@
 require 'httparty'
+require 'active_support/hash_with_indifferent_access'
 
 module Customerio
   class Client
@@ -58,7 +59,7 @@ module Customerio
       raise MissingIdAttributeError.new("Must provide an customer id") unless attributes[:id]
 
       url = customer_path(attributes[:id])
-      attributes[:id] = custom_id(attributes[:id]);
+      attributes[:id] = custom_id(attributes[:id])
 
 	    self.class.put(url, options.merge(:body => attributes))
 	  end
@@ -81,18 +82,18 @@ module Customerio
 	  end
 
     def extract_attributes(args)
-      args.last.is_a?(Hash) ? args.pop : {}
+      HashWithIndifferentAccess.new(args.last.is_a?(Hash) ? args.pop : {})
     end
 
     def attributes_from(customer)
       if id?(customer)
-        { :id => customer }
+        HashWithIndifferentAccess.new(:id => customer)
       else
-        {
+        HashWithIndifferentAccess.new(
           :id => id_from(customer),
           :email => customer.email,
           :created_at => customer.created_at.to_i
-        }
+        )
       end
     end
 

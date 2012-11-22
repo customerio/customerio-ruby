@@ -16,6 +16,7 @@ Gem::Specification.new do |gem|
   gem.version       = Customerio::VERSION
 
   gem.add_dependency('httparty', '~> 0.9.0')
+  gem.add_dependency('activesupport')
 
   gem.add_development_dependency('rake')
   gem.add_development_dependency('rspec')
