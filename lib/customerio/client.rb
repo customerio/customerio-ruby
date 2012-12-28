@@ -1,32 +1,31 @@
 require 'httparty'
-require 'active_support/hash_with_indifferent_access'
 
 module Customerio
   class Client
-	  include HTTParty
-	  base_uri 'https://app.customer.io'
+    include HTTParty
+    base_uri 'https://app.customer.io'
 
     CustomerProxy = Struct.new("Customer", :id)
 
     class MissingIdAttributeError < RuntimeError; end
     class InvalidResponse < RuntimeError; end
 
-	  @@id_block = nil
+    @@id_block = nil
 
-	  def self.id(&block)
+    def self.id(&block)
       warn "[DEPRECATION] Customerio::Client.id customization is deprecated."
       @@id_block = block
-	  end
+    end
 
-	  def self.default_config
-	  	@@id_block = nil
-	  end
+    def self.default_config
+      @@id_block = nil
+    end
 
-	  def initialize(site_id, secret_key)
-	    @auth = { :username => site_id, :password => secret_key }
-	  end
+    def initialize(site_id, secret_key)
+      @auth = { :username => site_id, :password => secret_key }
+    end
 
-	  def identify(*args)
+    def identify(*args)
       attributes = extract_attributes(args)
 
       if args.any?
@@ -34,10 +33,10 @@ module Customerio
         attributes = attributes_from(customer).merge(attributes)
       end
 
-	    create_or_update(attributes)
-	  end
+      create_or_update(attributes)
+    end
 
-	  def track(*args)
+    def track(*args)
       attributes = extract_attributes(args)
 
       if args.length == 1
@@ -52,35 +51,35 @@ module Customerio
         identify(attributes_from(customer))
         create_customer_event(id_from(customer), event_name, attributes)
       end
-	  end
+    end
 
-	  private
+    private
 
-	  def create_or_update(attributes = {})
+    def create_or_update(attributes = {})
       raise MissingIdAttributeError.new("Must provide an customer id") unless attributes[:id]
 
       url = customer_path(attributes[:id])
       attributes[:id] = custom_id(attributes[:id])
 
-	    verify_response(self.class.put(url, options.merge(:body => attributes)))
-	  end
+      verify_response(self.class.put(url, options.merge(:body => attributes)))
+    end
 
-	  def create_customer_event(customer_id, event_name, attributes = {})
+    def create_customer_event(customer_id, event_name, attributes = {})
       create_event("#{customer_path(customer_id)}/events", event_name, attributes)
-	  end
+    end
 
     def create_anonymous_event(event_name, attributes = {})
       create_event("/api/v1/events", event_name, attributes)
     end
 
-	  def create_event(url, event_name, attributes = {})
-	  	body = { :name => event_name, :data => attributes }
-	    verify_response(self.class.post(url, options.merge(:body => body)))
-	  end
+    def create_event(url, event_name, attributes = {})
+      body = { :name => event_name, :data => attributes }
+      verify_response(self.class.post(url, options.merge(:body => body)))
+    end
 
-	  def customer_path(id)
-	    "/api/v1/customers/#{custom_id(id)}"
-	  end
+    def customer_path(id)
+      "/api/v1/customers/#{custom_id(id)}"
+    end
 
     def verify_response(response)
       if response.code >= 200 && response.code < 300
@@ -91,18 +90,19 @@ module Customerio
     end
 
     def extract_attributes(args)
-      HashWithIndifferentAccess.new(args.last.is_a?(Hash) ? args.pop : {})
+      hash = args.last.is_a?(Hash) ? args.pop : {}
+      hash.inject({}){ |hash, (k,v)| hash[k.to_sym] = v; hash }
     end
 
     def attributes_from(customer)
       if id?(customer)
-        HashWithIndifferentAccess.new(:id => customer)
+        { :id => customer }
       else
-        HashWithIndifferentAccess.new(
+        {
           :id => id_from(customer),
           :email => customer.email,
           :created_at => customer.created_at.to_i
-        )
+        }
       end
     end
 
@@ -115,16 +115,16 @@ module Customerio
       end
     end
 
-	  def custom_id(id)
-	  	@@id_block ? @@id_block.call(id) : id
-	  end
+    def custom_id(id)
+      @@id_block ? @@id_block.call(id) : id
+    end
 
     def id?(object)
       object.is_a?(Integer) || object.is_a?(String)
     end
 
-	  def options
-	    { :basic_auth => @auth }
-	  end
+    def options
+      { :basic_auth => @auth }
+    end
   end
 end

@@ -1,5 +1,5 @@
 require "customerio/version"
 
 module Customerio
-  autoload :Client, 'customerio/client'
+  require "customerio/client"
 end

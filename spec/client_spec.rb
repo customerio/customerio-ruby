@@ -46,7 +46,7 @@ describe Customerio::Client do
           :created_at => Time.now.to_i,
           :first_name => "Bob",
           :plan => "basic"
-        }.stringify_keys
+        }
       }).and_return(response)
 
       client.identify(:id => 5, :email => "customer@example.com", :created_at => Time.now.to_i, :first_name => "Bob", :plan => "basic")
@@ -64,7 +64,7 @@ describe Customerio::Client do
             :id => 5,
             :email => "customer@example.com",
             :created_at => Time.now.to_i
-          }.stringify_keys
+          }
         }).and_return(response)
 
         client.identify(customer)
@@ -79,10 +79,25 @@ describe Customerio::Client do
             :created_at => Time.now.to_i,
             :first_name => "Bob",
             :plan => "basic"
-          }.stringify_keys
+          }
         }).and_return(response)
 
         client.identify(customer, :first_name => "Bob", :plan => "basic")
+      end
+
+      it "allows customer object attributes to be overriden" do
+        Customerio::Client.should_receive(:put).with("/api/v1/customers/5", {
+          :basic_auth => anything(),
+          :body => {
+            :id => 5,
+            :email => "customer2@example.com",
+            :created_at => Time.now.to_i,
+            :first_name => "Bob",
+            :plan => "basic"
+          }
+        }).and_return(response)
+
+        client.identify(customer, "email" => "customer2@example.com", :first_name => "Bob", :plan => "basic")
       end
     end
 
@@ -100,7 +115,7 @@ describe Customerio::Client do
             :id => "production_5",
             :email => "customer@example.com",
             :created_at => Time.now.to_i
-          }.stringify_keys
+          }
         }).and_return(response)
 
         client.identify(customer)
@@ -113,7 +128,7 @@ describe Customerio::Client do
             :id => "production_5",
             :email => "customer@example.com",
             :created_at => Time.now.to_i
-          }.stringify_keys
+          }
         }).and_return(response)
 
         client.identify(:id => 5, :email => "customer@example.com", :created_at => Time.now.to_i)
@@ -133,7 +148,7 @@ describe Customerio::Client do
     end
 
   	it "calls identify with the user's attributes to ensure they've been properly identified" do
-  		client.should_receive(:identify).with({ :id => 5, :email => "customer@example.com", :created_at => Time.now.to_i }.stringify_keys).and_return(response)
+  		client.should_receive(:identify).with({ :id => 5, :email => "customer@example.com", :created_at => Time.now.to_i }).and_return(response)
   		client.track(customer, "purchase")
   	end
 
@@ -160,7 +175,7 @@ describe Customerio::Client do
   			:basic_auth => anything(),
   			:body => {
   				:name => "purchase",
-  			  :data => { :type => "socks", :price => "13.99" }.stringify_keys
+  			  :data => { :type => "socks", :price => "13.99" }
   			}
   		}).and_return(response)
 
@@ -172,7 +187,7 @@ describe Customerio::Client do
   			:basic_auth => anything(),
   			:body => {
   				:name => "purchase",
-  			  :data => { :type => "socks", :price => "13.99" }.stringify_keys
+  			  :data => { :type => "socks", :price => "13.99" }
   			}
   		}).and_return(response)
 
@@ -234,7 +249,7 @@ describe Customerio::Client do
           :basic_auth => anything(),
           :body => {
             :name => "purchase",
-            :data => { :type => "socks", :price => "13.99" }.stringify_keys
+            :data => { :type => "socks", :price => "13.99" }
           }
         }).and_return(response)
 

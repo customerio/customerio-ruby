@@ -1,3 +1,8 @@
+## Customerio 0.3.0 - Dec 28, 2012 ##
+
+* Now raise an error if an API call doesn't respond with a 200 response code
+* Removed dependency on ActiveSupport
+
 ## Customerio 0.2.0 - Nov 21, 2012 ##
 
 * Allow raw hashes to be passed into `identify` and `track` methods rather than a customer object.
