@@ -56,7 +56,7 @@ module Customerio
     private
 
     def create_or_update(attributes = {})
-      raise MissingIdAttributeError.new("Must provide an customer id") unless attributes[:id]
+      raise MissingIdAttributeError.new("Must provide a customer id") unless attributes[:id]
 
       url = customer_path(attributes[:id])
       attributes[:id] = custom_id(attributes[:id])
