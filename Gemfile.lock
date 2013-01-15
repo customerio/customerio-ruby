@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    customerio (0.3.0)
+    customerio (0.3.1)
       httparty (>= 0.5, < 1.0)
 
 GEM
