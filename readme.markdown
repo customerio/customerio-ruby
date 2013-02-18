@@ -83,6 +83,19 @@ key information changes. This keeps [Customer.io](http://customer.io) up to date
       plan: "basic"
     )
 
+### Deleting customers
+
+Deleting a customer will remove them, and all their information from
+Customer.io.  Note: if you're still sending data to Customer.io via
+other means (such as the javascript snippet), the customer could be
+recreated.
+
+    # Arguments
+    # customer_id (required) - a unique identifier for the customer.  This
+    #                          should be the same id you'd pass into the
+    #                          `identify` command above.
+
+    $customerio.delete(5)
 
 ### Tracking a custom event
 
