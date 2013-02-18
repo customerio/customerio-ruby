@@ -36,6 +36,10 @@ module Customerio
       create_or_update(attributes)
     end
 
+    def delete(customer_id)
+      verify_response(self.class.delete(customer_path(customer_id)))
+    end
+
     def track(*args)
       attributes = extract_attributes(args)
 

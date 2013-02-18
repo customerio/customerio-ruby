@@ -136,6 +136,13 @@ describe Customerio::Client do
     end
   end
 
+  describe "#delete" do
+  	it "sends a DELETE request to the customer.io's event API" do
+  		Customerio::Client.should_receive(:delete).with("/api/v1/customers/5").and_return(response)
+      client.delete(5)
+  	end
+  end
+
   describe "#track" do
   	it "sends a POST request to the customer.io's event API" do
   		Customerio::Client.should_receive(:post).with("/api/v1/customers/5/events", anything()).and_return(response)
