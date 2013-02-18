@@ -37,7 +37,7 @@ module Customerio
     end
 
     def delete(customer_id)
-      verify_response(self.class.delete(customer_path(customer_id)))
+      verify_response(self.class.delete(customer_path(customer_id), options))
     end
 
     def track(*args)

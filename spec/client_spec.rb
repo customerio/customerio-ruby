@@ -138,7 +138,7 @@ describe Customerio::Client do
 
   describe "#delete" do
   	it "sends a DELETE request to the customer.io's event API" do
-  		Customerio::Client.should_receive(:delete).with("/api/v1/customers/5").and_return(response)
+  		Customerio::Client.should_receive(:delete).with("/api/v1/customers/5", anything()).and_return(response)
       client.delete(5)
   	end
   end
