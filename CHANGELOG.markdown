@@ -1,3 +1,11 @@
+## Customerio 0.4.1 - Feb 18, 2013 ##
+
+* Bug fixes related to the 4.0 change.
+
+## Customerio 0.4.0 - Feb 18, 2013 ##
+
+* Added support for deleting customers.
+
 ## Customerio 0.3.0 - Dec 28, 2012 ##
 
 * Now raise an error if an API call doesn't respond with a 200 response code
