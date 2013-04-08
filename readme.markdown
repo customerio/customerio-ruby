@@ -76,11 +76,11 @@ key information changes. This keeps [Customer.io](http://customer.io) up to date
     #                         must at least pass in an id, email, and created_at timestamp.
 
     $customerio.identify(
-      id: 5,
-      email: "bob@example.com,
-      created_at: customer.created_at.to_i,
-      first_name: "Bob",
-      plan: "basic"
+      :id => 5,
+      :email => "bob@example.com,
+      :created_at => customer.created_at.to_i,
+      :first_name => "Bob",
+      :plan => "basic"
     )
 
 ### Deleting customers
@@ -111,7 +111,12 @@ encourage your customers to perform an action.
     #                          event. These attributes can be used in your triggers to control who should
     #                          receive the triggered email. You can set any number of data values.
 
-    $customerio.track(5, "purchase", type: "socks", price: "13.99")
+    $customerio.track(5, "purchase", :type => "socks", :price => "13.99")
+
+**Note:** If you'd like to track events which occurred in the past, you can include a `timestamp` attribute
+(in seconds since the epoch), and we'll use that as the date the event occurred.
+
+    $customerio.track(5, "purchase", :type => "socks", :price => "13.99", :timestamp => 1365436200)
 
 ## Contributing
 

@@ -1,3 +1,8 @@
+## Customerio 0.5.0 - Apr 8, 2013 ##
+
+* Removed deprecated methods around using a customer object. All calls simply take a hash of attributes now.
+* Added ability to set a timestamp on a tracked event.  Useful for backfilling past events.
+
 ## Customerio 0.4.1 - Feb 18, 2013 ##
 
 * Bug fixes related to the 4.0 change.

@@ -2,7 +2,6 @@ require 'spec_helper'
 
 describe Customerio::Client do
 	let(:client)   { Customerio::Client.new("SITE_ID", "API_KEY") }
-	let(:customer) { mock("Customer", :id => 5, :email => "customer@example.com", :created_at => Time.now) }
   let(:response) { mock("Response", :code => 200) }
 
   before do
@@ -13,7 +12,7 @@ describe Customerio::Client do
 
   describe ".base_uri" do
   	it "should be set to customer.io's api" do
-  		Customerio::Client.base_uri.should == "https://app.customer.io"
+  		Customerio::Client.base_uri.should == "https://track.customer.io"
   	end
   end
 
@@ -55,85 +54,6 @@ describe Customerio::Client do
     it "requires an id attribute" do
       lambda { client.identify(:email => "customer@example.com") }.should raise_error(Customerio::Client::MissingIdAttributeError)
     end
-
-    context "customer object passed in" do
-      it "sends the customer's id, email, and created_at timestamp" do
-        Customerio::Client.should_receive(:put).with("/api/v1/customers/5", {
-          :basic_auth => anything(),
-          :body => {
-            :id => 5,
-            :email => "customer@example.com",
-            :created_at => Time.now.to_i
-          }
-        }).and_return(response)
-
-        client.identify(customer)
-      end
-
-      it "sends any optional attributes" do
-        Customerio::Client.should_receive(:put).with("/api/v1/customers/5", {
-          :basic_auth => anything(),
-          :body => {
-            :id => 5,
-            :email => "customer@example.com",
-            :created_at => Time.now.to_i,
-            :first_name => "Bob",
-            :plan => "basic"
-          }
-        }).and_return(response)
-
-        client.identify(customer, :first_name => "Bob", :plan => "basic")
-      end
-
-      it "allows customer object attributes to be overriden" do
-        Customerio::Client.should_receive(:put).with("/api/v1/customers/5", {
-          :basic_auth => anything(),
-          :body => {
-            :id => 5,
-            :email => "customer2@example.com",
-            :created_at => Time.now.to_i,
-            :first_name => "Bob",
-            :plan => "basic"
-          }
-        }).and_return(response)
-
-        client.identify(customer, "email" => "customer2@example.com", :first_name => "Bob", :plan => "basic")
-      end
-    end
-
-    context "client has customized identities" do
-      before do
-        Customerio::Client.id do |customer_id|
-          "production_#{customer_id}"
-        end
-      end
-
-      it "identifies the customer with the identification method" do
-        Customerio::Client.should_receive(:put).with("/api/v1/customers/production_5", {
-          :basic_auth => anything(),
-          :body => {
-            :id => "production_5",
-            :email => "customer@example.com",
-            :created_at => Time.now.to_i
-          }
-        }).and_return(response)
-
-        client.identify(customer)
-      end
-
-      it "uses custom identity when using a pure hash" do
-        Customerio::Client.should_receive(:put).with("/api/v1/customers/production_5", {
-          :basic_auth => anything(),
-          :body => {
-            :id => "production_5",
-            :email => "customer@example.com",
-            :created_at => Time.now.to_i
-          }
-        }).and_return(response)
-
-        client.identify(:id => 5, :email => "customer@example.com", :created_at => Time.now.to_i)
-      end
-    end
   end
 
   describe "#delete" do
@@ -146,18 +66,13 @@ describe Customerio::Client do
   describe "#track" do
   	it "sends a POST request to the customer.io's event API" do
   		Customerio::Client.should_receive(:post).with("/api/v1/customers/5/events", anything()).and_return(response)
-      client.track(customer, "purchase")
+      client.track(5, "purchase")
   	end
 
     it "raises an error if POST doesn't return a 2xx response code" do
       Customerio::Client.should_receive(:post).and_return(mock("Response", :code => 500))
-      lambda { client.track(customer, "purchase") }.should raise_error(Customerio::Client::InvalidResponse)
+      lambda { client.track(5, "purchase") }.should raise_error(Customerio::Client::InvalidResponse)
     end
-
-  	it "calls identify with the user's attributes to ensure they've been properly identified" do
-  		client.should_receive(:identify).with({ :id => 5, :email => "customer@example.com", :created_at => Time.now.to_i }).and_return(response)
-  		client.track(customer, "purchase")
-  	end
 
   	it "uses the site_id and api key for basic auth" do
   		Customerio::Client.should_receive(:post).with("/api/v1/customers/5/events", {
@@ -165,7 +80,7 @@ describe Customerio::Client do
   			:body => anything()
   		})
 
-      client.track(customer, "purchase")
+      client.track(5, "purchase")
   	end
 
   	it "sends the event name" do
@@ -174,7 +89,7 @@ describe Customerio::Client do
   			:body => { :name => "purchase", :data => {} }
   		}).and_return(response)
 
-      client.track(customer, "purchase")
+      client.track(5, "purchase")
   	end
 
   	it "sends any optional event attributes" do
@@ -186,45 +101,58 @@ describe Customerio::Client do
   			}
   		}).and_return(response)
 
-      client.track(customer, "purchase", :type => "socks", :price => "13.99")
+      client.track(5, "purchase", :type => "socks", :price => "13.99")
   	end
 
-    it "allows tracking by customer id as well" do
+  	it "allows sending of a timestamp" do
   		Customerio::Client.should_receive(:post).with("/api/v1/customers/5/events", {
   			:basic_auth => anything(),
   			:body => {
   				:name => "purchase",
-  			  :data => { :type => "socks", :price => "13.99" }
+  			  :data => { :type => "socks", :price => "13.99", :timestamp => 1561231234 },
+          :timestamp => 1561231234
   			}
   		}).and_return(response)
 
-      client.track(5, "purchase", :type => "socks", :price => "13.99")
+      client.track(5, "purchase", :type => "socks", :price => "13.99", :timestamp => 1561231234)
+  	end
+
+    it "doesn't send timestamp if timestamp is in milliseconds" do
+  		Customerio::Client.should_receive(:post).with("/api/v1/customers/5/events", {
+  			:basic_auth => anything(),
+  			:body => {
+  				:name => "purchase",
+  			  :data => { :type => "socks", :price => "13.99", :timestamp => 1561231234000 }
+  			}
+  		}).and_return(response)
+
+      client.track(5, "purchase", :type => "socks", :price => "13.99", :timestamp => 1561231234000)
     end
 
-    context "client has customized identities" do
-      before do
-        Customerio::Client.id do |customer_id|
-          "production_#{customer_id}"
-        end
-      end
+    it "doesn't send timestamp if timestamp is a date" do
+      date = Time.now
 
-      it "identifies the customer with the identification method" do
-        Customerio::Client.should_receive(:post).with("/api/v1/customers/production_5/events", {
-          :basic_auth => anything(),
-          :body => anything()
-        }).and_return(response)
+  		Customerio::Client.should_receive(:post).with("/api/v1/customers/5/events", {
+  			:basic_auth => anything(),
+  			:body => {
+  				:name => "purchase",
+  			  :data => { :type => "socks", :price => "13.99", :timestamp => date }
+  			}
+  		}).and_return(response)
 
-        client.track(customer, "purchase")
-      end
+      client.track(5, "purchase", :type => "socks", :price => "13.99", :timestamp => date)
+    end
 
-      it "uses the identification method when tracking by id" do
-        Customerio::Client.should_receive(:post).with("/api/v1/customers/production_5/events", {
-          :basic_auth => anything(),
-          :body => anything()
-        }).and_return(response)
+    it "doesn't send timestamp if timestamp isn't a integer" do
+  		Customerio::Client.should_receive(:post).with("/api/v1/customers/5/events", {
+  			:basic_auth => anything(),
+  			:body => {
+  				:name => "purchase",
+  			  :data => { :type => "socks", :price => "13.99", :timestamp => "Hello world" }
+  			}
+  		}).and_return(response)
 
-        client.track(5, "purchase")
-      end
+      client.track(5, "purchase", :type => "socks", :price => "13.99", :timestamp => "Hello world")
     end
 
     context "tracking an anonymous event" do
@@ -261,6 +189,19 @@ describe Customerio::Client do
         }).and_return(response)
 
         client.track("purchase", :type => "socks", :price => "13.99")
+      end
+
+      it "allows sending of a timestamp" do
+        Customerio::Client.should_receive(:post).with("/api/v1/events", {
+          :basic_auth => anything(),
+          :body => {
+            :name => "purchase",
+  			    :data => { :type => "socks", :price => "13.99", :timestamp => 1561231234 },
+            :timestamp => 1561231234
+          }
+        }).and_return(response)
+
+        client.track("purchase", :type => "socks", :price => "13.99", :timestamp => 1561231234)
       end
     end
   end
