@@ -43,7 +43,7 @@ You'll be able to integrate **fully** with [Customer.io](http://customer.io) wit
 ### Setup
 
 Create an instance of the client with your [customer.io](http://customer.io) credentials
-which can be found in your [customer.io settings](https://app.customer.io/settings).
+which can be found on the [customer.io integration screen](https://manage.customer.io/integration).
 
 If you're using Rails, create an initializer `config/initializers/customerio.rb`:
 
