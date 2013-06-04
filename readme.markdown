@@ -77,7 +77,7 @@ key information changes. This keeps [Customer.io](http://customer.io) up to date
 
     $customerio.identify(
       :id => 5,
-      :email => "bob@example.com,
+      :email => "bob@example.com",
       :created_at => customer.created_at.to_i,
       :first_name => "Bob",
       :plan => "basic"
