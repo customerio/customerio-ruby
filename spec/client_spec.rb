@@ -42,13 +42,13 @@ describe Customerio::Client do
         :body => {
           :id => 5,
           :email => "customer@example.com",
-          :created_at => Time.now.to_i,
+          :created_at => 1374701292,
           :first_name => "Bob",
           :plan => "basic"
         }
       }).and_return(response)
 
-      client.identify(:id => 5, :email => "customer@example.com", :created_at => Time.now.to_i, :first_name => "Bob", :plan => "basic")
+      client.identify(:id => 5, :email => "customer@example.com", :created_at => 1374701292, :first_name => "Bob", :plan => "basic")
     end
 
     it "requires an id attribute" do
