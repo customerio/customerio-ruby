@@ -51,6 +51,23 @@ describe Customerio::Client do
       client.identify(:id => 5, :email => "customer@example.com", :created_at => 1374701292, :first_name => "Bob", :plan => "basic")
     end
 
+    it "converts Time, DateTime, and Date objects to integer timestamps" do
+      t = Time.at(1374701292).utc
+      dt = t.to_datetime
+      d = t.to_date
+      Customerio::Client.should_receive(:put).with("/api/v1/customers/5", {
+        :basic_auth => anything(),
+        :body => {
+          :id => 5,
+          :created_at => 1374701292,
+          :datetime_created_at => 1374701292,
+          :date_created_at => 1374638400
+        }
+      }).and_return(response)
+
+      client.identify(:id => 5, :created_at => t, :datetime_created_at => dt, :date_created_at => d)
+    end
+
     it "requires an id attribute" do
       lambda { client.identify(:email => "customer@example.com") }.should raise_error(Customerio::Client::MissingIdAttributeError)
     end
@@ -129,21 +146,22 @@ describe Customerio::Client do
       client.track(5, "purchase", :type => "socks", :price => "13.99", :timestamp => 1561231234000)
     end
 
-    it "doesn't send timestamp if timestamp is a date" do
-      date = Time.now
+    it "converts timestamp if timestamp is a Time" do
+      time = Time.now
 
   		Customerio::Client.should_receive(:post).with("/api/v1/customers/5/events", {
   			:basic_auth => anything(),
   			:body => {
   				:name => "purchase",
-  			  :data => { :type => "socks", :price => "13.99", :timestamp => date }
+  			  :data => { :type => "socks", :price => "13.99", :timestamp => time.to_i },
+          :timestamp => time.to_i
   			}
   		}).and_return(response)
 
-      client.track(5, "purchase", :type => "socks", :price => "13.99", :timestamp => date)
+      client.track(5, "purchase", :type => "socks", :price => "13.99", :timestamp => time)
     end
 
-    it "doesn't send timestamp if timestamp isn't a integer" do
+    it "doesn't send timestamp if timestamp can't be converted" do
   		Customerio::Client.should_receive(:post).with("/api/v1/customers/5/events", {
   			:basic_auth => anything(),
   			:body => {
