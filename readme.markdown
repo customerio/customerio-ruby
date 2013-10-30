@@ -47,7 +47,7 @@ which can be found in your [customer.io settings](https://app.customer.io/settin
 
 If you're using Rails, create an initializer `config/initializers/customerio.rb`:
 
-    $customerio = Customerio::Client.new("YOUR SITE ID", "YOUR API SECRET KEY")
+    customerio = Customerio::Client.new("YOUR SITE ID", "YOUR API SECRET KEY")
 
 ### Identify logged in customers
 
@@ -75,7 +75,7 @@ key information changes. This keeps [Customer.io](http://customer.io) up to date
     #                         information that would be useful in your triggers. You 
     #                         must at least pass in an id, email, and created_at timestamp.
 
-    $customerio.identify(
+    customerio.identify(
       :id => 5,
       :email => "bob@example.com,
       :created_at => customer.created_at.to_i,
@@ -95,7 +95,7 @@ recreated.
     #                          should be the same id you'd pass into the
     #                          `identify` command above.
 
-    $customerio.delete(5)
+    customerio.delete(5)
 
 ### Tracking a custom event
 
@@ -111,12 +111,12 @@ encourage your customers to perform an action.
     #                          event. These attributes can be used in your triggers to control who should
     #                          receive the triggered email. You can set any number of data values.
 
-    $customerio.track(5, "purchase", :type => "socks", :price => "13.99")
+    customerio.track(5, "purchase", :type => "socks", :price => "13.99")
 
 **Note:** If you'd like to track events which occurred in the past, you can include a `timestamp` attribute
 (in seconds since the epoch), and we'll use that as the date the event occurred.
 
-    $customerio.track(5, "purchase", :type => "socks", :price => "13.99", :timestamp => 1365436200)
+    customerio.track(5, "purchase", :type => "socks", :price => "13.99", :timestamp => 1365436200)
 
 ## Contributing
 
