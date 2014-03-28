@@ -1,3 +1,7 @@
+## Customerio 0.5.0 - Mar 28, 2014 ##
+
+* Added flag to send body encoded as JSON, rather than the default form encoding.
+
 ## Customerio 0.5.0 - Apr 8, 2013 ##
 
 * Removed deprecated methods around using a customer object. All calls simply take a hash of attributes now.
