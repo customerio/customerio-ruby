@@ -1,4 +1,5 @@
 require 'httparty'
+require 'json'
 
 module Customerio
   class Client
@@ -8,8 +9,9 @@ module Customerio
     class MissingIdAttributeError < RuntimeError; end
     class InvalidResponse < RuntimeError; end
 
-    def initialize(site_id, secret_key)
+    def initialize(site_id, secret_key, options = {})
       @auth = { :username => site_id, :password => secret_key }
+      @json = options[:json]
     end
 
     def identify(attributes)
@@ -43,7 +45,11 @@ module Customerio
 
       url = customer_path(attributes[:id])
 
-      verify_response(self.class.put(url, options.merge(:body => attributes)))
+      if @json
+        verify_response(self.class.put(url, options.merge(:body => attributes.to_json, :headers => {'Content-Type' => 'application/json'})))
+      else
+        verify_response(self.class.put(url, options.merge(:body => attributes)))
+      end
     end
 
     def create_customer_event(customer_id, event_name, attributes = {})

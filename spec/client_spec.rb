@@ -22,6 +22,16 @@ describe Customerio::Client do
       client.identify(:id => 5)
     end
 
+    it "sends a PUT request to customer.io's customer API using json headers" do
+      client = Customerio::Client.new("SITE_ID", "API_KEY", :json => true)
+      Customerio::Client.should_receive(:put).with(
+        "/api/v1/customers/5",
+        {:basic_auth=>{:username=>"SITE_ID", :password=>"API_KEY"},
+          :body=>"{\"id\":5,\"name\":\"Bob\"}",
+          :headers=>{"Content-Type"=>"application/json"}}).and_return(response)
+      client.identify(:id => 5, :name => "Bob")
+    end
+
     it "raises an error if PUT doesn't return a 2xx response code" do
       Customerio::Client.should_receive(:put).and_return(mock("Response", :code => 500))
       lambda { client.identify(:id => 5) }.should raise_error(Customerio::Client::InvalidResponse)

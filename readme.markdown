@@ -49,6 +49,10 @@ If you're using Rails, create an initializer `config/initializers/customerio.rb`
 
     customerio = Customerio::Client.new("YOUR SITE ID", "YOUR API SECRET KEY")
 
+If you'd like to send complex data to associate to a user as json, pass a json option:
+
+    customerio = Customerio::Client.new("YOUR SITE ID", "YOUR API SECRET KEY", :json => true)
+
 ### Identify logged in customers
 
 Tracking data of logged in customers is a key part of [Customer.io](http://customer.io). In order to
