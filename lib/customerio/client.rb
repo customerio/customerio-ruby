@@ -63,7 +63,11 @@ module Customerio
     def create_event(url, event_name, attributes = {})
       body = { :name => event_name, :data => attributes }
       body[:timestamp] = attributes[:timestamp] if valid_timestamp?(attributes[:timestamp])
-      verify_response(self.class.post(url, options.merge(:body => body)))
+      if @json
+        verify_response(self.class.post(url, options.merge(:body => body.to_json, :headers => {'Content-Type' => 'application/json'})))
+      else
+        verify_response(self.class.post(url, options.merge(:body => body)))
+      end
     end
 
     def customer_path(id)

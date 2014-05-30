@@ -114,6 +114,20 @@ describe Customerio::Client do
       client.track(5, "purchase", :type => "socks", :price => "13.99")
   	end
 
+    it "sends a POST request as json using json headers" do
+      client = Customerio::Client.new("SITE_ID", "API_KEY", :json => true)
+  		Customerio::Client.should_receive(:post).with(
+        "/api/v1/customers/5/events", {
+          :basic_auth => anything(),
+          :body => {
+            :name => "purchase",
+            :data => { :type => "socks", :price => "13.99" }
+          }.to_json,
+        :headers=>{"Content-Type"=>"application/json"}}).and_return(response)
+      client.track(5, "purchase", :type => "socks", :price => "13.99")
+    end
+
+
   	it "allows sending of a timestamp" do
   		Customerio::Client.should_receive(:post).with("/api/v1/customers/5/events", {
   			:basic_auth => anything(),
