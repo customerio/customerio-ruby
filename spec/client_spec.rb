@@ -93,6 +93,18 @@ describe Customerio::Client do
       client.track(5, "purchase")
   	end
 
+    it "sends JSON serialized data with a POST request to customer.io's customer API using json headers" do
+
+      client = Customerio::Client.new("SITE_ID", "API_KEY", :json => true)
+      Customerio::Client.should_receive(:post).with("/api/v1/customers/5/events", {
+        :basic_auth=>{:username=>"SITE_ID", :password=>"API_KEY"},
+        :body=>"{\"name\":\"purchase\",\"data\":{\"type\":\"socks\",\"price\":\"13.99\"}}",
+        :headers=>{"Content-Type"=>"application/json"}
+      }).and_return(response)
+
+      client.track(5, "purchase", :type => "socks", :price => "13.99")
+    end
+
   	it "sends the event name" do
   		Customerio::Client.should_receive(:post).with("/api/v1/customers/5/events", {
   			:basic_auth => anything(),
