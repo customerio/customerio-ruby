@@ -16,6 +16,7 @@ Gem::Specification.new do |gem|
   gem.version       = Customerio::VERSION
 
   gem.add_dependency('httparty', ["< 0.12", ">= 0.5"])
+  gem.add_dependency('multi_json', "~> 1.0")
 
   gem.add_development_dependency('rake')
   gem.add_development_dependency('rspec')

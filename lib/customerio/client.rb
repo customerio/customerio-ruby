@@ -1,5 +1,5 @@
 require 'httparty'
-require 'json'
+require 'multi_json'
 
 module Customerio
   class Client
@@ -46,7 +46,7 @@ module Customerio
       url = customer_path(attributes[:id])
 
       if @json
-        verify_response(self.class.put(url, options.merge(:body => attributes.to_json, :headers => {'Content-Type' => 'application/json'})))
+        verify_response(self.class.put(url, options.merge(:body => MultiJson.dump(attributes), :headers => {'Content-Type' => 'application/json'})))
       else
         verify_response(self.class.put(url, options.merge(:body => attributes)))
       end
