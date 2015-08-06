@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'multi_json'
 
 describe Customerio::Client do
 	let(:client)   { Customerio::Client.new("SITE_ID", "API_KEY") }
@@ -24,12 +25,14 @@ describe Customerio::Client do
 
     it "sends a PUT request to customer.io's customer API using json headers" do
       client = Customerio::Client.new("SITE_ID", "API_KEY", :json => true)
+      body = { :id => 5, :name => "Bob" }
+      json = MultiJson.dump(body)
       Customerio::Client.should_receive(:put).with(
         "/api/v1/customers/5",
         {:basic_auth=>{:username=>"SITE_ID", :password=>"API_KEY"},
-          :body=>"{\"id\":5,\"name\":\"Bob\"}",
+          :body=>json,
           :headers=>{"Content-Type"=>"application/json"}}).and_return(response)
-      client.identify(:id => 5, :name => "Bob")
+      client.identify(body)
     end
 
     it "raises an error if PUT doesn't return a 2xx response code" do
