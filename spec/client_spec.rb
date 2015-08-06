@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Customerio::Client do
 	let(:client)   { Customerio::Client.new("SITE_ID", "API_KEY") }
-  let(:response) { mock("Response", :code => 200) }
+  let(:response) { double("Response", :code => 200) }
 
   before do
     # Dont call out to customer.io
@@ -33,7 +33,7 @@ describe Customerio::Client do
     end
 
     it "raises an error if PUT doesn't return a 2xx response code" do
-      Customerio::Client.should_receive(:put).and_return(mock("Response", :code => 500))
+      Customerio::Client.should_receive(:put).and_return(double("Response", :code => 500))
       lambda { client.identify(:id => 5) }.should raise_error(Customerio::Client::InvalidResponse)
     end
 
@@ -80,7 +80,7 @@ describe Customerio::Client do
   	end
 
     it "raises an error if POST doesn't return a 2xx response code" do
-      Customerio::Client.should_receive(:post).and_return(mock("Response", :code => 500))
+      Customerio::Client.should_receive(:post).and_return(double("Response", :code => 500))
       lambda { client.track(5, "purchase") }.should raise_error(Customerio::Client::InvalidResponse)
     end
 
