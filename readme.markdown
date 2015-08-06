@@ -3,7 +3,7 @@
 A ruby client for the [Customer.io](http://customer.io) [event API](http://customer.io/docs/api/overview.html).
 
 [![Build Status](https://secure.travis-ci.org/customerio/customerio-ruby.png?branch=master)](http://travis-ci.org/customerio/customerio-ruby)
-[![Code Climate](https://codeclimate.com/badge.png)](https://codeclimate.com/github/customerio/customerio-ruby)
+[![Code Climate](https://codeclimate.com/github/customerio/customerio-ruby/badges/gpa.svg)](https://codeclimate.com/github/customerio/customerio-ruby)
 
 ## Installation
 
@@ -47,11 +47,15 @@ which can be found on the [customer.io integration screen](https://manage.custom
 
 If you're using Rails, create an initializer `config/initializers/customerio.rb`:
 
-    $customerio = Customerio::Client.new("YOUR SITE ID", "YOUR API SECRET KEY")
+```ruby
+$customerio = Customerio::Client.new("YOUR SITE ID", "YOUR API SECRET KEY")
+```
 
 If you'd like to send complex data to associate to a user as json, pass a json option:
 
-    customerio = Customerio::Client.new("YOUR SITE ID", "YOUR API SECRET KEY", :json => true)
+```ruby
+customerio = Customerio::Client.new("YOUR SITE ID", "YOUR API SECRET KEY", :json => true)
+```
 
 ### Identify logged in customers
 
@@ -74,18 +78,20 @@ particular plan (e.g. "premium").
 You'll want to indentify your customers when they sign up for your app and any time their
 key information changes. This keeps [Customer.io](http://customer.io) up to date with your customer information.
 
-    # Arguments
-    # attributes (required) - a hash of information about the customer. You can pass any
-    #                         information that would be useful in your triggers. You 
-    #                         must at least pass in an id, email, and created_at timestamp.
+```ruby
+# Arguments
+# attributes (required) - a hash of information about the customer. You can pass any
+#                         information that would be useful in your triggers. You 
+#                         must at least pass in an id, email, and created_at timestamp.
 
-    $customerio.identify(
-      :id => 5,
-      :email => "bob@example.com",
-      :created_at => customer.created_at.to_i,
-      :first_name => "Bob",
-      :plan => "basic"
-    )
+$customerio.identify(
+  :id => 5,
+  :email => "bob@example.com",
+  :created_at => customer.created_at.to_i,
+  :first_name => "Bob",
+  :plan => "basic"
+)
+```
 
 ### Deleting customers
 
@@ -94,12 +100,14 @@ Customer.io.  Note: if you're still sending data to Customer.io via
 other means (such as the javascript snippet), the customer could be
 recreated.
 
-    # Arguments
-    # customer_id (required) - a unique identifier for the customer.  This
-    #                          should be the same id you'd pass into the
-    #                          `identify` command above.
+```ruby
+# Arguments
+# customer_id (required) - a unique identifier for the customer.  This
+#                          should be the same id you'd pass into the
+#                          `identify` command above.
 
-    $customerio.delete(5)
+$customerio.delete(5)
+```
 
 ### Tracking a custom event
 
@@ -108,19 +116,23 @@ Now that you're identifying your customers with [Customer.io](http://customer.io
 with automated emails, and track conversions when you're sending automated emails to
 encourage your customers to perform an action.
 
-    # Arguments
-    # customer_id (required) - the id of the customer who you want to associate with the event.
-    # name (required)        - the name of the event you want to track.
-    # attributes (optional)  - any related information you'd like to attach to this
-    #                          event. These attributes can be used in your triggers to control who should
-    #                          receive the triggered email. You can set any number of data values.
+```ruby
+# Arguments
+# customer_id (required) - the id of the customer who you want to associate with the event.
+# name (required)        - the name of the event you want to track.
+# attributes (optional)  - any related information you'd like to attach to this
+#                          event. These attributes can be used in your triggers to control who should
+#                          receive the triggered email. You can set any number of data values.
 
-    $customerio.track(5, "purchase", :type => "socks", :price => "13.99")
+$customerio.track(5, "purchase", :type => "socks", :price => "13.99")
+```
 
 **Note:** If you'd like to track events which occurred in the past, you can include a `timestamp` attribute
 (in seconds since the epoch), and we'll use that as the date the event occurred.
 
-    $customerio.track(5, "purchase", :type => "socks", :price => "13.99", :timestamp => 1365436200)
+```ruby
+$customerio.track(5, "purchase", :type => "socks", :price => "13.99", :timestamp => 1365436200)
+```
 
 ## Contributing
 
