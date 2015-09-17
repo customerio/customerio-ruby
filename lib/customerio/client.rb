@@ -63,6 +63,7 @@ module Customerio
     def create_event(url, event_name, attributes = {})
       body = { :name => event_name, :data => attributes }
       body[:timestamp] = attributes[:timestamp] if valid_timestamp?(attributes[:timestamp])
+      body[:type] = "page" if valid_url?(event_name)
       verify_response(self.class.post(url, options.merge(:body => body)))
     end
 
@@ -73,7 +74,10 @@ module Customerio
     def valid_timestamp?(timestamp)
       timestamp && timestamp.is_a?(Integer) && timestamp > 999999999 && timestamp < 100000000000
     end
-
+    
+    def valid_url?(event_name)
+      event_name && event_name.is_a?(String) && event_name =~ URI::regexp(%w(http https))
+    end
 
     def verify_response(response)
       if response.code >= 200 && response.code < 300
