@@ -67,7 +67,7 @@ module Customerio
       body = { :name => event_name, :data => attributes }
       body[:timestamp] = attributes[:timestamp] if valid_timestamp?(attributes[:timestamp])
       if @json
-        verify_response(self.class.post(url, options.merge(:body => body.to_json, :headers => {'Content-Type' => 'application/json'})))
+        verify_response(self.class.post(url, options.merge(:body => MultiJson.dump(body), :headers => {'Content-Type' => 'application/json'})))
       else
         verify_response(self.class.post(url, options.merge(:body => body)))
       end
