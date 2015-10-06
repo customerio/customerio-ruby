@@ -128,10 +128,10 @@ describe Customerio::Client do
   		Customerio::Client.should_receive(:post).with(
         "/api/v1/customers/5/events", {
           :basic_auth => anything(),
-          :body => {
+          :body => MultiJson.dump({
             :name => "purchase",
             :data => { :type => "socks", :price => "13.99" }
-          }.to_json,
+          }),
         :headers=>{"Content-Type"=>"application/json"}}).and_return(response)
       client.track(5, "purchase", :type => "socks", :price => "13.99")
     end
