@@ -67,6 +67,12 @@ describe Customerio::Client do
     it "requires an id attribute" do
       lambda { client.identify(:email => "customer@example.com") }.should raise_error(Customerio::Client::MissingIdAttributeError)
     end
+
+    it 'should not raise errors when attribute keys are strings' do
+      attributes = { "id" => 5 }
+
+      lambda { client.identify(attributes) }.should_not raise_error(Customerio::Client::MissingIdAttributeError)
+    end
   end
 
   describe "#delete" do

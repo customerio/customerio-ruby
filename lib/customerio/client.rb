@@ -41,6 +41,8 @@ module Customerio
     private
 
     def create_or_update(attributes = {})
+      attributes = Hash[attributes.map { |(k,v)| [ k.to_sym, v ] }]
+
       raise MissingIdAttributeError.new("Must provide a customer id") unless attributes[:id]
 
       url = customer_path(attributes[:id])
