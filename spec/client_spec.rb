@@ -71,7 +71,7 @@ describe Customerio::Client do
     it 'should not raise errors when attribute keys are strings' do
       attributes = { "id" => 5 }
 
-      lambda { client.identify(attributes) }.should_not raise_error(Customerio::Client::MissingIdAttributeError)
+      lambda { client.identify(attributes) }.should_not raise_error()
     end
   end
 
