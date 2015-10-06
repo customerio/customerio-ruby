@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'multi_json'
 
 describe Customerio::Client do
-	let(:client)   { Customerio::Client.new("SITE_ID", "API_KEY") }
+  let(:client)   { Customerio::Client.new("SITE_ID", "API_KEY", :json => false) }
   let(:response) { double("Response", :code => 200) }
 
   before do
