@@ -40,6 +40,15 @@ describe Customerio::Client do
       lambda { client.identify(:id => 5) }.should raise_error(Customerio::Client::InvalidResponse)
     end
 
+    it "includes the HTTP response with raised errors" do
+      response = double("Response", :code => 500, :body => "whatever")
+      Customerio::Client.should_receive(:put).and_return(response)
+      lambda { client.identify(:id => 5) }.should raise_error {|error|
+        error.should be_a Customerio::Client::InvalidResponse
+        error.response.should eq response
+      }
+    end
+
     it "uses the site_id and api key for basic auth" do
       Customerio::Client.should_receive(:put).with("/api/v1/customers/5", {
         :basic_auth => { :username => "SITE_ID", :password => "API_KEY" },
