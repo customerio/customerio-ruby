@@ -1,3 +1,17 @@
+## Customerio 0.6.1 - Oct 8, 2015 ##
+
+* Include HTTP response as an attribute on the InvalidResponse exception to help with debugging failed API requests. For example:
+
+    ```ruby
+    begin
+      $customerio.track(1, 'event', { :test => 'testing' })
+    rescue => e
+      puts e.message
+      puts e.response.status
+      puts e.response.body
+    end
+    ```
+
 ## Customerio 0.6.0 - Oct 6, 2015 ##
 
 Deprecation warning: we are going to switch to JSON encoding by default for the next release. The current default is form-encoding. This will probably not affect you, unless you rely on how form-encoding arrays work.
