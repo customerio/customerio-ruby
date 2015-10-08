@@ -8,7 +8,14 @@ module Customerio
     default_timeout 10
 
     class MissingIdAttributeError < RuntimeError; end
-    class InvalidResponse < RuntimeError; end
+    class InvalidResponse < RuntimeError
+      attr_reader :response
+
+      def initialize(message, response)
+        @message = message
+        @response = response
+      end
+    end
 
     def initialize(site_id, secret_key, options = {})
       @auth = { :username => site_id, :password => secret_key }
@@ -89,7 +96,7 @@ module Customerio
       if response.code >= 200 && response.code < 300
         response
       else
-        raise InvalidResponse.new("Customer.io API returned an invalid response: #{response.code}")
+        raise InvalidResponse.new("Customer.io API returned an invalid response: #{response.code}", response)
       end
     end
 
