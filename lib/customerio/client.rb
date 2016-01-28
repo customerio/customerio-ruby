@@ -34,6 +34,7 @@ module Customerio
     end
 
     def track(*args)
+      args.compact!
       attributes = extract_attributes(args)
 
       if args.length == 1
