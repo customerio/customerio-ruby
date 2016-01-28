@@ -233,6 +233,18 @@ describe Customerio::Client do
         client.track("purchase", :type => "socks", :price => "13.99")
       end
 
+      it "sends an anonymous even when nil attributes are passed" do
+        Customerio::Client.should_receive(:post).with("/api/v1/events", {
+          :basic_auth => anything(),
+          :body => {
+            :name => "purchase",
+            :data => { :price => "20.99" }
+          }
+        }).and_return(response)
+
+        client.track("purchase", nil, :price => "13.99")
+      end
+
       it "allows sending of a timestamp" do
         Customerio::Client.should_receive(:post).with("/api/v1/events", {
           :basic_auth => anything(),
