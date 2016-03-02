@@ -1,3 +1,15 @@
+## Customerio 0.7.0 - Mar 2, 2016 ##
+
+* Add new method for tracking anonymous events: `anonymous_track`. See README for more details. Many thanks to @sdawson for this contribution! [#36](https://github.com/customerio/customerio-ruby/pull/36)
+
+* Use JSON encoding by default. [#37](https://github.com/customerio/customerio-ruby/pull/37)
+
+    If you want to stick with form-encoding for your integration, you must add `:json => false` to your Customerio::Client initializer. Like this:
+
+    ```ruby
+    customerio = Customerio::Client.new("YOUR SITE ID", "YOUR API SECRET KEY", :json => false)
+    ```
+
 ## Customerio 0.6.1 - Oct 8, 2015 ##
 
 * Include HTTP response as an attribute on the InvalidResponse exception to help with debugging failed API requests. For example:
