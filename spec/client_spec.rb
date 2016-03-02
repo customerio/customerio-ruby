@@ -11,6 +11,36 @@ describe Customerio::Client do
     Customerio::Client.stub(:put).and_return(response)
   end
 
+  describe "json option" do
+    let(:body) { { :id => 5, :name => "Bob" } }
+
+    it "uses json by default" do
+      client = Customerio::Client.new("SITE_ID", "API_KEY")
+
+      json = MultiJson.dump(body)
+      Customerio::Client.should_receive(:put).with(
+        "/api/v1/customers/5",
+        {
+          :basic_auth=>{:username=>"SITE_ID", :password=>"API_KEY"},
+          :body=>json,
+          :headers=>{"Content-Type"=>"application/json"}
+        }).and_return(response)
+      client.identify(body)
+    end
+
+    it "allows disabling json" do
+      client = Customerio::Client.new("SITE_ID", "API_KEY", :json => false)
+
+      Customerio::Client.should_receive(:put).with(
+        "/api/v1/customers/5",
+        {
+          :basic_auth=>{:username=>"SITE_ID", :password=>"API_KEY"},
+          :body=>body
+        }).and_return(response)
+      client.identify(body)
+    end
+  end
+
   describe ".base_uri" do
   	it "should be set to customer.io's api" do
   		Customerio::Client.base_uri.should == "https://track.customer.io"
