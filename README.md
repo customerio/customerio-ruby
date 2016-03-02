@@ -134,6 +134,16 @@ $customerio.track(5, "purchase", :type => "socks", :price => "13.99")
 $customerio.track(5, "purchase", :type => "socks", :price => "13.99", :timestamp => 1365436200)
 ```
 
+### Tracking anonymous events
+
+You can also send anonymous events, for situations where you don't yet have a customer record but still want to trigger a campaign:
+
+```ruby
+$customerio.anonymous_track("help_enquiry", :recipient => 'user@example.com')
+```
+
+Use the `recipient` attribute to specify the email address to send the messages to. [See our documentation on how to use anonymous events for more details](https://customer.io/docs/invitation-emails.html).
+
 ## Contributing
 
 1. Fork it
