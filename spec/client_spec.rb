@@ -247,4 +247,65 @@ describe Customerio::Client do
       end
     end
   end
+
+  describe "#anonymous_track" do
+    it "sends a POST request to the customer.io event API" do
+      Customerio::Client.should_receive(:post).with("/api/v1/events", anything()).and_return(response)
+      client.anonymous_track("purchase")
+    end
+
+    it "raises an error if POST doesn't return a 2xx response code" do
+      Customerio::Client.should_receive(:post).and_return(double("Response", :code => 500))
+      lambda { client.anonymous_track("purchase") }.should raise_error(Customerio::Client::InvalidResponse)
+    end
+
+    it "uses the site_id and api key for basic auth" do
+      Customerio::Client.should_receive(:post).with("/api/v1/events", {
+        :basic_auth => { :username => "SITE_ID", :password => "API_KEY" },
+        :body => anything()
+      })
+
+      client.anonymous_track("purchase")
+    end
+
+    it "sends the event name" do
+      Customerio::Client.should_receive(:post).with("/api/v1/events", {
+        :basic_auth => anything(),
+        :body => { :name => "purchase", :data => {} }
+      }).and_return(response)
+
+      client.anonymous_track("purchase")
+    end
+
+    it "sends any optional event attributes" do
+      Customerio::Client.should_receive(:post).with("/api/v1/events", {
+        :basic_auth => anything(),
+        :body => {
+          :name => "purchase",
+          :data => { :type => "socks", :price => "27.99" }
+        }
+      }).and_return(response)
+
+      client.anonymous_track("purchase", :type => "socks", :price => "27.99")
+    end
+
+    it "allows sending of a timestamp" do
+      Customerio::Client.should_receive(:post).with("/api/v1/events", {
+        :basic_auth => anything(),
+        :body => {
+          :name => "purchase",
+          :data => { :type => "socks", :price => "27.99", :timestamp => 1561235678 },
+          :timestamp => 1561235678
+        }
+      }).and_return(response)
+
+      client.anonymous_track("purchase", :type => "socks", :price => "27.99", :timestamp => 1561235678)
+    end
+
+    context "too many arguments are passed" do
+      it "throws an error" do
+        lambda { client.anonymous_track("purchase", "text", :type => "socks", :price => "27.99") }.should raise_error(ArgumentError)
+      end
+    end
+  end
 end

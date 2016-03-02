@@ -49,6 +49,10 @@ module Customerio
       end
     end
 
+    def anonymous_track(event_name, attributes = {})
+      create_anonymous_event(event_name, attributes)
+    end
+
     private
 
     def create_or_update(attributes = {})
