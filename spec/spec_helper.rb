@@ -2,11 +2,13 @@ require 'rubygems'
 require 'bundler/setup'
 
 require 'customerio'
-require 'fakeweb'
+require 'webmock'
 
-FakeWeb.allow_net_connect = false
+WebMock.disable_net_connect!
 
 require 'rspec'
+require 'webmock/rspec'
+
 RSpec.configure do |config|
   config.expect_with(:rspec) { |c| c.syntax = :should }
   config.mock_with(:rspec) { |c| c.syntax = :should }
