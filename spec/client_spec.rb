@@ -32,7 +32,7 @@ describe Customerio::Client do
       client = Customerio::Client.new("SITE_ID", "API_KEY", :json => false)
 
       stub_request(:put, api_uri('/api/v1/customers/5')).
-        with(:body => 'id=5&name=Bob').
+        with(:body => { :id => "5", :name => "Bob" }).
         to_return(:status => 200, :body => "", :headers => {})
 
       client.identify(body)
@@ -89,11 +89,22 @@ describe Customerio::Client do
     it "sends along all attributes" do
       time = Time.now.to_i
 
-      stub_request(:put, api_uri('/api/v1/customers/5')).
-        with(:body => "id=5&email=customer%40example.com&created_at=#{time}&first_name=Bob&plan=basic").
-        to_return(:status => 200, :body => "", :headers => {})
+      stub_request(:put, api_uri('/api/v1/customers/5')).with(
+        :body => {
+          :id => "5",
+          :email => "customer@example.com",
+          :created_at => time.to_s,
+          :first_name => "Bob",
+          :plan => "basic"
+        }).to_return(:status => 200, :body => "", :headers => {})
 
-      client.identify(:id => 5, :email => "customer@example.com", :created_at => time, :first_name => "Bob", :plan => "basic")
+      client.identify({
+        :id => 5,
+        :email => "customer@example.com",
+        :created_at => time,
+        :first_name => "Bob",
+        :plan => "basic"
+      })
     end
 
     it "requires an id attribute" do
@@ -139,7 +150,13 @@ describe Customerio::Client do
 
     it "sends any optional event attributes" do
       stub_request(:post, api_uri('/api/v1/customers/5/events')).
-         with(:body => "name=purchase&data[type]=socks&data[price]=13.99").
+         with(:body => {
+          :name => "purchase",
+          :data => {
+            :type => "socks",
+            :price => "13.99"
+          }
+        }).
         to_return(:status => 200, :body => "", :headers => {})
 
       client.track(5, "purchase", :type => "socks", :price => "13.99")
@@ -160,7 +177,15 @@ describe Customerio::Client do
 
     it "allows sending of a timestamp" do
       stub_request(:post, api_uri('/api/v1/customers/5/events')).
-        with(:body => "name=purchase&data[type]=socks&data[price]=13.99&data[timestamp]=1561231234&timestamp=1561231234").
+        with(:body => {
+          :name => "purchase",
+          :data => {
+            :type => "socks",
+            :price => "13.99",
+            :timestamp => "1561231234"
+          },
+          :timestamp => "1561231234"
+        }).
         to_return(:status => 200, :body => "", :headers => {})
 
       client.track(5, "purchase", :type => "socks", :price => "13.99", :timestamp => 1561231234)
@@ -168,7 +193,14 @@ describe Customerio::Client do
 
     it "doesn't send timestamp if timestamp is in milliseconds" do
       stub_request(:post, api_uri('/api/v1/customers/5/events')).
-        with(:body => "name=purchase&data[type]=socks&data[price]=13.99&data[timestamp]=1561231234000").
+        with(:body => {
+          :name => "purchase",
+          :data => {
+            :type => "socks",
+            :price => "13.99",
+            :timestamp => "1561231234000"
+          }
+        }).
         to_return(:status => 200, :body => "", :headers => {})
 
       client.track(5, "purchase", :type => "socks", :price => "13.99", :timestamp => 1561231234000)
@@ -178,15 +210,30 @@ describe Customerio::Client do
       date = Time.now
 
       stub_request(:post, api_uri('/api/v1/customers/5/events')).
-        with(:body => /^name=purchase&data\[type\]=socks&data\[price\]=13\.99&data\[timestamp\]=[^&]+$/).
+        with(:body => {
+          :name => "purchase",
+          :data => {
+            :type => "socks",
+            :price => "13.99",
+            :timestamp => Time.now.to_s
+          }
+        }).
         to_return(:status => 200, :body => "", :headers => {})
 
       client.track(5, "purchase", :type => "socks", :price => "13.99", :timestamp => date)
     end
 
-    it "doesn't send timestamp if timestamp isn't a integer" do
+    it "doesn't send timestamp if timestamp isn't an integer" do
       stub_request(:post, api_uri('/api/v1/customers/5/events')).
-        with(:body => "name=purchase&data[type]=socks&data[price]=13.99&data[timestamp]=Hello%20world").
+        with(:body => {
+          :name => "purchase",
+          :data => {
+            :type => "socks",
+            :price => "13.99",
+            :timestamp => "Hello world"
+          }
+        }).
+
         to_return(:status => 200, :body => "", :headers => {})
 
       client.track(5, "purchase", :type => "socks", :price => "13.99", :timestamp => "Hello world")
@@ -203,7 +250,13 @@ describe Customerio::Client do
 
       it "sends any optional event attributes" do
         stub_request(:post, api_uri('/api/v1/events')).
-          with(:body => "name=purchase&data[type]=socks&data[price]=13.99").
+          with(:body => {
+            :name => "purchase",
+            :data => {
+              :type => "socks",
+              :price => "13.99"
+            }
+          }).
           to_return(:status => 200, :body => "", :headers => {})
 
         client.track("purchase", :type => "socks", :price => "13.99")
@@ -211,7 +264,15 @@ describe Customerio::Client do
 
       it "allows sending of a timestamp" do
         stub_request(:post, api_uri('/api/v1/events')).
-          with(:body => "name=purchase&data[type]=socks&data[price]=13.99&data[timestamp]=1561231234&timestamp=1561231234").
+          with(:body => {
+            :name => "purchase",
+            :data => {
+              :type => "socks",
+              :price => "13.99",
+              :timestamp => "1561231234"
+            },
+            :timestamp => "1561231234"
+          }).
           to_return(:status => 200, :body => "", :headers => {})
 
         client.track("purchase", :type => "socks", :price => "13.99", :timestamp => 1561231234)
@@ -238,7 +299,14 @@ describe Customerio::Client do
 
     it "sends any optional event attributes" do
       stub_request(:post, api_uri('/api/v1/events')).
-        with(:body => "name=purchase&data[type]=socks&data[price]=27.99").
+          with(:body => {
+            :name => "purchase",
+            :data => {
+              :type => "socks",
+              :price => "27.99"
+            },
+          }).
+
         to_return(:status => 200, :body => "", :headers => {})
 
       client.anonymous_track("purchase", :type => "socks", :price => "27.99")
@@ -246,7 +314,16 @@ describe Customerio::Client do
 
     it "allows sending of a timestamp" do
       stub_request(:post, api_uri('/api/v1/events')).
-        with(:body => "name=purchase&data[type]=socks&data[price]=27.99&data[timestamp]=1561235678&timestamp=1561235678").
+          with(:body => {
+            :name => "purchase",
+            :data => {
+              :type => "socks",
+              :price => "27.99",
+              :timestamp => "1561235678"
+            },
+            :timestamp => "1561235678"
+          }).
+
         to_return(:status => 200, :body => "", :headers => {})
 
       client.anonymous_track("purchase", :type => "socks", :price => "27.99", :timestamp => 1561235678)
