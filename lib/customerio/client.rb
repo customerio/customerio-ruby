@@ -21,7 +21,7 @@ module Customerio
       @username = site_id
       @password = secret_key
       @json = options.has_key?(:json) ? options[:json] : true
-      @base_uri = URI.parse(options[:base_uri] || DEFAULT_BASE_URI)
+      @base_uri = options[:base_uri] || DEFAULT_BASE_URI
       @timeout = options[:timeout] || DEFAULT_TIMEOUT
     end
 
