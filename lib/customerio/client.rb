@@ -1,13 +1,13 @@
-require 'httparty'
+require 'net/http'
 require 'multi_json'
 
 module Customerio
-  class Client
-    include HTTParty
-    base_uri 'https://track.customer.io'
-    default_timeout 10
+  DEFAULT_BASE_URI = 'https://track.customer.io'
+  DEFAULT_TIMEOUT  = 10
 
+  class Client
     class MissingIdAttributeError < RuntimeError; end
+    class InvalidRequest < RuntimeError; end
     class InvalidResponse < RuntimeError
       attr_reader :response
 
@@ -18,8 +18,11 @@ module Customerio
     end
 
     def initialize(site_id, secret_key, options = {})
-      @auth = { :username => site_id, :password => secret_key }
+      @username = site_id
+      @password = secret_key
       @json = options.has_key?(:json) ? options[:json] : true
+      @base_uri = URI.parse(options[:base_uri] || DEFAULT_BASE_URI)
+      @timeout = options[:timeout] || DEFAULT_TIMEOUT
     end
 
     def identify(attributes)
@@ -27,7 +30,7 @@ module Customerio
     end
 
     def delete(customer_id)
-      verify_response(self.class.delete(customer_path(customer_id), options))
+      verify_response(request(:delete, customer_path(customer_id)))
     end
 
     def track(*args)
@@ -59,11 +62,7 @@ module Customerio
 
       url = customer_path(attributes[:id])
 
-      if @json
-        verify_response(self.class.put(url, options.merge(:body => MultiJson.dump(attributes), :headers => {'Content-Type' => 'application/json'})))
-      else
-        verify_response(self.class.put(url, options.merge(:body => attributes, :headers => {'Content-Type' => 'application/x-www-form-urlencoded'})))
-      end
+      verify_response(request(:put, url, attributes))
     end
 
     def create_customer_event(customer_id, event_name, attributes = {})
@@ -77,11 +76,7 @@ module Customerio
     def create_event(url, event_name, attributes = {})
       body = { :name => event_name, :data => attributes }
       body[:timestamp] = attributes[:timestamp] if valid_timestamp?(attributes[:timestamp])
-      if @json
-        verify_response(self.class.post(url, options.merge(:body => MultiJson.dump(body), :headers => {'Content-Type' => 'application/json'})))
-      else
-        verify_response(self.class.post(url, options.merge(:body => body, :headers => {'Content-Type' => 'application/x-www-form-urlencoded'})))
-      end
+      verify_response(request(:post, url, body))
     end
 
     def customer_path(id)
@@ -94,7 +89,7 @@ module Customerio
 
 
     def verify_response(response)
-      if response.code >= 200 && response.code < 300
+      if response.code.to_i >= 200 && response.code.to_i < 300
         response
       else
         raise InvalidResponse.new("Customer.io API returned an invalid response: #{response.code}", response)
@@ -106,8 +101,46 @@ module Customerio
       hash.inject({}){ |hash, (k,v)| hash[k.to_sym] = v; hash }
     end
 
-    def options
-      { :basic_auth => @auth }
+    def request(method, path, body = nil, headers = {})
+      uri = URI.join(@base_uri, path)
+
+      session = Net::HTTP.new(uri.host, uri.port)
+      session.use_ssl = (uri.scheme == 'https')
+      session.open_timeout = @timeout
+      session.read_timeout = @timeout
+
+      req = request_class(method).new(uri.path)
+      req.initialize_http_header(headers)
+      req.basic_auth @username, @password
+
+      add_request_body(req, body) unless body.nil?
+
+      session.start do |http|
+        http.request(req)
+      end
+    end
+
+    def request_class(method)
+      case method
+      when :post
+        Net::HTTP::Post
+      when :put
+        Net::HTTP::Put
+      when :delete
+        Net::HTTP::Delete
+      else
+        raise InvalidRequest.new("Invalid request method #{method.inspect}")
+      end
+    end
+
+    def add_request_body(req, body)
+      if @json
+        req.add_field('Content-Type', 'application/json')
+        req.body = MultiJson.dump(body)
+      else
+        req.add_field('Content-Type', 'application/x-www-form-urlencoded')
+        req.body = ParamEncoder.to_params(body)
+      end
     end
   end
 end

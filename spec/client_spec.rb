@@ -39,12 +39,6 @@ describe Customerio::Client do
     end
   end
 
-  describe ".base_uri" do
-    it "should be set to customer.io's api" do
-      Customerio::Client.base_uri.should == "https://track.customer.io"
-    end
-  end
-
   describe "#identify" do
     it "sends a PUT request to customer.io's customer API" do
       stub_request(:put, api_uri('/api/v1/customers/5')).
@@ -81,7 +75,7 @@ describe Customerio::Client do
 
       lambda { client.identify(:id => 5) }.should raise_error {|error|
         error.should be_a Customerio::Client::InvalidResponse
-        error.response.code.should eq 500
+        error.response.code.should eq "500"
         error.response.body.should eq "whatever"
       }
     end
@@ -160,6 +154,32 @@ describe Customerio::Client do
         to_return(:status => 200, :body => "", :headers => {})
 
       client.track(5, "purchase", :type => "socks", :price => "13.99")
+    end
+
+    it "copes with arrays" do
+      stub_request(:post, api_uri('/api/v1/customers/5/events')).
+         with(:body => {
+          :name => "event",
+          :data => {
+            :things => ["a", "b", "c"]
+          }
+        }).
+        to_return(:status => 200, :body => "", :headers => {})
+
+      client.track(5, "event", :things => ["a", "b", "c"])
+    end
+
+    it "copes with hashes" do
+      stub_request(:post, api_uri('/api/v1/customers/5/events')).
+         with(:body => {
+          :name => "event",
+          :data => {
+            :stuff => { :a => "b" }
+          }
+        }).
+        to_return(:status => 200, :body => "", :headers => {})
+
+      client.track(5, "event", :stuff => { :a => "b" })
     end
 
     it "sends a POST request as json using json headers" do
