@@ -56,6 +56,7 @@ module Customerio
       attributes = Hash[attributes.map { |(k,v)| [ k.to_sym, v ] }]
 
       raise MissingIdAttributeError.new("Must provide a customer id") unless attributes[:id]
+      attributes = normalize_attributes(attributes)
 
       url = customer_path(attributes[:id])
 
@@ -75,6 +76,7 @@ module Customerio
     end
 
     def create_event(url, event_name, attributes = {})
+      attributes = normalize_attributes(attributes)
       body = { :name => event_name, :data => attributes }
       body[:timestamp] = attributes[:timestamp] if valid_timestamp?(attributes[:timestamp])
       if @json
@@ -92,7 +94,6 @@ module Customerio
       timestamp && timestamp.is_a?(Integer) && timestamp > 999999999 && timestamp < 100000000000
     end
 
-
     def verify_response(response)
       if response.code >= 200 && response.code < 300
         response
@@ -102,8 +103,20 @@ module Customerio
     end
 
     def extract_attributes(args)
-      hash = args.last.is_a?(Hash) ? args.pop : {}
-      hash.inject({}){ |hash, (k,v)| hash[k.to_sym] = v; hash }
+      args.last.is_a?(Hash) ? args.pop : {}
+    end
+
+    def normalize_attributes(attributes)
+      attributes.inject({}){ |result, (k,v)| result[k.to_sym] = encode_value(v); result }
+    end
+
+    def encode_value(value)
+      case value
+      when Time, Date, DateTime
+        value.to_time.to_i
+      else
+        value
+      end
     end
 
     def options
