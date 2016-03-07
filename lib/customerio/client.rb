@@ -62,7 +62,7 @@ module Customerio
       if @json
         verify_response(self.class.put(url, options.merge(:body => MultiJson.dump(attributes), :headers => {'Content-Type' => 'application/json'})))
       else
-        verify_response(self.class.put(url, options.merge(:body => attributes)))
+        verify_response(self.class.put(url, options.merge(:body => attributes, :headers => {'Content-Type' => 'application/x-www-form-urlencoded'})))
       end
     end
 
@@ -80,7 +80,7 @@ module Customerio
       if @json
         verify_response(self.class.post(url, options.merge(:body => MultiJson.dump(body), :headers => {'Content-Type' => 'application/json'})))
       else
-        verify_response(self.class.post(url, options.merge(:body => body)))
+        verify_response(self.class.post(url, options.merge(:body => body, :headers => {'Content-Type' => 'application/x-www-form-urlencoded'})))
       end
     end
 
