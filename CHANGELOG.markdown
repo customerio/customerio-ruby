@@ -1,3 +1,11 @@
+## Customerio 1.0.0 - Mar 15, 2016 ##
+
+There is a slight breaking change in this release. If you are depending on the HTTP response object included in the InvalidResponse exception (introduced in 0.6.1), note that it is now a `Net::HTTPBadRequest`.
+
+* Remove HTTParty dependency, use Net::HTTP instead. [#42](https://github.com/customerio/customerio-ruby/pull/42)
+
+* Update test suite to use webmock, to increase confidence that we're not changing our HTTP requests [#41](https://github.com/customerio/customerio-ruby/pull/41)
+
 ## Customerio 0.7.0 - Mar 2, 2016 ##
 
 * Add new method for tracking anonymous events: `anonymous_track`. See README for more details. Many thanks to @sdawson for this contribution! [#36](https://github.com/customerio/customerio-ruby/pull/36)
