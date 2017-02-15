@@ -1,6 +1,6 @@
 # Customerio
 
-A ruby client for the [Customer.io](http://customer.io) [event API](http://customer.io/docs/api/overview.html).
+A ruby client for the [Customer.io](http://customer.io) [event API](http://learn.customer.io/api/).
 
 [![Build Status](https://secure.travis-ci.org/customerio/customerio-ruby.png?branch=master)](http://travis-ci.org/customerio/customerio-ruby)
 [![Code Climate](https://codeclimate.com/github/customerio/customerio-ruby/badges/gpa.svg)](https://codeclimate.com/github/customerio/customerio-ruby)
@@ -24,7 +24,7 @@ Or install it yourself:
 ### Before we get started: API client vs. JavaScript snippet
 
 It's helpful to know that everything below can also be accomplished
-through the [Customer.io JavaScript snippet](http://customer.io/docs/basic-integration.html).
+through the [Customer.io JavaScript snippet](http://learn.customer.io/developer-documentation/javascript-quick-start.html).
 
 In many cases, using the JavaScript snippet will be easier to integrate with
 your app, but there are several reasons why using the API client is useful:
@@ -43,7 +43,7 @@ You'll be able to integrate **fully** with [Customer.io](http://customer.io) wit
 ### Setup
 
 Create an instance of the client with your [customer.io](http://customer.io) credentials
-which can be found on the [customer.io integration screen](https://manage.customer.io/integration).
+which can be found on the [customer.io integration screen](https://fly.customer.io/account/customerio_integration).
 
 If you're using Rails, create an initializer `config/initializers/customerio.rb`:
 
@@ -142,7 +142,7 @@ You can also send anonymous events, for situations where you don't yet have a cu
 $customerio.anonymous_track("help_enquiry", :recipient => 'user@example.com')
 ```
 
-Use the `recipient` attribute to specify the email address to send the messages to. [See our documentation on how to use anonymous events for more details](https://customer.io/docs/invitation-emails.html).
+Use the `recipient` attribute to specify the email address to send the messages to. [See our documentation on how to use anonymous events for more details](https://learn.customer.io/recipes/invite-emails.html).
 
 ## Contributing
 
