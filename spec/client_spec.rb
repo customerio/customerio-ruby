@@ -306,7 +306,11 @@ describe Customerio::Client do
         with(:body => "name=purchase").
         to_return(:status => 500, :body => "", :headers => {})
 
-      lambda { client.anonymous_track("purchase") }.should raise_error(Customerio::Client::InvalidResponse)
+      lambda { client.anonymous_track("purchase", :recipient => "email@example.com") }.should raise_error(Customerio::Client::InvalidResponse)
+    end
+
+    it "requires a recipient attribute" do
+      lambda { client.anonymous_track("purchase", :without_recipient => 'x') }.should raise_error(Customerio::Client::MissingIdAttributeError)
     end
 
     it "uses the site_id and api key for basic auth and sends the event name" do
@@ -314,7 +318,7 @@ describe Customerio::Client do
         with(:body => "name=purchase").
         to_return(:status => 200, :body => "", :headers => {})
 
-      client.anonymous_track("purchase")
+      client.anonymous_track("purchase", :recipient => "email@example.com")
     end
 
     it "sends any optional event attributes" do
@@ -329,7 +333,7 @@ describe Customerio::Client do
 
         to_return(:status => 200, :body => "", :headers => {})
 
-      client.anonymous_track("purchase", :type => "socks", :price => "27.99")
+      client.anonymous_track("purchase", :type => "socks", :price => "27.99", :recipient => "email@example.com")
     end
 
     it "allows sending of a timestamp" do
@@ -346,7 +350,7 @@ describe Customerio::Client do
 
         to_return(:status => 200, :body => "", :headers => {})
 
-      client.anonymous_track("purchase", :type => "socks", :price => "27.99", :timestamp => 1561235678)
+      client.anonymous_track("purchase", :type => "socks", :price => "27.99", :timestamp => 1561235678, :recipient => "email@example.com")
     end
 
     context "too many arguments are passed" do

@@ -50,6 +50,7 @@ module Customerio
     end
 
     def anonymous_track(event_name, attributes = {})
+      raise MissingIdAttributeError.new("Must provide a recipient") unless attributes[:recipient]
       create_anonymous_event(event_name, attributes)
     end
 
