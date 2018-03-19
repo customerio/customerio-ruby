@@ -55,7 +55,7 @@ module Customerio
       create_anonymous_event(event_name, attributes)
     end
 
-    def create_device(customer_id, platform, token, last_used)
+    def add_device(customer_id, platform, token, last_used)
       raise InvalidTimestampError.new("last_used must be a valid UNIX timestamp") unless valid_timestamp?(last_used)
       raise UnsupportedPlatformError.new("platform must be one of [ios, android]") unless platform == "ios" || platform == "android"
 

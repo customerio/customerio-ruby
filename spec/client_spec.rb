@@ -361,17 +361,17 @@ describe Customerio::Client do
       stub_request(:put, api_uri('/api/v1/customers/5/devices')).
         to_return(:status => 200, :body => "", :headers => {})
 
-      client.create_device(5, "ios", "myDeviceToken", 1561235678)
+      client.add_device(5, "ios", "myDeviceToken", 1561235678)
     end
     it "requires a valid timestamp for last_used" do
       stub_request(:put, api_uri('/api/v1/customers/5/devices')).
         to_return(:status => 200, :body => "", :headers => {})
-       lambda { client.create_device(5, "ios", "myDeviceToken", "not_a_timestamp") }.should raise_error(Customerio::Client::InvalidTimestampError)
+       lambda { client.add_device(5, "ios", "myDeviceToken", "not_a_timestamp") }.should raise_error(Customerio::Client::InvalidTimestampError)
     end
     it "requires a supported platform" do
       stub_request(:put, api_uri('/api/v1/customers/5/devices')).
         to_return(:status => 200, :body => "", :headers => {})
-       lambda { client.create_device(5, "carrier_pigeon", "myDeviceToken", 1561235678) }.should raise_error(Customerio::Client::UnsupportedPlatformError)
+       lambda { client.add_device(5, "carrier_pigeon", "myDeviceToken", 1561235678) }.should raise_error(Customerio::Client::UnsupportedPlatformError)
     end
     it "supports deletion of devices by token" do
       stub_request(:delete, api_uri('/api/v1/customers/5/devices/myDeviceToken')).
