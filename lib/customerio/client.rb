@@ -7,6 +7,8 @@ module Customerio
 
   class Client
     class MissingIdAttributeError < RuntimeError; end
+    class InvalidTimestampError < RuntimeError; end
+    class UnsupportedPlatformError < RuntimeError; end
     class InvalidRequest < RuntimeError; end
     class InvalidResponse < RuntimeError
       attr_reader :response
@@ -53,7 +55,32 @@ module Customerio
       create_anonymous_event(event_name, attributes)
     end
 
+    def create_device(customer_id, platform, token, last_used)
+      raise InvalidTimestampError.new("last_used must be a valid UNIX timestamp") unless valid_timestamp?(last_used)
+      raise UnsupportedPlatformError.new("platform must be one of [ios, android]") unless platform == "ios" || platform == "android"
+
+      verify_response(request(:put, device_path(customer_id), {
+        :device => {
+          :id => token,
+          :platform => platform,
+          :last_used => last_used
+        }
+      }))
+    end
+
+    def delete_device(customer_id, token)
+      verify_response(request(:delete, device_token_path(customer_id, token)))
+    end
+
     private
+
+    def device_path(customer_id)
+      "/api/v1/customers/#{customer_id}/devices"
+    end
+
+    def device_token_path(customer_id, token)
+      "/api/v1/customers/#{customer_id}/devices/#{token}"
+    end
 
     def create_or_update(attributes = {})
       attributes = Hash[attributes.map { |(k,v)| [ k.to_sym, v ] }]
