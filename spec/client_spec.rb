@@ -361,23 +361,54 @@ describe Customerio::Client do
       stub_request(:put, api_uri('/api/v1/customers/5/devices')).
         to_return(:status => 200, :body => "", :headers => {})
 
-      client.add_device(5, "ios", "myDeviceToken", 1561235678)
+      client.add_device(5, "androidDeviceID", "ios", {:last_used=>1561235678})
+      client.add_device(5, "iosDeviceID", "android")
     end
-    it "requires a valid timestamp for last_used" do
+    it "requires a valid customer_id when creating" do
       stub_request(:put, api_uri('/api/v1/customers/5/devices')).
-        to_return(:status => 200, :body => "", :headers => {})
-       lambda { client.add_device(5, "ios", "myDeviceToken", "not_a_timestamp") }.should raise_error(Customerio::Client::InvalidTimestampError)
-    end
-    it "requires a supported platform" do
-      stub_request(:put, api_uri('/api/v1/customers/5/devices')).
-        to_return(:status => 200, :body => "", :headers => {})
-       lambda { client.add_device(5, "carrier_pigeon", "myDeviceToken", 1561235678) }.should raise_error(Customerio::Client::UnsupportedPlatformError)
-    end
-    it "supports deletion of devices by token" do
-      stub_request(:delete, api_uri('/api/v1/customers/5/devices/myDeviceToken')).
         to_return(:status => 200, :body => "", :headers => {})
 
-      client.delete_device(5, "myDeviceToken")
+       lambda { client.add_device("", "ios", "myDeviceID") }.should raise_error(Customerio::Client::ParamError)
+       lambda { client.add_device(nil, "ios", "myDeviceID", {:last_used=>1561235678}) }.should raise_error(Customerio::Client::ParamError)
+    end
+    it "requires a valid token when creating" do
+      stub_request(:put, api_uri('/api/v1/customers/5/devices')).
+        to_return(:status => 200, :body => "", :headers => {})
+
+       lambda { client.add_device(5, "", "ios") }.should raise_error(Customerio::Client::ParamError)
+       lambda { client.add_device(5, nil, "ios", {:last_used=>1561235678}) }.should raise_error(Customerio::Client::ParamError)
+    end
+    it "accepts a nil data param" do
+      stub_request(:put, api_uri('/api/v1/customers/5/devices')).
+        to_return(:status => 200, :body => "", :headers => {})
+
+        client.add_device(5, "ios", "myDeviceID", nil)
+    end
+    it "fails on invalid data param" do
+      stub_request(:put, api_uri('/api/v1/customers/5/devices')).
+        to_return(:status => 200, :body => "", :headers => {})
+
+       lambda { client.add_device(5, "ios", "myDeviceID", 1000) }.should raise_error(Customerio::Client::ParamError)
+    end
+    it "supports deletion of devices by token" do
+      stub_request(:delete, api_uri('/api/v1/customers/5/devices/myDeviceID')).
+        to_return(:status => 200, :body => "", :headers => {})
+
+      client.delete_device(5, "myDeviceID")
+    end
+    it "requires a valid customer_id when deleting" do
+      stub_request(:delete, api_uri('/api/v1/customers/5/devices/myDeviceID')).
+        to_return(:status => 200, :body => "", :headers => {})
+
+       lambda { client.delete_device("", "myDeviceID") }.should raise_error(Customerio::Client::ParamError)
+       lambda { client.delete_device(nil, "myDeviceID") }.should raise_error(Customerio::Client::ParamError)
+    end
+    it "requires a valid device_id when deleting" do
+      stub_request(:delete, api_uri('/api/v1/customers/5/devices/myDeviceID')).
+        to_return(:status => 200, :body => "", :headers => {})
+
+       lambda { client.delete_device(5, "") }.should raise_error(Customerio::Client::ParamError)
+       lambda { client.delete_device(5, nil) }.should raise_error(Customerio::Client::ParamError)
     end
   end
 end

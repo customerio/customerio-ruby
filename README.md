@@ -149,8 +149,14 @@ Use the `recipient` attribute to specify the email address to send the messages 
 To send push notifications, you can add ios and android device tokens to a customer:
 
 ```ruby
-$customerio.add_device(5, "ios", "my_ios_token", Time.now.unix)
-$customerio.add_device(5, "android", "my_android_token", Time.now.unix)
+$customerio.add_device(5, "my_ios_device_id", "ios")
+$customerio.add_device(5, "my_android_device_id", "android")
+```
+
+Optionally, `last_used` can be passed in to specify the last touch of the device. Otherwise, this attribute is set by the API.
+
+```ruby
+$customerio.add_device(5, "my_ios_device_id", "ios", {:last_used=>Time.now.to_i})
 ```
 
 ### Removing a mobile device
