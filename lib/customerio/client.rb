@@ -57,6 +57,7 @@ module Customerio
     def add_device(customer_id, device_id, platform, data={})
       raise ParamError.new("customer_id must be a non-empty string") unless customer_id != "" and !customer_id.nil?
       raise ParamError.new("device_id must be a non-empty string") unless device_id != "" and !device_id.nil?
+      raise ParamError.new("platform must be a non-empty string") unless platform != "" and !platform.nil?
 
       if data.nil?
         data = {}

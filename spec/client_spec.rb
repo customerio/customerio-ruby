@@ -378,6 +378,13 @@ describe Customerio::Client do
        lambda { client.add_device(5, "", "ios") }.should raise_error(Customerio::Client::ParamError)
        lambda { client.add_device(5, nil, "ios", {:last_used=>1561235678}) }.should raise_error(Customerio::Client::ParamError)
     end
+    it "requires a valid platform when creating" do
+      stub_request(:put, api_uri('/api/v1/customers/5/devices')).
+        to_return(:status => 200, :body => "", :headers => {})
+
+       lambda { client.add_device(5, "token", "") }.should raise_error(Customerio::Client::ParamError)
+       lambda { client.add_device(5, "toke", nil, {:last_used=>1561235678}) }.should raise_error(Customerio::Client::ParamError)
+    end
     it "accepts a nil data param" do
       stub_request(:put, api_uri('/api/v1/customers/5/devices')).
         to_return(:status => 200, :body => "", :headers => {})
