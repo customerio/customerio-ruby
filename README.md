@@ -144,6 +144,29 @@ $customerio.anonymous_track("help_enquiry", :recipient => 'user@example.com')
 
 Use the `recipient` attribute to specify the email address to send the messages to. [See our documentation on how to use anonymous events for more details](https://learn.customer.io/recipes/invite-emails.html).
 
+### Adding a mobile device
+
+To send push notifications, you can add ios and android device tokens to a customer:
+
+```ruby
+$customerio.add_device(5, "my_ios_device_id", "ios")
+$customerio.add_device(5, "my_android_device_id", "android")
+```
+
+Optionally, `last_used` can be passed in to specify the last touch of the device. Otherwise, this attribute is set by the API.
+
+```ruby
+$customerio.add_device(5, "my_ios_device_id", "ios", {:last_used=>Time.now.to_i})
+```
+
+### Removing a mobile device
+
+Deleting a device token will remove it from the associated customer to stop further push notifications from being sent for that device
+
+```ruby
+$customerio.delete_device(5, "my_device_token")
+```
+
 ## Contributing
 
 1. Fork it

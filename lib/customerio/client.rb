@@ -7,6 +7,7 @@ module Customerio
 
   class Client
     class MissingIdAttributeError < RuntimeError; end
+    class ParamError < RuntimeError; end
     class InvalidRequest < RuntimeError; end
     class InvalidResponse < RuntimeError
       attr_reader :response
@@ -53,7 +54,41 @@ module Customerio
       create_anonymous_event(event_name, attributes)
     end
 
+    def add_device(customer_id, device_id, platform, data={})
+      raise ParamError.new("customer_id must be a non-empty string") unless customer_id != "" and !customer_id.nil?
+      raise ParamError.new("device_id must be a non-empty string") unless device_id != "" and !device_id.nil?
+      raise ParamError.new("platform must be a non-empty string") unless platform != "" and !platform.nil?
+
+      if data.nil?
+        data = {}
+      end
+
+      raise ParamError.new("data parameter must be a hash") unless data.is_a?(Hash)
+
+      verify_response(request(:put, device_path(customer_id), {
+        :device => data.update({
+          :id => device_id,
+          :platform => platform,
+        })
+      }))
+    end
+
+    def delete_device(customer_id, device_id)
+      raise ParamError.new("customer_id must be a non-empty string") unless customer_id != "" and !customer_id.nil?
+      raise ParamError.new("device_id must be a non-empty string") unless device_id != "" and !device_id.nil?
+      
+      verify_response(request(:delete, device_id_path(customer_id, device_id)))
+    end
+
     private
+
+    def device_path(customer_id)
+      "/api/v1/customers/#{customer_id}/devices"
+    end
+
+    def device_id_path(customer_id, device_id)
+      "/api/v1/customers/#{customer_id}/devices/#{device_id}"
+    end
 
     def create_or_update(attributes = {})
       attributes = Hash[attributes.map { |(k,v)| [ k.to_sym, v ] }]

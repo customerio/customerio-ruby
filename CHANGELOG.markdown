@@ -1,3 +1,9 @@
+## Customerio 2.0.0 - Apr 10, 2018 ##
+
+With this release we have dropped the support for ruby 1.8.7.
+
+* Support new add and remove device endpoints for push notifications [#47](https://github.com/customerio/customerio-ruby/pull/47)
+
 ## Customerio 1.0.0 - Mar 15, 2016 ##
 
 There is a slight breaking change in this release. If you are depending on the HTTP response object included in the InvalidResponse exception (introduced in 0.6.1), note that it is now a `Net::HTTPBadRequest`.
