@@ -125,6 +125,24 @@ describe Customerio::Client do
     end
   end
 
+  describe "#suppress" do
+    it "sends a POST request to the customer.io's suppress API" do
+      stub_request(:post, api_uri('/api/v1/customers/5/suppress')).
+        to_return(:status => 200, :body => "", :headers => {})
+
+      client.suppress(5)
+    end
+  end
+
+  describe "#unsuppress" do
+    it "sends a POST request to the customer.io's unsuppress API" do
+      stub_request(:post, api_uri('/api/v1/customers/5/unsuppress')).
+        to_return(:status => 200, :body => "", :headers => {})
+
+      client.unsuppress(5)
+    end
+  end
+
   describe "#track" do
     it "raises an error if POST doesn't return a 2xx response code" do
       stub_request(:post, api_uri('/api/v1/customers/5/events')).
