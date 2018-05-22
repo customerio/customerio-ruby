@@ -34,6 +34,14 @@ module Customerio
       verify_response(request(:delete, customer_path(customer_id)))
     end
 
+    def suppress(customer_id)
+      verify_response(request(:post, suppress_path(customer_id)))
+    end
+
+    def unsuppress(customer_id)
+      verify_response(request(:post, unsuppress_path(customer_id)))
+    end
+
     def track(*args)
       attributes = extract_attributes(args)
 
@@ -116,6 +124,14 @@ module Customerio
 
     def customer_path(id)
       "/api/v1/customers/#{id}"
+    end
+
+    def suppress_path(customer_id)
+      "/api/v1/customers/#{customer_id}/suppress"
+    end
+
+    def unsuppress_path(customer_id)
+      "/api/v1/customers/#{customer_id}/unsuppress"
     end
 
     def valid_timestamp?(timestamp)
