@@ -1,3 +1,7 @@
+## Customerio 2.1.0 - May 22, 2018 ##
+
+Added support for the suppress / unsuppress methods [#49](https://github.com/customerio/customerio-ruby/pull/49)
+
 ## Customerio 2.0.0 - Apr 10, 2018 ##
 
 With this release we have dropped the support for ruby 1.8.7.
