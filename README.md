@@ -167,6 +167,22 @@ Deleting a device token will remove it from the associated customer to stop furt
 $customerio.delete_device(5, "my_device_token")
 ```
 
+### Suppress a user
+
+Deletes the customer with the provided id if it exists and suppresses all future events and identifies for for that customer.
+
+```ruby
+$customerio.suppress(5)
+```
+
+### Unsuppress a user
+
+Start tracking events and identifies again for a previously suppressed customer. Note when a user is suppressed thier history is deleted and unsupressing them wil not recover that history.
+
+```ruby
+$customerio.unsuppress(5)
+```
+
 ## Contributing
 
 1. Fork it
