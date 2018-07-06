@@ -13,7 +13,7 @@ module Customerio
       attr_reader :response
 
       def initialize(message, response)
-        @message = message
+        super(message)
         @response = response
       end
     end
