@@ -453,11 +453,6 @@ describe Customerio::Client do
 
       lambda { client.add_to_segment(1, "not_valid").should raise_error(Customerio::Client::ParamError) }
     end
-    it "validates the size of the customer list when adding customers" do
-      stub_request(:post, api_uri('/api/v1/segments/1/add_customers')).to_return(:status => 200, :body => "", :headers => {})
-
-      lambda { client.add_to_segment(1, [1..1001]).should raise_error(Customerio::Client::ParamError) }
-    end
     it "allows removing customers from a manual segment" do
       stub_request(:post, api_uri('/api/v1/segments/1/remove_customers')).to_return(:status => 200, :body => "", :headers => {})
 
@@ -472,11 +467,6 @@ describe Customerio::Client do
       stub_request(:post, api_uri('/api/v1/segments/1/remove_customers')).to_return(:status => 200, :body => "", :headers => {})
 
       lambda { client.remove_from_segment(1, "not_valid").should raise_error(Customerio::Client::ParamError) }
-    end
-    it "validates the size of the customer list when removing customers" do
-      stub_request(:post, api_uri('/api/v1/segments/1/remove_customers')).to_return(:status => 200, :body => "", :headers => {})
-
-      lambda { client.remove_from_segment(1, [1..1001]).should raise_error(Customerio::Client::ParamError) }
     end
   end
 end
