@@ -436,4 +436,47 @@ describe Customerio::Client do
        lambda { client.delete_device(5, nil) }.should raise_error(Customerio::Client::ParamError)
     end
   end
+
+  describe "#manual_segments" do
+    it "allows adding customers to a manual segment" do
+      stub_request(:post, api_uri('/api/v1/segments/1/add_customers')).to_return(:status => 200, :body => "", :headers => {})
+
+      client.add_to_segment(1, ["customer1", "customer2", "customer3"])
+    end
+    it "requires a valid segment id when adding customers" do
+      stub_request(:post, api_uri('/api/v1/segments/1/add_customers')).to_return(:status => 200, :body => "", :headers => {})
+
+      lambda { client.add_to_segment("not_valid", ["customer1", "customer2", "customer3"]).should raise_error(Customerio::Client::ParamError) }
+    end
+    it "requires a valid customer list when adding customers" do
+      stub_request(:post, api_uri('/api/v1/segments/1/add_customers')).to_return(:status => 200, :body => "", :headers => {})
+
+      lambda { client.add_to_segment(1, "not_valid").should raise_error(Customerio::Client::ParamError) }
+    end
+    it "validates the size of the customer list when adding customers" do
+      stub_request(:post, api_uri('/api/v1/segments/1/add_customers')).to_return(:status => 200, :body => "", :headers => {})
+
+      lambda { client.add_to_segment(1, [1..1001]).should raise_error(Customerio::Client::ParamError) }
+    end
+    it "allows removing customers from a manual segment" do
+      stub_request(:post, api_uri('/api/v1/segments/1/remove_customers')).to_return(:status => 200, :body => "", :headers => {})
+
+      client.remove_from_segment(1, ["customer1", "customer2", "customer3"])
+    end
+    it "requires a valid segment id when removing customers" do
+      stub_request(:post, api_uri('/api/v1/segments/1/remove_customers')).to_return(:status => 200, :body => "", :headers => {})
+
+      lambda { client.remove_from_segment("not_valid", ["customer1", "customer2", "customer3"]).should raise_error(Customerio::Client::ParamError) }
+    end
+    it "requires a valid customer list when removing customers" do
+      stub_request(:post, api_uri('/api/v1/segments/1/remove_customers')).to_return(:status => 200, :body => "", :headers => {})
+
+      lambda { client.remove_from_segment(1, "not_valid").should raise_error(Customerio::Client::ParamError) }
+    end
+    it "validates the size of the customer list when removing customers" do
+      stub_request(:post, api_uri('/api/v1/segments/1/remove_customers')).to_return(:status => 200, :body => "", :headers => {})
+
+      lambda { client.remove_from_segment(1, [1..1001]).should raise_error(Customerio::Client::ParamError) }
+    end
+  end
 end
