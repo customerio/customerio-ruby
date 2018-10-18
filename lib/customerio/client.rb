@@ -88,7 +88,33 @@ module Customerio
       verify_response(request(:delete, device_id_path(customer_id, device_id)))
     end
 
+    def add_to_segment(segment_id, customer_ids)
+      raise ParamError.new("segment_id must be an integer") unless segment_id.is_a? Integer
+      raise ParamError.new("customer_ids must be a list of values") unless customer_ids.is_a? Array
+
+      verify_response(request(:post, add_to_segment_path(segment_id), {
+        :ids => customer_ids,
+      }))
+    end
+
+    def remove_from_segment(segment_id, customer_ids)
+      raise ParamError.new("segment_id must be an integer") unless segment_id.is_a? Integer
+      raise ParamError.new("customer_ids must be a list of values") unless customer_ids.is_a? Array
+      
+      verify_response(request(:post, remove_from_segment_path(segment_id), {
+        :ids => customer_ids,
+      }))
+    end
+
     private
+
+    def add_to_segment_path(segment_id)
+      "/api/v1/segments/#{segment_id}/add_customers"
+    end
+
+    def remove_from_segment_path(segment_id)
+      "/api/v1/segments/#{segment_id}/remove_customers"
+    end
 
     def device_path(customer_id)
       "/api/v1/customers/#{customer_id}/devices"
