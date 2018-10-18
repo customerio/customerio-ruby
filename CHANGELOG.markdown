@@ -1,3 +1,7 @@
+## Customerio 2.2.0 - Oct 18, 2018 ##
+
+Add support for manual segments [#52](https://github.com/customerio/customerio-ruby/pull/52)
+
 ## Customerio 2.1.0 - May 22, 2018 ##
 
 Added support for the suppress / unsuppress methods [#49](https://github.com/customerio/customerio-ruby/pull/49)

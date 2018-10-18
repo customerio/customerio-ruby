@@ -183,6 +183,22 @@ Start tracking events and identifies again for a previously suppressed customer.
 $customerio.unsuppress(5)
 ```
 
+### Add customers to a manual segment
+
+Add the list of customer ids to the specified manual segment. If you send customer ids that don't exist yet in an add_to_segment request, we will automatically create customer profiles for the new customer ids.
+
+```ruby
+$customerio.add_to_segment(segment_id=1,customer_ids=['1','2','3'])
+```
+
+### Remove customers from a manual segment
+
+Remove the list of customer ids from the specified manual segment.
+
+```ruby
+$customerio.remove_from_segment(segment_id=1,customer_ids=['1','2','3'])
+```
+
 ## Contributing
 
 1. Fork it
