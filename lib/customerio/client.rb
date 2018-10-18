@@ -92,6 +92,8 @@ module Customerio
       raise ParamError.new("segment_id must be an integer") unless segment_id.is_a? Integer
       raise ParamError.new("customer_ids must be a list of values") unless customer_ids.is_a? Array
 
+      customer_ids = customer_ids.map{ |id| id.to_s }
+
       verify_response(request(:post, add_to_segment_path(segment_id), {
         :ids => customer_ids,
       }))
@@ -100,6 +102,8 @@ module Customerio
     def remove_from_segment(segment_id, customer_ids)
       raise ParamError.new("segment_id must be an integer") unless segment_id.is_a? Integer
       raise ParamError.new("customer_ids must be a list of values") unless customer_ids.is_a? Array
+
+      customer_ids = customer_ids.map{ |id| id.to_s }
       
       verify_response(request(:post, remove_from_segment_path(segment_id), {
         :ids => customer_ids,
