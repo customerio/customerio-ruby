@@ -7,6 +7,7 @@ Gem::Specification.new do |gem|
   gem.description   = "A ruby client for the Customer.io event API."
   gem.summary       = "A ruby client for the Customer.io event API."
   gem.homepage      = "http://customer.io"
+  gem.license       = "MIT"
 
   gem.files         = `git ls-files`.split($\)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
