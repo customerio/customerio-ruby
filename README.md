@@ -2,6 +2,7 @@
 
 A ruby client for the [Customer.io](http://customer.io) [event API](http://learn.customer.io/api/).
 
+[![CircleCI](https://circleci.com/gh/customerio/customerio-ruby.svg?style=svg)](https://circleci.com/gh/customerio/customerio-ruby)
 [![Build Status](https://secure.travis-ci.org/customerio/customerio-ruby.png?branch=master)](http://travis-ci.org/customerio/customerio-ruby)
 [![Code Climate](https://codeclimate.com/github/customerio/customerio-ruby/badges/gpa.svg)](https://codeclimate.com/github/customerio/customerio-ruby)
 
