@@ -3,6 +3,10 @@ version: 2.1
 commands:
   rubytest:
     description: Run ruby tests using rake
+    parameters:
+      version:
+        type: string
+        default: unknown
     steps:
       # Which version of bundler?
       - run:
@@ -12,7 +16,7 @@ commands:
       # Restore bundle cache
       - restore_cache:
           keys:
-            - v1-gems-{{ checksum "Gemfile.lock" }}
+            - v1-gems-ruby<< parameters.version >>-{{ checksum "Gemfile.lock" }}
             # fallback to using the latest cache if no exact match is found
             - v1-gems-
 
@@ -22,7 +26,7 @@ commands:
 
       # Store cache
       - save_cache:
-          key: v1-gems-{{ checksum "Gemfile.lock" }}
+          key: v1-gems-ruby<< parameters.version >>-{{ checksum "Gemfile.lock" }}
           paths:
             - vendor/bundle
 
@@ -44,7 +48,8 @@ jobs:
 
     steps:
       - checkout
-      - rubytest
+      - rubytest:
+          version: "2.6"
 
   ruby25:
     docker:
@@ -58,7 +63,8 @@ jobs:
 
     steps:
       - checkout
-      - rubytest
+      - rubytest:
+          version: "2.5"
 
   ruby24:
     docker:
@@ -72,7 +78,8 @@ jobs:
 
     steps:
       - checkout
-      - rubytest
+      - rubytest:
+          version: "2.4"
 
   ruby19:
     docker:
@@ -86,7 +93,8 @@ jobs:
 
     steps:
       - checkout
-      - rubytest
+      - rubytest:
+          version: "1.9"
 
 workflows:
   version: 2
