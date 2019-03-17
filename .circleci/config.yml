@@ -1,37 +1,38 @@
 version: 2.1
 
 commands:
-  - rubytest:
-      steps:
-        # Which version of bundler?
-        - run:
-            name: Which bundler?
-            command: bundle -v
+  rubytest:
+    description: Run ruby tests using rake
+    steps:
+      # Which version of bundler?
+      - run:
+          name: Which bundler?
+          command: bundle -v
 
-        # Restore bundle cache
-        - restore_cache:
-            keys:
-              - v1-gems-{{ checksum "Gemfile.lock" }}
-              # fallback to using the latest cache if no exact match is found
-              - v1-gems-
+      # Restore bundle cache
+      - restore_cache:
+          keys:
+            - v1-gems-{{ checksum "Gemfile.lock" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-gems-
 
-        - run:
-            name: install gems
-            command: bundle check || bundle install
+      - run:
+          name: install gems
+          command: bundle check || bundle install
 
-        # Store cache
-        - save_cache:
-            key: v1-gems-{{ checksum "Gemfile.lock" }}
-            paths:
-              - vendor/bundle
+      # Store cache
+      - save_cache:
+          key: v1-gems-{{ checksum "Gemfile.lock" }}
+          paths:
+            - vendor/bundle
 
-        # run tests!
-        - run:
-            name: run tests
-            command: bundle exec rake
+      # run tests!
+      - run:
+          name: run tests
+          command: bundle exec rake
 
 jobs:
-  ruby2.6.2:
+  ruby262:
     docker:
       - image: circleci/ruby:2.6.2
         environment:
@@ -44,8 +45,8 @@ jobs:
     steps:
       - checkout
       - rubytest
-      
-  ruby2.5.5:
+
+  ruby255:
     docker:
       - image: circleci/ruby:2.5.5
         environment:
@@ -59,7 +60,7 @@ jobs:
       - checkout
       - rubytest
 
-  ruby2.4.5:
+  ruby245:
     docker:
       - image: circleci/ruby:2.4.5
         environment:
@@ -73,7 +74,7 @@ jobs:
       - checkout
       - rubytest
 
-  ruby1.9:
+  ruby19:
     docker:
       - image: ruby:1.9
         environment:
@@ -91,7 +92,7 @@ workflows:
   version: 2
   test:
     jobs:
-      - ruby2.6.2
-      - ruby2.5.5
-      - ruby2.4.5
-      - ruby1.9
+      - ruby262
+      - ruby255
+      - ruby245
+      - ruby19
