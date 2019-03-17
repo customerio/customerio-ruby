@@ -32,9 +32,9 @@ commands:
           command: bundle exec rake
 
 jobs:
-  ruby262:
+  ruby26:
     docker:
-      - image: ruby:2.6.2
+      - image: ruby:2.6
         environment:
           BUNDLE_JOBS: 4
           BUNDLE_RETRY: 3
@@ -46,9 +46,9 @@ jobs:
       - checkout
       - rubytest
 
-  ruby255:
+  ruby25:
     docker:
-      - image: ruby:2.5.5
+      - image: ruby:2.5
         environment:
           BUNDLE_JOBS: 4
           BUNDLE_RETRY: 3
@@ -60,9 +60,9 @@ jobs:
       - checkout
       - rubytest
 
-  ruby245:
+  ruby24:
     docker:
-      - image: ruby:2.4.5
+      - image: ruby:2.4
         environment:
           BUNDLE_JOBS: 4
           BUNDLE_RETRY: 3
@@ -92,7 +92,7 @@ workflows:
   version: 2
   test:
     jobs:
-      - ruby262
-      - ruby255
-      - ruby245
+      - ruby26
+      - ruby25
+      - ruby24
       - ruby19
