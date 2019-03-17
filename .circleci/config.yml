@@ -1,0 +1,97 @@
+version: 2.1
+
+commands:
+  - rubytest:
+      steps:
+        # Which version of bundler?
+        - run:
+            name: Which bundler?
+            command: bundle -v
+
+        # Restore bundle cache
+        - restore_cache:
+            keys:
+              - v1-gems-{{ checksum "Gemfile.lock" }}
+              # fallback to using the latest cache if no exact match is found
+              - v1-gems-
+
+        - run:
+            name: install gems
+            command: bundle check || bundle install
+
+        # Store cache
+        - save_cache:
+            key: v1-gems-{{ checksum "Gemfile.lock" }}
+            paths:
+              - vendor/bundle
+
+        # run tests!
+        - run:
+            name: run tests
+            command: bundle exec rake
+
+jobs:
+  ruby2.6.2:
+    docker:
+      - image: circleci/ruby:2.6.2
+        environment:
+          BUNDLE_JOBS: 4
+          BUNDLE_RETRY: 3
+          BUNDLE_PATH: vendor/bundle
+
+    working_directory: ~/customerio-ruby
+
+    steps:
+      - checkout
+      - rubytest
+      
+  ruby2.5.5:
+    docker:
+      - image: circleci/ruby:2.5.5
+        environment:
+          BUNDLE_JOBS: 4
+          BUNDLE_RETRY: 3
+          BUNDLE_PATH: vendor/bundle
+
+    working_directory: ~/customerio-ruby
+
+    steps:
+      - checkout
+      - rubytest
+
+  ruby2.4.5:
+    docker:
+      - image: circleci/ruby:2.4.5
+        environment:
+          BUNDLE_JOBS: 4
+          BUNDLE_RETRY: 3
+          BUNDLE_PATH: vendor/bundle
+
+    working_directory: ~/customerio-ruby
+
+    steps:
+      - checkout
+      - rubytest
+
+  ruby1.9:
+    docker:
+      - image: ruby:1.9
+        environment:
+          BUNDLE_JOBS: 4
+          BUNDLE_RETRY: 3
+          BUNDLE_PATH: vendor/bundle
+
+    working_directory: ~/customerio-ruby
+
+    steps:
+      - checkout
+      - rubytest
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - ruby2.6.2
+      - ruby2.5.5
+      - ruby2.4.5
+      - ruby1.9
