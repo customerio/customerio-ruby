@@ -34,7 +34,7 @@ commands:
 jobs:
   ruby262:
     docker:
-      - image: circleci/ruby:2.6.2
+      - image: ruby:2.6.2
         environment:
           BUNDLE_JOBS: 4
           BUNDLE_RETRY: 3
@@ -48,7 +48,7 @@ jobs:
 
   ruby255:
     docker:
-      - image: circleci/ruby:2.5.5
+      - image: ruby:2.5.5
         environment:
           BUNDLE_JOBS: 4
           BUNDLE_RETRY: 3
@@ -62,7 +62,7 @@ jobs:
 
   ruby245:
     docker:
-      - image: circleci/ruby:2.4.5
+      - image: ruby:2.4.5
         environment:
           BUNDLE_JOBS: 4
           BUNDLE_RETRY: 3
