@@ -16,9 +16,9 @@ commands:
       # Restore bundle cache
       - restore_cache:
           keys:
-            - v1-gems-ruby<< parameters.version >>-{{ checksum "Gemfile.lock" }}
+            - v2-gems-ruby<< parameters.version >>-{{ checksum "Gemfile.lock" }}
             # fallback to using the latest cache if no exact match is found
-            - v1-gems-
+            - v2-gems-
 
       - run:
           name: install gems
@@ -26,7 +26,7 @@ commands:
 
       # Store cache
       - save_cache:
-          key: v1-gems-ruby<< parameters.version >>-{{ checksum "Gemfile.lock" }}
+          key: v2-gems-ruby<< parameters.version >>-{{ checksum "Gemfile.lock" }}
           paths:
             - vendor/bundle
 
