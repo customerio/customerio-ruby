@@ -110,6 +110,20 @@ module Customerio
       }))
     end
 
+    def track_push_notification_open(attributes = {})
+        keys = [:delivery_id, :device_id, :timestamp]
+        attributes = Hash[attributes.map { |(k,v)| [ k.to_sym, v ] }].
+            select { |k, v| keys.include?(k) }
+
+        raise ParamError.new('delivery_id must be a non-empty string') unless attributes[:delivery_id] != "" and !attributes[:delivery_id].nil?
+        raise ParamError.new('device_id must be a non-empty string') unless attributes[:device_id] != "" and !attributes[:device_id].nil?
+        raise ParamError.new('timestamp must be a valid timestamp') unless valid_timestamp?(attributes[:timestamp])
+
+        verify_response(request(:post, track_push_notification_open_path, attributes.merge({
+            :event => 'opened'
+        })))
+    end
+
     private
 
     def add_to_segment_path(segment_id)
@@ -126,6 +140,10 @@ module Customerio
 
     def device_id_path(customer_id, device_id)
       "/api/v1/customers/#{customer_id}/devices/#{device_id}"
+    end
+
+    def track_push_notification_open_path
+        "/push/events"
     end
 
     def create_or_update(attributes = {})
