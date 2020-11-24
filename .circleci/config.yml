@@ -3,16 +3,16 @@ version: 2
 
 references:
   restore_cache: &restore_cache
-    - type: cache-restore
-      name: Restore bundle cache
-      key: customerio-ruby-{{ checksum "Gemfile.lock" }}
+    type: cache-restore
+    name: Restore bundle cache
+    key: customerio-ruby-{{ checksum "Gemfile.lock" }}
 
   save_cache: &save_cache
-    - type: cache-save
-      name: Store bundle cache
-      key: customerio-ruby-{{ checksum "Gemfile.lock" }}
-      paths:
-        - vendor/bundle
+    type: cache-save
+    name: Store bundle cache
+    key: customerio-ruby-{{ checksum "Gemfile.lock" }}
+    paths:
+      - vendor/bundle
 
 jobs:
   ruby_27:
@@ -53,6 +53,7 @@ jobs:
       - run: bundle exec rspec
 
 workflows:
+  version: 2
   test:
     jobs:
       - ruby_27
