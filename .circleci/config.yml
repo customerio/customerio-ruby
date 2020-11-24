@@ -12,13 +12,13 @@ jobs:
 
       - type: cache-restore
         name: Restore bundle cache
-        key: customerio-ruby-{{ checksum "Gemfile.lock" }}
+        key: customerio-ruby-{{ checksum "Gemfile" }}
 
       - run: bundle install
 
       - type: cache-save
         name: Store bundle cache
-        key: customerio-ruby-{{ checksum "Gemfile.lock" }}
+        key: customerio-ruby-{{ checksum "Gemfile" }}
         paths:
           - vendor/bundle
 
