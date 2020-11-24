@@ -5,12 +5,12 @@ references:
   restore_cache: &restore_cache
     type: cache-restore
     name: Restore bundle cache
-    key: customerio-ruby-{{ checksum "Gemfile.lock" }}
+    key: customerio-ruby-{{ checksum "customerio.gemspec" }}
 
   save_cache: &save_cache
     type: cache-save
     name: Store bundle cache
-    key: customerio-ruby-{{ checksum "Gemfile.lock" }}
+    key: customerio-ruby-{{ checksum "customerio.gemspec" }}
     paths:
       - vendor/bundle
 
