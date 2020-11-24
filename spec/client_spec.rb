@@ -1,13 +1,21 @@
 require 'spec_helper'
 require 'multi_json'
-
+require 'base64'
 
 describe Customerio::Client do
-  let(:client)   { Customerio::Client.new("SITE_ID", "API_KEY", :json => false) }
+  let(:site_id) { "SITE_ID" }
+  let(:api_key) { "API_KEY" }
+
+  let(:client)   { Customerio::Client.new(site_id, api_key, :json => false) }
   let(:response) { double("Response", :code => 200) }
 
   def api_uri(path)
-    "https://SITE_ID:API_KEY@track.customer.io#{path}"
+    "https://track.customer.io#{path}"
+  end
+
+  def request_headers
+    token = Base64.strict_encode64("#{site_id}:#{api_key}")
+    { 'Authorization': "Basic #{token}", 'Content-Type': 'application/json' }
   end
 
   def json(data)
@@ -33,6 +41,20 @@ describe Customerio::Client do
 
       stub_request(:put, api_uri('/api/v1/customers/5')).
         with(:body => { :id => "5", :name => "Bob" }).
+        to_return(:status => 200, :body => "", :headers => {})
+
+      client.identify(body)
+    end
+  end
+
+  describe "headers" do
+    let(:body) { { id: 1, token: :test } }
+
+    it "sends the basic headers, base64 encoded with the request" do
+      client = Customerio::Client.new("SITE_ID", "API_KEY")
+
+      stub_request(:put, api_uri('/api/v1/customers/1')).
+        with(body: json(body), headers: request_headers).
         to_return(:status => 200, :body => "", :headers => {})
 
       client.identify(body)
@@ -477,7 +499,9 @@ describe Customerio::Client do
       lambda { client.remove_from_segment(1, "not_valid").should raise_error(Customerio::Client::ParamError) }
     end
     it "coerces non-string values to strings when removing customers" do
-      stub_request(:post, api_uri('/api/v1/segments/1/remove_customers')).with(:body=>json({:ids=>["1", "2", "3"]})).to_return(:status => 200, :body => "", :headers => {})
+      stub_request(:post, api_uri('/api/v1/segments/1/remove_customers'))
+        .with(:body=>json({:ids=>["1", "2", "3"]}))
+        .to_return(:status => 200, :body => "", :headers => {})
 
       client.remove_from_segment(1, [1, 2, 3])
     end
