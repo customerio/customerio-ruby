@@ -1,0 +1,25 @@
+---
+version: 2
+jobs:
+  build:
+    working_directory: ~/customerio-ruby
+    docker:
+      - image: circleci/ruby:2.6.0
+        environment:
+          RAILS_ENV: test
+    steps:
+      - checkout
+
+      - type: cache-restore
+        name: Restore bundle cache
+        key: customerio-ruby-{{ checksum "customerio.gemspec" }}
+
+      - run: bundle install
+
+      - type: cache-save
+        name: Store bundle cache
+        key: customerio-ruby-{{ checksum "customerio.gemspec" }}
+        paths:
+          - vendor/bundle
+
+      - run: bundle exec rspec
