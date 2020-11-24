@@ -1,5 +1,7 @@
 module Customerio
   class Client
+    DEFAULT_BASE_URI = 'https://track.customer.io'
+
     class MissingIdAttributeError < RuntimeError; end
     class ParamError < RuntimeError; end
     class InvalidRequest < RuntimeError; end
@@ -13,6 +15,7 @@ module Customerio
     end
 
     def initialize(site_id, secret_key, options = {})
+      options[:base_uri] = DEFAULT_BASE_URI if options[:base_uri].nil? || options[:base_uri].empty?
       @client = Customerio::BaseClient.new({ site_id: site_id, secret_key: secret_key }, options)
     end
 
