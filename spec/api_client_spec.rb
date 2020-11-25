@@ -2,10 +2,10 @@ require 'spec_helper'
 require 'multi_json'
 require 'base64'
 
-describe Customerio::API do
+describe Customerio::ApiClient do
   let(:app_key) { "appkey" }
 
-  let(:client)   { Customerio::API.new(app_key) }
+  let(:client)   { Customerio::ApiClient.new(app_key) }
   let(:response) { double("Response", code: 200) }
 
   def api_uri(path)
