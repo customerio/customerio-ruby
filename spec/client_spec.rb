@@ -3,15 +3,23 @@ require 'multi_json'
 
 
 describe Customerio::Client do
-  let(:client)   { Customerio::Client.new("SITE_ID", "API_KEY", :json => false) }
+  let(:site_id) { "SITE_ID" }
+  let(:api_key) { "API_KEY" }
+
+  let(:client)   { Customerio::Client.new(site_id, api_key, :json => false) }
   let(:response) { double("Response", :code => 200) }
 
   def api_uri(path)
-    "https://SITE_ID:API_KEY@track.customer.io#{path}"
+    "https://track.customer.io#{path}"
   end
 
   def json(data)
     MultiJson.dump(data)
+  end
+
+  def request_headers
+    token = Base64.strict_encode64("#{site_id}:#{api_key}")
+    { 'Authorization': "Basic #{token}", 'Content-Type': 'application/json' }
   end
 
   describe "json option" do
@@ -33,6 +41,20 @@ describe Customerio::Client do
 
       stub_request(:put, api_uri('/api/v1/customers/5')).
         with(:body => { :id => "5", :name => "Bob" }).
+        to_return(:status => 200, :body => "", :headers => {})
+
+      client.identify(body)
+    end
+  end
+
+  describe "headers" do
+    let(:body) { { id: 1, token: :test } }
+
+    it "sends the basic headers, base64 encoded with the request" do
+      client = Customerio::Client.new("SITE_ID", "API_KEY")
+
+      stub_request(:put, api_uri('/api/v1/customers/1')).
+        with(body: json(body), headers: request_headers).
         to_return(:status => 200, :body => "", :headers => {})
 
       client.identify(body)
