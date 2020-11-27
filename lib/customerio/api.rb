@@ -2,7 +2,7 @@ require 'net/http'
 require 'multi_json'
 
 module Customerio
-  class ApiClient
+  class APIClient
     DEFAULT_BASE_URI = 'https://api.customer.io'
 
     def initialize(app_key, options = {})
