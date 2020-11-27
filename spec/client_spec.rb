@@ -87,7 +87,7 @@ describe Customerio::Client do
         with(:body => "id=5").
         to_return(:status => 500, :body => "", :headers => {})
 
-      lambda { client.identify(:id => 5) }.should raise_error(Customerio::Client::InvalidResponse)
+      lambda { client.identify(:id => 5) }.should raise_error(Customerio::BaseClient::InvalidResponse)
     end
 
     it "includes the HTTP response with raised errors" do
@@ -96,7 +96,7 @@ describe Customerio::Client do
         to_return(:status => 500, :body => "whatever", :headers => {})
 
       lambda { client.identify(:id => 5) }.should raise_error {|error|
-        error.should be_a Customerio::Client::InvalidResponse
+        error.should be_a Customerio::BaseClient::InvalidResponse
         error.response.code.should eq "500"
         error.response.body.should eq "whatever"
       }
@@ -171,7 +171,7 @@ describe Customerio::Client do
         with(:body => "name=purchase").
         to_return(:status => 500, :body => "", :headers => {})
 
-      lambda { client.track(5, "purchase") }.should raise_error(Customerio::Client::InvalidResponse)
+      lambda { client.track(5, "purchase") }.should raise_error(Customerio::BaseClient::InvalidResponse)
     end
 
     it "uses the site_id and api key for basic auth and sends the event name" do
@@ -346,7 +346,7 @@ describe Customerio::Client do
         with(:body => "name=purchase").
         to_return(:status => 500, :body => "", :headers => {})
 
-      lambda { client.anonymous_track("purchase") }.should raise_error(Customerio::Client::InvalidResponse)
+      lambda { client.anonymous_track("purchase") }.should raise_error(Customerio::BaseClient::InvalidResponse)
     end
 
     it "uses the site_id and api key for basic auth and sends the event name" do

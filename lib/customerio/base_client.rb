@@ -5,25 +5,32 @@ module Customerio
   DEFAULT_TIMEOUT  = 10
 
   class BaseClient
+    class InvalidRequest < RuntimeError; end
+    class InvalidResponse < RuntimeError
+      attr_reader :response
+
+      def initialize(message, response)
+        super(message)
+        @response = response
+      end
+    end
+
     def initialize(auth, options = {})
       @auth = auth
       @timeout = options[:timeout] || DEFAULT_TIMEOUT
-
       @json = options.has_key?(:json) ? options[:json] : true
-      @base_uri = options[:base_uri] || DEFAULT_BASE_URI
-      @timeout = options[:timeout] || DEFAULT_TIMEOUT
+      @base_uri = options[:base_uri]
     end
 
     def request(method, path, body = nil, headers = {})
       execute(method, path, body, headers)
     end
 
-    private
-
-    def extract_attributes(args)
-      hash = args.last.is_a?(Hash) ? args.pop : {}
-      hash.inject({}){ |hash, (k,v)| hash[k.to_sym] = v; hash }
+    def request_and_verify_response(method, path, body = nil, headers = {})
+      verify_response(request(method, path, body, headers))
     end
+
+    private
 
     def execute(method, path, body = nil, headers = {})
       uri = URI.join(@base_uri, path)
@@ -70,6 +77,14 @@ module Customerio
       else
         req.add_field('Content-Type', 'application/x-www-form-urlencoded')
         req.body = ParamEncoder.to_params(body)
+      end
+    end
+
+    def verify_response(response)
+      if response.code.to_i >= 200 && response.code.to_i < 300
+        response
+      else
+        raise InvalidResponse.new("Customer.io API returned an invalid response: #{response.code}", response)
       end
     end
   end

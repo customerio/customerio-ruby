@@ -4,15 +4,6 @@ module Customerio
 
     class MissingIdAttributeError < RuntimeError; end
     class ParamError < RuntimeError; end
-    class InvalidRequest < RuntimeError; end
-    class InvalidResponse < RuntimeError
-      attr_reader :response
-
-      def initialize(message, response)
-        super(message)
-        @response = response
-      end
-    end
 
     def initialize(site_id, secret_key, options = {})
       options[:base_uri] = DEFAULT_BASE_URI if options[:base_uri].nil? || options[:base_uri].empty?
@@ -24,15 +15,15 @@ module Customerio
     end
 
     def delete(customer_id)
-      verify_response(@client.request(:delete, customer_path(customer_id)))
+      @client.request_and_verify_response(:delete, customer_path(customer_id))
     end
 
     def suppress(customer_id)
-      verify_response(@client.request(:post, suppress_path(customer_id)))
+      @client.request_and_verify_response(:post, suppress_path(customer_id))
     end
 
     def unsuppress(customer_id)
-      verify_response(@client.request(:post, unsuppress_path(customer_id)))
+      @client.request_and_verify_response(:post, unsuppress_path(customer_id))
     end
 
     def track(*args)
@@ -66,19 +57,19 @@ module Customerio
 
       raise ParamError.new("data parameter must be a hash") unless data.is_a?(Hash)
 
-      verify_response(@client.request(:put, device_path(customer_id), {
+      @client.request_and_verify_response(:put, device_path(customer_id), {
         :device => data.update({
           :id => device_id,
           :platform => platform,
         })
-      }))
+      })
     end
 
     def delete_device(customer_id, device_id)
       raise ParamError.new("customer_id must be a non-empty string") unless customer_id != "" and !customer_id.nil?
       raise ParamError.new("device_id must be a non-empty string") unless device_id != "" and !device_id.nil?
       
-      verify_response(@client.request(:delete, device_id_path(customer_id, device_id)))
+      @client.request_and_verify_response(:delete, device_id_path(customer_id, device_id))
     end
 
     def add_to_segment(segment_id, customer_ids)
@@ -87,9 +78,9 @@ module Customerio
 
       customer_ids = customer_ids.map{ |id| id.to_s }
 
-      verify_response(@client.request(:post, add_to_segment_path(segment_id), {
+      @client.request_and_verify_response(:post, add_to_segment_path(segment_id), {
         :ids => customer_ids,
-      }))
+      })
     end
 
     def remove_from_segment(segment_id, customer_ids)
@@ -98,9 +89,9 @@ module Customerio
 
       customer_ids = customer_ids.map{ |id| id.to_s }
       
-      verify_response(@client.request(:post, remove_from_segment_path(segment_id), {
+      @client.request_and_verify_response(:post, remove_from_segment_path(segment_id), {
         :ids => customer_ids,
-      }))
+      })
     end
 
     private
@@ -126,7 +117,7 @@ module Customerio
       raise MissingIdAttributeError.new("Must provide a customer id") unless attributes[:id]
 
       url = customer_path(attributes[:id])
-      verify_response(@client.request(:put, url, attributes))
+      @client.request_and_verify_response(:put, url, attributes)
     end
 
     def create_customer_event(customer_id, event_name, attributes = {})
@@ -140,7 +131,7 @@ module Customerio
     def create_event(url, event_name, attributes = {})
       body = { :name => event_name, :data => attributes }
       body[:timestamp] = attributes[:timestamp] if valid_timestamp?(attributes[:timestamp])
-      verify_response(@client.request(:post, url, body))
+      @client.request_and_verify_response(:post, url, body)
     end
 
     def customer_path(id)
@@ -157,14 +148,6 @@ module Customerio
 
     def valid_timestamp?(timestamp)
       timestamp && timestamp.is_a?(Integer) && timestamp > 999999999 && timestamp < 100000000000
-    end
-
-    def verify_response(response)
-      if response.code.to_i >= 200 && response.code.to_i < 300
-        response
-      else
-        raise InvalidResponse.new("Customer.io API returned an invalid response: #{response.code}", response)
-      end
     end
 
     def extract_attributes(args)

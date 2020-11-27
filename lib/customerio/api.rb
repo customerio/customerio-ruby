@@ -11,7 +11,7 @@ module Customerio
     end
 
     def send_email(payload)
-      @client.request(:post, send_email_path, payload)
+      @client.request_and_verify_response(:post, send_email_path, payload)
     end
 
     private
