@@ -27,7 +27,7 @@ describe Customerio::APIClient do
         transactional_message_id: 1,
       }
 
-      stub_request(:post, api_uri('/v1/api/send/email'))
+      stub_request(:post, api_uri('/v1/send/email'))
         .with(headers: request_headers, body: payload)
         .to_return(status: 200, body: "", headers: {})
 
