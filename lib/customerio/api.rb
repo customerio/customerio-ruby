@@ -17,7 +17,7 @@ module Customerio
     private
 
     def send_email_path
-      "/v1/api/send/email"
+      "/v1/send/email"
     end
   end
 end
