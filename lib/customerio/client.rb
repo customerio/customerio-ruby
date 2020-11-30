@@ -1,4 +1,4 @@
-require 'cgi'
+require "addressable/uri"
 
 module Customerio
   class Client
