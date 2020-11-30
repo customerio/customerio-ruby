@@ -42,9 +42,9 @@ module Customerio
 
       req = request_class(method).new(uri.path)
 
-      if @auth.has_key?(:site_id) && @auth.has_key?(:secret_key)
+      if @auth.has_key?(:site_id) && @auth.has_key?(:api_key)
         req.initialize_http_header(headers)
-        req.basic_auth @auth[:site_id], @auth[:secret_key]
+        req.basic_auth @auth[:site_id], @auth[:api_key]
       else
         headers['Authorization'] = "Bearer #{@auth[:app_key]}"
         req.initialize_http_header(headers)

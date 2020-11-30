@@ -5,9 +5,9 @@ module Customerio
     class MissingIdAttributeError < RuntimeError; end
     class ParamError < RuntimeError; end
 
-    def initialize(site_id, secret_key, options = {})
+    def initialize(site_id, api_key, options = {})
       options[:base_uri] = DEFAULT_BASE_URI if options[:base_uri].nil? || options[:base_uri].empty?
-      @client = Customerio::BaseClient.new({ site_id: site_id, secret_key: secret_key }, options)
+      @client = Customerio::BaseClient.new({ site_id: site_id, api_key: api_key }, options)
     end
 
     def identify(attributes)
