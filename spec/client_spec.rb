@@ -76,6 +76,11 @@ describe Customerio::Client do
          to_return(status: 200, body: "", headers: {})
 
       client.identify(id: "5 ")
+
+      stub_request(:put, api_uri('/api/v1/customers/5%2F')).
+         with(body: { id: "5/" }).
+         to_return(status: 200, body: "", headers: {})
+      client.identify(id: "5/")
     end
 
     it "sends a PUT request to customer.io's customer API using json headers" do

@@ -1,3 +1,5 @@
+require 'cgi'
+
 module Customerio
   class Client
     DEFAULT_BASE_URI = 'https://track.customer.io'
@@ -104,20 +106,37 @@ module Customerio
 
     private
 
+    def escape(val)
+      # CGI.escape is recommended for escaping, however, it doesn't correctly escape spaces.
+      Addressable::URI.encode_component(val.to_s, Addressable::URI::CharacterClasses::UNRESERVED)
+    end
+
     def add_to_segment_path(segment_id)
-      "/api/v1/segments/#{segment_id}/add_customers"
+      "/api/v1/segments/#{escape(segment_id)}/add_customers"
     end
 
     def remove_from_segment_path(segment_id)
-      "/api/v1/segments/#{segment_id}/remove_customers"
+      "/api/v1/segments/#{escape(segment_id)}/remove_customers"
     end
 
     def device_path(customer_id)
-      "/api/v1/customers/#{customer_id}/devices"
+      "/api/v1/customers/#{escape(customer_id)}/devices"
     end
 
     def device_id_path(customer_id, device_id)
-      "/api/v1/customers/#{customer_id}/devices/#{device_id}"
+      "/api/v1/customers/#{escape(customer_id)}/devices/#{escape(device_id)}"
+    end
+
+    def customer_path(id)
+      "/api/v1/customers/#{escape(id)}"
+    end
+
+    def suppress_path(customer_id)
+      "/api/v1/customers/#{escape(customer_id)}/suppress"
+    end
+
+    def unsuppress_path(customer_id)
+      "/api/v1/customers/#{escape(customer_id)}/unsuppress"
     end
 
     def create_or_update(attributes = {})
@@ -140,18 +159,6 @@ module Customerio
       body = { :name => event_name, :data => attributes }
       body[:timestamp] = attributes[:timestamp] if valid_timestamp?(attributes[:timestamp])
       @client.request_and_verify_response(:post, url, body)
-    end
-
-    def customer_path(id)
-      "/api/v1/customers/#{id}"
-    end
-
-    def suppress_path(customer_id)
-      "/api/v1/customers/#{customer_id}/suppress"
-    end
-
-    def unsuppress_path(customer_id)
-      "/api/v1/customers/#{customer_id}/unsuppress"
     end
 
     def valid_timestamp?(timestamp)

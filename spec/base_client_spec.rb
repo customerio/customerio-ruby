@@ -33,16 +33,6 @@ describe Customerio::BaseClient do
 
       track_client.request(:put, '/some/path', "")
     end
-
-    it "escapes URLs" do
-      client = Customerio::BaseClient.new({ site_id: site_id, api_key: api_key }, { base_uri: base_uri })
-
-      stub_request(:put, api_uri('/some/path%20')).
-        with(headers: track_client_request_headers).
-        to_return(status: 200, body: "", headers: {})
-
-      track_client.request(:put, '/some/path ', "")
-    end
   end
 
   describe "with an app key" do
@@ -52,14 +42,6 @@ describe Customerio::BaseClient do
         to_return(status: 200, body: "", headers: {})
 
       api_client.request(:put, '/some/path', "")
-    end
-
-    it "escapes URLs" do
-      stub_request(:put, api_uri('/some/path%20')).
-        with(headers: api_client_request_headers).
-        to_return(status: 200, body: "", headers: {})
-
-      api_client.request(:put, '/some/path ', "")
     end
   end
 
