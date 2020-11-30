@@ -154,6 +154,13 @@ describe Customerio::Client do
       client.delete(5)
     end
 
+    it "throws an error when customer_id is missing" do
+      stub_request(:put, /track.customer.io/)
+        .to_return(status: 200, body: "", headers: {})
+
+      lambda { client.delete(" ") }.should raise_error(Customerio::Client::ParamError, "customer_id must be a non-empty string")
+    end
+
     it "escapes customer IDs" do
       stub_request(:delete, api_uri('/api/v1/customers/5%20')).
          to_return(status: 200, body: "", headers: {})
@@ -169,6 +176,13 @@ describe Customerio::Client do
 
       client.suppress(5)
     end
+
+    it "throws an error when customer_id is missing" do
+      stub_request(:put, /track.customer.io/)
+        .to_return(status: 200, body: "", headers: {})
+
+      lambda { client.suppress(" ") }.should raise_error(Customerio::Client::ParamError, "customer_id must be a non-empty string")
+    end
   end
 
   describe "#unsuppress" do
@@ -177,6 +191,13 @@ describe Customerio::Client do
         to_return(status: 200, body: "", headers: {})
 
       client.unsuppress(5)
+    end
+
+    it "throws an error when customer_id is missing" do
+      stub_request(:put, /track.customer.io/)
+        .to_return(status: 200, body: "", headers: {})
+
+      lambda { client.suppress(" ") }.should raise_error(Customerio::Client::ParamError, "customer_id must be a non-empty string")
     end
   end
 
@@ -187,6 +208,14 @@ describe Customerio::Client do
         to_return(status: 500, body: "", headers: {})
 
       lambda { client.track(5, "purchase") }.should raise_error(Customerio::BaseClient::InvalidResponse)
+    end
+
+    it "throws an error when customer_id or event_name is missing" do
+      stub_request(:put, /track.customer.io/)
+        .to_return(status: 200, body: "", headers: {})
+
+      lambda { client.track(" ", "test_event") }.should raise_error(Customerio::Client::ParamError, "customer_id must be a non-empty string")
+      lambda { client.track(5, " ") }.should raise_error(Customerio::Client::ParamError, "event_name must be a non-empty string")
     end
 
     it "uses the site_id and api key for basic auth and sends the event name" do
@@ -362,6 +391,13 @@ describe Customerio::Client do
         to_return(status: 500, body: "", headers: {})
 
       lambda { client.anonymous_track("purchase") }.should raise_error(Customerio::BaseClient::InvalidResponse)
+    end
+
+    it "throws an error when event_name is missing" do
+      stub_request(:put, /track.customer.io/)
+        .to_return(status: 200, body: "", headers: {})
+
+      lambda { client.track(" ") }.should raise_error(Customerio::Client::ParamError, "event_name must be a non-empty string")
     end
 
     it "uses the site_id and api key for basic auth and sends the event name" do

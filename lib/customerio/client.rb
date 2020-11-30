@@ -15,14 +15,17 @@ module Customerio
     end
 
     def delete(customer_id)
+      raise ParamError.new("customer_id must be a non-empty string") if is_empty?(customer_id)
       @client.request_and_verify_response(:delete, customer_path(customer_id))
     end
 
     def suppress(customer_id)
+      raise ParamError.new("customer_id must be a non-empty string") if is_empty?(customer_id)
       @client.request_and_verify_response(:post, suppress_path(customer_id))
     end
 
     def unsuppress(customer_id)
+      raise ParamError.new("customer_id must be a non-empty string") if is_empty?(customer_id)
       @client.request_and_verify_response(:post, unsuppress_path(customer_id))
     end
 
@@ -32,24 +35,29 @@ module Customerio
       if args.length == 1
         # Only passed in an event name, create an anonymous event
         event_name = args.first
+        raise ParamError.new("event_name must be a non-empty string") if is_empty?(event_name)
         create_anonymous_event(event_name, attributes)
       else
         # Passed in a customer id and an event name.
         # Track the event for the given customer
         customer_id, event_name = args
 
+        raise ParamError.new("customer_id must be a non-empty string") if is_empty?(customer_id)
+        raise ParamError.new("event_name must be a non-empty string") if is_empty?(event_name)
+
         create_customer_event(customer_id, event_name, attributes)
       end
     end
 
     def anonymous_track(event_name, attributes = {})
+      raise ParamError.new("event_name must be a non-empty string") if is_empty?(event_name)
       create_anonymous_event(event_name, attributes)
     end
 
     def add_device(customer_id, device_id, platform, data={})
-      raise ParamError.new("customer_id must be a non-empty string") unless customer_id != "" and !customer_id.nil?
-      raise ParamError.new("device_id must be a non-empty string") unless device_id != "" and !device_id.nil?
-      raise ParamError.new("platform must be a non-empty string") unless platform != "" and !platform.nil?
+      raise ParamError.new("customer_id must be a non-empty string") if is_empty?(customer_id)
+      raise ParamError.new("device_id must be a non-empty string") if is_empty?(device_id)
+      raise ParamError.new("platform must be a non-empty string") if is_empty?(platform)
 
       if data.nil?
         data = {}
@@ -66,8 +74,8 @@ module Customerio
     end
 
     def delete_device(customer_id, device_id)
-      raise ParamError.new("customer_id must be a non-empty string") unless customer_id != "" and !customer_id.nil?
-      raise ParamError.new("device_id must be a non-empty string") unless device_id != "" and !device_id.nil?
+      raise ParamError.new("customer_id must be a non-empty string") if is_empty?(customer_id)
+      raise ParamError.new("device_id must be a non-empty string") if is_empty?(device_id)
       
       @client.request_and_verify_response(:delete, device_id_path(customer_id, device_id))
     end
@@ -153,6 +161,10 @@ module Customerio
     def extract_attributes(args)
       hash = args.last.is_a?(Hash) ? args.pop : {}
       hash.inject({}){ |hash, (k,v)| hash[k.to_sym] = v; hash }
+    end
+
+    def is_empty?(val)
+      val.nil? || (val.is_a?(String) && val.strip == "")
     end
   end
 end
