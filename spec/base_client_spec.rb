@@ -3,17 +3,17 @@ require 'multi_json'
 require 'base64'
 
 describe Customerio::BaseClient do
-  let(:base_uri) { "https://test.customer.io" }
+  let(:url) { "https://test.customer.io" }
 
   let(:site_id) { "SITE_ID" }
   let(:api_key) { "API_KEY" }
-  let(:track_client) { Customerio::BaseClient.new({ site_id: site_id, api_key: api_key }, { base_uri: base_uri }) }
+  let(:track_client) { Customerio::BaseClient.new({ site_id: site_id, api_key: api_key }, { url: url }) }
 
   let(:app_key) { "APP_KEY" }
-  let(:api_client) { Customerio::BaseClient.new({ app_key: app_key }, { base_uri: base_uri }) }
+  let(:api_client) { Customerio::BaseClient.new({ app_key: app_key }, { url: url }) }
 
   def api_uri(path)
-    "#{base_uri}#{path}"
+    "#{url}#{path}"
   end
 
   def track_client_request_headers

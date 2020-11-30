@@ -2,13 +2,13 @@ require 'cgi'
 
 module Customerio
   class Client
-    DEFAULT_BASE_URI = 'https://track.customer.io'
+    DEFAULT_TRACK_URL = 'https://track.customer.io'
 
     class MissingIdAttributeError < RuntimeError; end
     class ParamError < RuntimeError; end
 
     def initialize(site_id, api_key, options = {})
-      options[:base_uri] = DEFAULT_BASE_URI if options[:base_uri].nil? || options[:base_uri].empty?
+      options[:url] = DEFAULT_TRACK_URL if options[:url].nil? || options[:url].empty?
       @client = Customerio::BaseClient.new({ site_id: site_id, api_key: api_key }, options)
     end
 

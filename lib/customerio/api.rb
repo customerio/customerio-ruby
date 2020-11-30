@@ -3,10 +3,10 @@ require 'multi_json'
 
 module Customerio
   class APIClient
-    DEFAULT_BASE_URI = 'https://api.customer.io'
+    DEFAULT_API_URL = 'https://api.customer.io'
 
     def initialize(app_key, options = {})
-      options[:base_uri] = DEFAULT_BASE_URI if options[:base_uri].nil? || options[:base_uri].empty?
+      options[:url] = DEFAULT_API_URL if options[:url].nil? || options[:url].empty?
       @client = Customerio::BaseClient.new({ app_key: app_key }, options)
     end
 

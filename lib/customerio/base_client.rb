@@ -19,7 +19,7 @@ module Customerio
       @auth = auth
       @timeout = options[:timeout] || DEFAULT_TIMEOUT
       @json = options.has_key?(:json) ? options[:json] : true
-      @base_uri = options[:base_uri]
+      @base_uri = options[:url]
     end
 
     def request(method, path, body = nil, headers = {})
