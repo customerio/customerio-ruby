@@ -33,7 +33,7 @@ module Customerio
     private
 
     def execute(method, path, body = nil, headers = {})
-      uri = URI.join(@base_uri, path)
+      uri = URI.join(@base_uri, URI.escape(path))
 
       session = Net::HTTP.new(uri.host, uri.port)
       session.use_ssl = (uri.scheme == 'https')

@@ -70,6 +70,14 @@ describe Customerio::Client do
       client.identify(id: "5")
     end
 
+    it "escapes customer IDs" do
+      stub_request(:put, api_uri('/api/v1/customers/5%20')).
+         with(body: { id: "5 " }).
+         to_return(status: 200, :body => "", :headers => {})
+
+      client.identify(id: "5 ")
+    end
+
     it "sends a PUT request to customer.io's customer API using json headers" do
       client = Customerio::Client.new("SITE_ID", "API_KEY", json: true)
       body = { id: 5, :name => "Bob" }
