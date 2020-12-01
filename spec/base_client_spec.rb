@@ -52,7 +52,7 @@ describe Customerio::BaseClient do
         to_return(status: 400, body: "", headers: {})
 
       lambda { api_client.request_and_verify_response(:put, '/some/path', "") }.should(
-        raise_error(Customerio::BaseClient::InvalidResponse)
+        raise_error(Customerio::InvalidResponse)
       )
     end
 

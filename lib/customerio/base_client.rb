@@ -4,16 +4,17 @@ require 'multi_json'
 module Customerio
   DEFAULT_TIMEOUT  = 10
 
-  class BaseClient
-    class InvalidRequest < RuntimeError; end
-    class InvalidResponse < RuntimeError
-      attr_reader :response
+  class InvalidRequest < RuntimeError; end
+  class InvalidResponse < RuntimeError
+    attr_reader :response
 
-      def initialize(message, response)
-        super(message)
-        @response = response
-      end
+    def initialize(message, response)
+      super(message)
+      @response = response
     end
+  end
+
+  class BaseClient
 
     def initialize(auth, options = {})
       @auth = auth

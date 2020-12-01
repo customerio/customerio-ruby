@@ -49,7 +49,7 @@ describe Customerio::APIClient do
         .with(headers: request_headers, body: req.message)
         .to_return(status: 400, body: "", headers: {})
 
-      lambda { client.send_email(req) }.should raise_error(Customerio::BaseClient::InvalidResponse)
+      lambda { client.send_email(req) }.should raise_error(Customerio::InvalidResponse)
     end
 
     it "allows attaching files by names" do
