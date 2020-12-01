@@ -177,20 +177,47 @@ Start tracking events and identifies again for a previously suppressed customer.
 $customerio.unsuppress(5)
 ```
 
-### Add customers to a manual segment
+### Send Transactional Messages
 
-Add the list of customer ids to the specified manual segment. If you send customer ids that don't exist yet in an add_to_segment request, we will automatically create customer profiles for the new customer ids.
+To use the Customer.io [Transactional API](https://customer.io/docs/transactional-api), create an instance of the API client using an [app key](https://customer.io/docs/managing-credentials#app-api-keys).
+
+Create a new `sendEmailRequest` object containing:
+
+* `transactional_message_id`: the ID of the transactional message you want to send
+* `to`: the email address of your recipients 
+* an `identifiers` object containing the `id` of your recipient. If the `id` does not exist, Customer.io creates it.
+* a `message_data` object containing properties that you want reference in your message using liquid. 
+
+Use `send_email` referencing your request object to send a transactional message. [Learn more about transactional messages and `sendEmailRequest` properties](https://customer.io/docs/transactional-api).
+
 
 ```ruby
-$customerio.add_to_segment(segment_id=1,customer_ids=['1','2','3'])
-```
+require "customerio"
 
-### Remove customers from a manual segment
+client = Customerio::APIClient.new("your API key")
 
-Remove the list of customer ids from the specified manual segment.
+request = Customerio::SendEmailRequest.new(
+  to: "person@example.com",
+  transactional_message_id: "3",
+  message_data: {
+    name: "Person",
+    items: {
+      name: "shoes",
+      price: "59.99",
+    },
+    products: [],
+  },
+  identifiers: {
+    id: "2",
+  },
+)
 
-```ruby
-$customerio.remove_from_segment(segment_id=1,customer_ids=['1','2','3'])
+begin
+  response = client.send_email(request)
+  puts JSON.parse(response.body)
+rescue Customerio::InvalidResponse => e
+  puts JSON.parse(e.response.body)
+end
 ```
 
 ## Contributing
