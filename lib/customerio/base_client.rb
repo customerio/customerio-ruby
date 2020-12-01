@@ -15,11 +15,9 @@ module Customerio
   end
 
   class BaseClient
-
     def initialize(auth, options = {})
       @auth = auth
       @timeout = options[:timeout] || DEFAULT_TIMEOUT
-      @json = options.has_key?(:json) ? options[:json] : true
       @base_uri = options[:url]
     end
 
@@ -51,7 +49,10 @@ module Customerio
         req.initialize_http_header(headers)
       end
 
-      add_request_body(req, body) unless body.nil?
+      if !body.nil?
+        req.add_field('Content-Type', 'application/json')
+        req.body = MultiJson.dump(body)
+      end
 
       session.start do |http|
         http.request(req)
@@ -68,16 +69,6 @@ module Customerio
         Net::HTTP::Delete
       else
         raise InvalidRequest.new("Invalid request method #{method.inspect}")
-      end
-    end
-
-    def add_request_body(req, body)
-      if @json
-        req.add_field('Content-Type', 'application/json')
-        req.body = MultiJson.dump(body)
-      else
-        req.add_field('Content-Type', 'application/x-www-form-urlencoded')
-        req.body = ParamEncoder.to_params(body)
       end
     end
 

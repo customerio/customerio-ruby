@@ -6,7 +6,7 @@ describe Customerio::Client do
   let(:site_id) { "SITE_ID" }
   let(:api_key) { "API_KEY" }
 
-  let(:client)   { Customerio::Client.new(site_id, api_key, json: false) }
+  let(:client)   { Customerio::Client.new(site_id, api_key) }
   let(:response) { double("Response", code: 200) }
 
   def api_uri(path)
@@ -22,29 +22,16 @@ describe Customerio::Client do
     MultiJson.dump(data)
   end
 
-  describe "json option" do
-    let(:body) { { id: 5, name: "Bob" } }
+  it "uses json by default" do
+    body = { id: 5, name: "Bob" }
+    client = Customerio::Client.new("SITE_ID", "API_KEY")
 
-    it "uses json by default" do
-      client = Customerio::Client.new("SITE_ID", "API_KEY")
+    stub_request(:put, api_uri('/api/v1/customers/5')).
+      with(body: json(body),
+           headers: {'Content-Type'=>'application/json'}).
+      to_return(status: 200, body: "", headers: {})
 
-      stub_request(:put, api_uri('/api/v1/customers/5')).
-        with(body: json(body),
-             headers: {'Content-Type'=>'application/json'}).
-        to_return(status: 200, body: "", headers: {})
-
-      client.identify(body)
-    end
-
-    it "allows disabling json" do
-      client = Customerio::Client.new("SITE_ID", "API_KEY", json: false)
-
-      stub_request(:put, api_uri('/api/v1/customers/5')).
-        with(body: { id: "5", name: "Bob" }).
-        to_return(status: 200, body: "", headers: {})
-
-      client.identify(body)
-    end
+    client.identify(body)
   end
 
   describe "headers" do
@@ -64,7 +51,7 @@ describe Customerio::Client do
   describe "#identify" do
     it "sends a PUT request to customer.io's customer API" do
       stub_request(:put, api_uri('/api/v1/customers/5')).
-         with(body: "id=5").
+         with(body: json(id: "5")).
          to_return(status: 200, body: "", headers: {})
 
       client.identify(id: "5")
@@ -72,7 +59,7 @@ describe Customerio::Client do
 
     it "escapes customer IDs" do
       stub_request(:put, api_uri('/api/v1/customers/5%20')).
-         with(body: { id: "5 " }).
+         with(body: json({ id: "5 " })).
          to_return(status: 200, body: "", headers: {})
 
       client.identify(id: "5 ")
@@ -97,7 +84,7 @@ describe Customerio::Client do
 
     it "raises an error if PUT doesn't return a 2xx response code" do
       stub_request(:put, api_uri('/api/v1/customers/5')).
-        with(body: "id=5").
+        with(body: json(id: 5)).
         to_return(status: 500, body: "", headers: {})
 
       lambda { client.identify(id: 5) }.should raise_error(Customerio::InvalidResponse)
@@ -105,7 +92,7 @@ describe Customerio::Client do
 
     it "includes the HTTP response with raised errors" do
       stub_request(:put, api_uri('/api/v1/customers/5')).
-        with(body: "id=5").
+        with(body: json(id: 5)).
         to_return(status: 500, body: "whatever", headers: {})
 
       lambda { client.identify(id: 5) }.should raise_error {|error|
@@ -119,13 +106,13 @@ describe Customerio::Client do
       time = Time.now.to_i
 
       stub_request(:put, api_uri('/api/v1/customers/5')).with(
-        body: {
-          id: "5",
+        body: json({
+          id: 5,
           email: "customer@example.com",
-          created_at: time.to_s,
+          created_at: time,
           first_name: "Bob",
           plan: "basic"
-        }).to_return(status: 200, body: "", headers: {})
+        })).to_return(status: 200, body: "", headers: {})
 
       client.identify({
         id: 5,
@@ -142,7 +129,7 @@ describe Customerio::Client do
 
     it 'should not raise errors when attribute keys are strings' do
       stub_request(:put, api_uri('/api/v1/customers/5')).
-        with(body: "id=5").
+        with(body: json(id: 5)).
         to_return(status: 200, body: "", headers: {})
 
       attributes = { "id" => 5 }
@@ -209,7 +196,7 @@ describe Customerio::Client do
   describe "#track" do
     it "raises an error if POST doesn't return a 2xx response code" do
       stub_request(:post, api_uri('/api/v1/customers/5/events')).
-        with(body: "name=purchase").
+        with(body: json(name: "purchase", data: {})).
         to_return(status: 500, body: "", headers: {})
 
       lambda { client.track(5, "purchase") }.should raise_error(Customerio::InvalidResponse)
@@ -225,7 +212,7 @@ describe Customerio::Client do
 
     it "uses the site_id and api key for basic auth and sends the event name" do
       stub_request(:post, api_uri('/api/v1/customers/5/events')).
-        with(body: "name=purchase").
+        with(body: json(name: "purchase", data: {})).
         to_return(status: 200, body: "", headers: {})
 
       client.track(5, "purchase")
@@ -233,13 +220,13 @@ describe Customerio::Client do
 
     it "sends any optional event attributes" do
       stub_request(:post, api_uri('/api/v1/customers/5/events')).
-         with(body: {
+         with(body: json({
           name: "purchase",
           data: {
             type: "socks",
             price: "13.99"
           }
-        }).
+        })).
         to_return(status: 200, body: "", headers: {})
 
       client.track(5, "purchase", type: "socks", price: "13.99")
@@ -286,15 +273,15 @@ describe Customerio::Client do
 
     it "allows sending of a timestamp" do
       stub_request(:post, api_uri('/api/v1/customers/5/events')).
-        with(body: {
+        with(body: json({
           name: "purchase",
           data: {
             type: "socks",
             price: "13.99",
-            timestamp: "1561231234"
+            timestamp: 1561231234
           },
-          timestamp: "1561231234"
-        }).
+          timestamp: 1561231234
+        })).
         to_return(status: 200, body: "", headers: {})
 
       client.track(5, "purchase", type: "socks", price: "13.99", timestamp: 1561231234)
@@ -302,14 +289,14 @@ describe Customerio::Client do
 
     it "doesn't send timestamp if timestamp is in milliseconds" do
       stub_request(:post, api_uri('/api/v1/customers/5/events')).
-        with(body: {
+        with(body: json({
           name: "purchase",
           data: {
             type: "socks",
             price: "13.99",
-            timestamp: "1561231234000"
+            timestamp: 1561231234000
           }
-        }).
+        })).
         to_return(status: 200, body: "", headers: {})
 
       client.track(5, "purchase", type: "socks", price: "13.99", timestamp: 1561231234000)
@@ -334,14 +321,14 @@ describe Customerio::Client do
 
     it "doesn't send timestamp if timestamp isn't an integer" do
       stub_request(:post, api_uri('/api/v1/customers/5/events')).
-        with(body: {
+        with(body: json({
           name: "purchase",
           data: {
             type: "socks",
             price: "13.99",
             timestamp: "Hello world"
           }
-        }).
+        })).
 
         to_return(status: 200, body: "", headers: {})
 
@@ -351,40 +338,40 @@ describe Customerio::Client do
     context "tracking an anonymous event" do
       it "sends a POST request to the customer.io's anonymous event API" do
         stub_request(:post, api_uri('/api/v1/events')).
-          with(body: "name=purchase").
+          with(body: json({ name: "purchase", data: {} })).
           to_return(status: 200, body: "", headers: {})
 
-        client.track("purchase")
+        client.anonymous_track("purchase")
       end
 
       it "sends any optional event attributes" do
         stub_request(:post, api_uri('/api/v1/events')).
-          with(body: {
+          with(body: json({
             name: "purchase",
             data: {
               type: "socks",
               price: "13.99"
             }
-          }).
+          })).
           to_return(status: 200, body: "", headers: {})
 
-        client.track("purchase", type: "socks", price: "13.99")
+        client.anonymous_track("purchase", type: "socks", price: "13.99")
       end
 
       it "allows sending of a timestamp" do
         stub_request(:post, api_uri('/api/v1/events')).
-          with(body: {
+          with(body: json({
             name: "purchase",
             data: {
               type: "socks",
               price: "13.99",
-              timestamp: "1561231234"
+              timestamp: 1561231234
             },
-            timestamp: "1561231234"
-          }).
+            timestamp: 1561231234
+          })).
           to_return(status: 200, body: "", headers: {})
 
-        client.track("purchase", type: "socks", price: "13.99", timestamp: 1561231234)
+        client.anonymous_track("purchase", type: "socks", price: "13.99", timestamp: 1561231234)
       end
     end
   end
@@ -392,7 +379,7 @@ describe Customerio::Client do
   describe "#anonymous_track" do
     it "raises an error if POST doesn't return a 2xx response code" do
       stub_request(:post, api_uri('/api/v1/events')).
-        with(body: "name=purchase").
+        with(body: json(name: "purchase", data: {})).
         to_return(status: 500, body: "", headers: {})
 
       lambda { client.anonymous_track("purchase") }.should raise_error(Customerio::InvalidResponse)
@@ -402,12 +389,12 @@ describe Customerio::Client do
       stub_request(:put, /track.customer.io/)
         .to_return(status: 200, body: "", headers: {})
 
-      lambda { client.track(" ") }.should raise_error(Customerio::Client::ParamError, "event_name must be a non-empty string")
+      lambda { client.anonymous_track(" ") }.should raise_error(Customerio::Client::ParamError, "event_name must be a non-empty string")
     end
 
     it "uses the site_id and api key for basic auth and sends the event name" do
       stub_request(:post, api_uri('/api/v1/events')).
-        with(body: "name=purchase").
+        with(body: json(name: "purchase", data: {})).
         to_return(status: 200, body: "", headers: {})
 
       client.anonymous_track("purchase")
@@ -430,15 +417,15 @@ describe Customerio::Client do
 
     it "allows sending of a timestamp" do
       stub_request(:post, api_uri('/api/v1/events')).
-          with(body: {
+          with(body: json({
             name: "purchase",
             data: {
               type: "socks",
               price: "27.99",
-              timestamp: "1561235678"
+              timestamp: 1561235678
             },
-            timestamp: "1561235678"
-          }).
+            timestamp: 1561235678
+          })).
 
         to_return(status: 200, body: "", headers: {})
 

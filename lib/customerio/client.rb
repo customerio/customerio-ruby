@@ -31,24 +31,11 @@ module Customerio
       @client.request_and_verify_response(:post, unsuppress_path(customer_id))
     end
 
-    def track(*args)
-      attributes = extract_attributes(args)
+    def track(customer_id, event_name, attributes = {})
+      raise ParamError.new("customer_id must be a non-empty string") if is_empty?(customer_id)
+      raise ParamError.new("event_name must be a non-empty string") if is_empty?(event_name)
 
-      if args.length == 1
-        # Only passed in an event name, create an anonymous event
-        event_name = args.first
-        raise ParamError.new("event_name must be a non-empty string") if is_empty?(event_name)
-        create_anonymous_event(event_name, attributes)
-      else
-        # Passed in a customer id and an event name.
-        # Track the event for the given customer
-        customer_id, event_name = args
-
-        raise ParamError.new("customer_id must be a non-empty string") if is_empty?(customer_id)
-        raise ParamError.new("event_name must be a non-empty string") if is_empty?(event_name)
-
-        create_customer_event(customer_id, event_name, attributes)
-      end
+      create_customer_event(customer_id, event_name, attributes)
     end
 
     def anonymous_track(event_name, attributes = {})
@@ -163,11 +150,6 @@ module Customerio
 
     def valid_timestamp?(timestamp)
       timestamp && timestamp.is_a?(Integer) && timestamp > 999999999 && timestamp < 100000000000
-    end
-
-    def extract_attributes(args)
-      hash = args.last.is_a?(Hash) ? args.pop : {}
-      hash.inject({}){ |hash, (k,v)| hash[k.to_sym] = v; hash }
     end
 
     def is_empty?(val)
