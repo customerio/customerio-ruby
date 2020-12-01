@@ -10,8 +10,9 @@ module Customerio
       @client = Customerio::BaseClient.new({ app_key: app_key }, options)
     end
 
-    def send_email(payload)
-      @client.request_and_verify_response(:post, send_email_path, payload)
+    def send_email(req)
+      raise "request must be an instance of Customerio::SendEmailRequest" unless req.is_a?(Customerio::SendEmailRequest)
+      @client.request_and_verify_response(:post, send_email_path, req.message)
     end
 
     private
