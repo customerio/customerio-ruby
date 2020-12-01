@@ -69,41 +69,11 @@ module Customerio
       @client.request_and_verify_response(:delete, device_id_path(customer_id, device_id))
     end
 
-    def add_to_segment(segment_id, customer_ids)
-      raise ParamError.new("segment_id must be an integer") unless segment_id.is_a? Integer
-      raise ParamError.new("customer_ids must be a list of values") unless customer_ids.is_a? Array
-
-      customer_ids = customer_ids.map{ |id| id.to_s }
-
-      @client.request_and_verify_response(:post, add_to_segment_path(segment_id), {
-        :ids => customer_ids,
-      })
-    end
-
-    def remove_from_segment(segment_id, customer_ids)
-      raise ParamError.new("segment_id must be an integer") unless segment_id.is_a? Integer
-      raise ParamError.new("customer_ids must be a list of values") unless customer_ids.is_a? Array
-
-      customer_ids = customer_ids.map{ |id| id.to_s }
-      
-      @client.request_and_verify_response(:post, remove_from_segment_path(segment_id), {
-        :ids => customer_ids,
-      })
-    end
-
     private
 
     def escape(val)
       # CGI.escape is recommended for escaping, however, it doesn't correctly escape spaces.
       Addressable::URI.encode_component(val.to_s, Addressable::URI::CharacterClasses::UNRESERVED)
-    end
-
-    def add_to_segment_path(segment_id)
-      "/api/v1/segments/#{escape(segment_id)}/add_customers"
-    end
-
-    def remove_from_segment_path(segment_id)
-      "/api/v1/segments/#{escape(segment_id)}/remove_customers"
     end
 
     def device_path(customer_id)
