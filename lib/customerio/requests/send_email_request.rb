@@ -1,3 +1,5 @@
+require 'base64'
+
 module Customerio
   class SendEmailRequest
     attr_reader :message
