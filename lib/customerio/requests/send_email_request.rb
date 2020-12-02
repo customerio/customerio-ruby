@@ -28,9 +28,7 @@ module Customerio
       transactional_message_id
       message_data
       from
-      from_id
       reply_to
-      reply_to_id
       bcc
       subject
       body
