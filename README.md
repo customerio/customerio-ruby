@@ -188,6 +188,8 @@ Create a new `sendEmailRequest` object containing:
 * an `identifiers` object containing the `id` of your recipient. If the `id` does not exist, Customer.io creates it.
 * a `message_data` object containing properties that you want reference in your message using liquid. 
 
+You can also send base64-encoded attachments with your transactional message. Use `attach` to encode your attachments.
+
 Use `send_email` referencing your request object to send a transactional message. [Learn more about transactional messages and `sendEmailRequest` properties](https://customer.io/docs/transactional-api).
 
 
@@ -211,6 +213,8 @@ request = Customerio::SendEmailRequest.new(
     id: "2",
   },
 )
+
+request.attach("filename", "def.pdf")
 
 begin
   response = client.send_email(request)
