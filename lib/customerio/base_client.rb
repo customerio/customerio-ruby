@@ -6,11 +6,14 @@ module Customerio
 
   class InvalidRequest < RuntimeError; end
   class InvalidResponse < RuntimeError
-    attr_reader :response
+    attr_reader :code, :response
 
-    def initialize(message, response)
-      super(message)
+    def initialize(code, body, response=nil)
+      @message = body
+      @code = code
       @response = response
+
+      super(@message)
     end
   end
 
@@ -73,10 +76,11 @@ module Customerio
     end
 
     def verify_response(response)
-      if response.code.to_i >= 200 && response.code.to_i < 300
+      case response
+      when Net::HTTPSuccess then
         response
       else
-        raise InvalidResponse.new("Customer.io API returned an invalid response: #{response.code}", response)
+        raise InvalidResponse.new(response.code, response.body, response)
       end
     end
   end

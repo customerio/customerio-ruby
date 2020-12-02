@@ -214,9 +214,9 @@ request = Customerio::SendEmailRequest.new(
 
 begin
   response = client.send_email(request)
-  puts JSON.parse(response.body)
+  puts response
 rescue Customerio::InvalidResponse => e
-  puts JSON.parse(e.response.body)
+  puts e.code, e.message
 end
 ```
 

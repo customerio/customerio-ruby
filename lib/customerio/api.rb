@@ -12,7 +12,17 @@ module Customerio
 
     def send_email(req)
       raise "request must be an instance of Customerio::SendEmailRequest" unless req.is_a?(Customerio::SendEmailRequest)
-      @client.request_and_verify_response(:post, send_email_path, req.message)
+      response = @client.request(:post, send_email_path, req.message)
+
+      case response
+      when Net::HTTPSuccess then
+        JSON.parse(response.body)
+      when Net::HTTPBadRequest then
+        json = JSON.parse(response.body)
+        raise Customerio::InvalidResponse.new(response.code, json['meta']['error'], response)
+      else
+        raise InvalidResponse.new(response.code, response.body)
+      end
     end
 
     private

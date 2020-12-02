@@ -93,12 +93,12 @@ describe Customerio::Client do
     it "includes the HTTP response with raised errors" do
       stub_request(:put, api_uri('/api/v1/customers/5')).
         with(body: json(id: 5)).
-        to_return(status: 500, body: "whatever", headers: {})
+        to_return(status: 500, body: "Server unavailable", headers: {})
 
       lambda { client.identify(id: 5) }.should raise_error {|error|
         error.should be_a Customerio::InvalidResponse
-        error.response.code.should eq "500"
-        error.response.body.should eq "whatever"
+        error.code.should eq "500"
+        error.message.should eq "Server unavailable"
       }
     end
 

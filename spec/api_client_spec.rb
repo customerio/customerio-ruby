@@ -32,12 +32,34 @@ describe Customerio::APIClient do
 
       stub_request(:post, api_uri('/v1/send/email'))
         .with(headers: request_headers, body: req.message)
-        .to_return(status: 200, body: "", headers: {})
+        .to_return(status: 200, body: { delivery_id: 1 }.to_json, headers: {})
 
-      client.send_email(req)
+      client.send_email(req).should eq({ "delivery_id" => 1 })
     end
 
-    it "handles failures" do
+    it "handles validation failures (400)" do
+      req = Customerio::SendEmailRequest.new(
+        identifiers: {
+          id: 'c1',
+        },
+        transactional_message_id: 1,
+      )
+
+      err_json = { meta: { error: "example error" } }.to_json
+
+      stub_request(:post, api_uri('/v1/send/email'))
+        .with(headers: request_headers, body: req.message)
+        .to_return(status: 400, body: err_json, headers: {})
+
+      lambda { client.send_email(req) }.should(
+        raise_error(Customerio::InvalidResponse) { |error|
+          error.message.should eq "example error"
+          error.code.should eq "400"
+        }
+      )
+    end
+
+    it "handles other failures (5xx)" do
       req = Customerio::SendEmailRequest.new(
         identifiers: {
           id: 'c1',
@@ -47,9 +69,14 @@ describe Customerio::APIClient do
 
       stub_request(:post, api_uri('/v1/send/email'))
         .with(headers: request_headers, body: req.message)
-        .to_return(status: 400, body: "", headers: {})
+        .to_return(status: 500, body: "Server unavailable", headers: {})
 
-      lambda { client.send_email(req) }.should raise_error(Customerio::InvalidResponse)
+      lambda { client.send_email(req) }.should(
+        raise_error(Customerio::InvalidResponse) { |error|
+          error.message.should eq "Server unavailable"
+          error.code.should eq "500"
+        }
+      )
     end
 
     it "allows attaching files by names" do
@@ -70,7 +97,7 @@ describe Customerio::APIClient do
 
       stub_request(:post, api_uri('/v1/send/email'))
         .with(headers: request_headers, body: req.message)
-        .to_return(status: 200, body: "", headers: {})
+        .to_return(status: 200, body: { delivery_id: 1 }.to_json, headers: {})
 
       client.send_email(req)
     end
@@ -93,7 +120,7 @@ describe Customerio::APIClient do
 
       stub_request(:post, api_uri('/v1/send/email'))
         .with(headers: request_headers, body: req.message)
-        .to_return(status: 200, body: "", headers: {})
+        .to_return(status: 200, body: { delivery_id: 1 }.to_json, headers: {})
 
       client.send_email(req)
     end
