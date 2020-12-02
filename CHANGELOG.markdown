@@ -1,3 +1,17 @@
+## Customerio 3.0.0 - Dec 2, 2020
+
+### Added
+- Support for the Transactional API
+
+### Removed
+- `add_to_segment` and `remove_from_segment` methods
+- Support for non-JSON data
+
+### Changed
+- IDs in the URLs are now escaped.
+- Improved validations for data that's passed in.
+- Earlier, if you passed in an event name without a customer ID to the `track` method, we would create an anonymous event. That is now removed. To create an anonymous event, use the `anonymous_track` method.
+
 ## Customerio 2.2.1 - Mar 23, 2020
 
 - Add license to gemspec [#55](https://github.com/customerio/customerio-ruby/pull/55)
