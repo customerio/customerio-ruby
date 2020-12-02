@@ -82,7 +82,7 @@ describe Customerio::APIClient do
     it "allows attaching files by names" do
       content = 'sample content'
 
-      file = Tempfile.new('example.txt')
+      file = StringIO.new('example.txt')
       file.write(content)
       file.rewind # move the read counter back so the file can be read again
       File.stub(:open).and_return(file)
@@ -123,6 +123,17 @@ describe Customerio::APIClient do
         .to_return(status: 200, body: { delivery_id: 1 }.to_json, headers: {})
 
       client.send_email(req)
+    end
+
+    it "raises error for unknown file objects" do
+      req = Customerio::SendEmailRequest.new(
+        customer_id: 'c1',
+        transactional_message_id: 1,
+      )
+
+      lambda { req.attach('test', {}) }.should raise_error(/Unknown attachment type/)
+
+      req.message[:attachments].should eq({})
     end
   end
 end

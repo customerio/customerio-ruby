@@ -11,7 +11,9 @@ module Customerio
     end
 
     def attach(name, file)
-      if file.is_a?(File) || file.is_a?(Tempfile)
+      # Accepts any IO-like value that responds to `.read`.
+      # StringIO, File, Tempfile, IO are all accepted.
+      if file.respond_to?(:read)
         @message[:attachments][name] = encode(file.read)
       elsif file.is_a?(String)
         @message[:attachments][name] = encode(File.open(file, 'r').read)
