@@ -10,16 +10,9 @@ module Customerio
       @message[:headers] = {}
     end
 
-    def attach(name, file)
-      # Accepts any IO-like value that responds to `.read`.
-      # StringIO, File, Tempfile, IO are all accepted.
-      if file.respond_to?(:read)
-        @message[:attachments][name] = encode(file.read)
-      elsif file.is_a?(String)
-        @message[:attachments][name] = encode(File.open(file, 'r').read)
-      else
-        raise "Unknown attachment type: #{file.class}"
-      end
+    def attach(name, data, encode: true)
+      raise "attachment #{name} already exists" if @message[:attachments].has_key?(name)
+      @message[:attachments][name] = encode ? Base64.strict_encode64(data) : data
     end
 
     private

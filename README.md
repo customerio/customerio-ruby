@@ -214,7 +214,8 @@ request = Customerio::SendEmailRequest.new(
   },
 )
 
-request.attach("filename", "def.pdf")
+file = File.open('<file-path>', 'r')
+request.attach("filename", file.read)
 
 begin
   response = client.send_email(request)

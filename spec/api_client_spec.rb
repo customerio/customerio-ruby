@@ -79,20 +79,33 @@ describe Customerio::APIClient do
       )
     end
 
-    it "allows attaching files by names" do
+    it "allows attaching file content without encoding" do
       content = 'sample content'
-
-      file = StringIO.new('example.txt')
-      file.write(content)
-      file.rewind # move the read counter back so the file can be read again
-      File.stub(:open).and_return(file)
 
       req = Customerio::SendEmailRequest.new(
         customer_id: 'c1',
         transactional_message_id: 1,
       )
 
-      req.attach('test', 'example.txt')
+      req.attach('test', content, encode: false)
+      req.message[:attachments]['test'].should eq content
+
+      stub_request(:post, api_uri('/v1/send/email'))
+        .with(headers: request_headers, body: req.message)
+        .to_return(status: 200, body: { delivery_id: 1 }.to_json, headers: {})
+
+      client.send_email(req)
+    end
+
+    it "allows attaching files with encoding (default)" do
+      content = 'sample content'
+
+      req = Customerio::SendEmailRequest.new(
+        customer_id: 'c1',
+        transactional_message_id: 1,
+      )
+
+      req.attach('test', content)
       req.message[:attachments]['test'].should eq Base64.strict_encode64(content)
 
       stub_request(:post, api_uri('/v1/send/email'))
@@ -102,38 +115,16 @@ describe Customerio::APIClient do
       client.send_email(req)
     end
 
-    it "allows attaching files by File objects" do
-      content = 'sample content'
-
-      file = Tempfile.new('example.txt')
-      file.write(content)
-      file.rewind # move the read counter back so the file can be read again
-      File.stub(:open).and_return(file)
-
+    it "raises error when attaching the same key again" do
       req = Customerio::SendEmailRequest.new(
         customer_id: 'c1',
         transactional_message_id: 1,
       )
 
-      req.attach('test', file)
-      req.message[:attachments]['test'].should eq Base64.strict_encode64(content)
+      req.attach('test', 'test-content')
 
-      stub_request(:post, api_uri('/v1/send/email'))
-        .with(headers: request_headers, body: req.message)
-        .to_return(status: 200, body: { delivery_id: 1 }.to_json, headers: {})
-
-      client.send_email(req)
-    end
-
-    it "raises error for unknown file objects" do
-      req = Customerio::SendEmailRequest.new(
-        customer_id: 'c1',
-        transactional_message_id: 1,
-      )
-
-      lambda { req.attach('test', {}) }.should raise_error(/Unknown attachment type/)
-
-      req.message[:attachments].should eq({})
+      lambda { req.attach('test', '') }.should raise_error(/attachment test already exists/)
+      req.message[:attachments].should eq({ "test" => Base64.strict_encode64("test-content") })
     end
   end
 end
