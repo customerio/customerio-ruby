@@ -29,6 +29,8 @@ module Customerio
     OPTIONAL_FIELDS = %i(
       transactional_message_id
       message_data
+      headers
+      preheader
       from
       reply_to
       bcc
@@ -37,7 +39,10 @@ module Customerio
       plaintext_body
       amp_body
       fake_bcc
-      hide_body
+      disable_message_retention
+      send_to_unsubscribed
+      tracked
+      queue_draft
     )
 
     def invalid_field?(field)
