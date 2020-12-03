@@ -51,12 +51,6 @@ If you're using Rails, create an initializer `config/initializers/customerio.rb`
 $customerio = Customerio::Client.new("YOUR SITE ID", "YOUR API SECRET KEY")
 ```
 
-If you'd like to send complex data to associate to a user as json, pass a json option:
-
-```ruby
-customerio = Customerio::Client.new("YOUR SITE ID", "YOUR API SECRET KEY", :json => true)
-```
-
 ### Identify logged in customers
 
 Tracking data of logged in customers is a key part of [Customer.io](http://customer.io). In order to
@@ -183,20 +177,51 @@ Start tracking events and identifies again for a previously suppressed customer.
 $customerio.unsuppress(5)
 ```
 
-### Add customers to a manual segment
+### Send Transactional Messages
 
-Add the list of customer ids to the specified manual segment. If you send customer ids that don't exist yet in an add_to_segment request, we will automatically create customer profiles for the new customer ids.
+To use the Customer.io [Transactional API](https://customer.io/docs/transactional-api), create an instance of the API client using an [app key](https://customer.io/docs/managing-credentials#app-api-keys).
+
+Create a new `SendEmailRequest` object containing:
+
+* `transactional_message_id`: the ID of the transactional message you want to send, or the `body`, `from`, and `subject` of a new message.
+* `to`: the email address of your recipients 
+* an `identifiers` object containing the `id` of your recipient. If the `id` does not exist, Customer.io creates it.
+* a `message_data` object containing properties that you want reference in your message using liquid.
+* You can also send attachments with your message. Use `attach` to encode attachments.
+
+Use `send_email` referencing your request to send a transactional message. [Learn more about transactional messages and `SendEmailRequest` properties](https://customer.io/docs/transactional-api).
+
 
 ```ruby
-$customerio.add_to_segment(segment_id=1,customer_ids=['1','2','3'])
-```
+require "customerio"
 
-### Remove customers from a manual segment
+client = Customerio::APIClient.new("your API key")
 
-Remove the list of customer ids from the specified manual segment.
+request = Customerio::SendEmailRequest.new(
+  to: "person@example.com",
+  transactional_message_id: "3",
+  message_data: {
+    name: "Person",
+    items: {
+      name: "shoes",
+      price: "59.99",
+    },
+    products: [],
+  },
+  identifiers: {
+    id: "2",
+  },
+)
 
-```ruby
-$customerio.remove_from_segment(segment_id=1,customer_ids=['1','2','3'])
+file = File.open('<file-path>', 'r')
+request.attach("filename", file.read)
+
+begin
+  response = client.send_email(request)
+  puts response
+rescue Customerio::InvalidResponse => e
+  puts e.code, e.message
+end
 ```
 
 ## Contributing
