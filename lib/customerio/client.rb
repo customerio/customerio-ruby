@@ -65,7 +65,7 @@ module Customerio
     def delete_device(customer_id, device_id)
       raise ParamError.new("customer_id must be a non-empty string") if is_empty?(customer_id)
       raise ParamError.new("device_id must be a non-empty string") if is_empty?(device_id)
-      
+
       @client.request_and_verify_response(:delete, device_id_path(customer_id, device_id))
     end
 
@@ -98,7 +98,7 @@ module Customerio
 
     def create_or_update(attributes = {})
       attributes = Hash[attributes.map { |(k,v)| [ k.to_sym, v ] }]
-      raise MissingIdAttributeError.new("Must provide a customer id") unless attributes[:id]
+      raise MissingIdAttributeError.new("Must provide a customer id") if is_empty?(attributes[:id])
 
       url = customer_path(attributes[:id])
       @client.request_and_verify_response(:put, url, attributes)
