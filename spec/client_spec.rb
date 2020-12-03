@@ -125,6 +125,7 @@ describe Customerio::Client do
 
     it "requires an id attribute" do
       lambda { client.identify(email: "customer@example.com") }.should raise_error(Customerio::Client::MissingIdAttributeError)
+      lambda { client.identify(id: "") }.should raise_error(Customerio::Client::MissingIdAttributeError)
     end
 
     it 'should not raise errors when attribute keys are strings' do
