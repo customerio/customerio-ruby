@@ -181,16 +181,15 @@ $customerio.unsuppress(5)
 
 To use the Customer.io [Transactional API](https://customer.io/docs/transactional-api), create an instance of the API client using an [app key](https://customer.io/docs/managing-credentials#app-api-keys).
 
-Create a new `sendEmailRequest` object containing:
+Create a new `SendEmailRequest` object containing:
 
-* `transactional_message_id`: the ID of the transactional message you want to send
+* `transactional_message_id`: the ID of the transactional message you want to send, or the `body`, `from`, and `subject` of a new message.
 * `to`: the email address of your recipients 
 * an `identifiers` object containing the `id` of your recipient. If the `id` does not exist, Customer.io creates it.
-* a `message_data` object containing properties that you want reference in your message using liquid. 
+* a `message_data` object containing properties that you want reference in your message using liquid.
+* You can also send attachments with your message. Use `attach` to encode attachments.
 
-You can also send base64-encoded attachments with your transactional message. Use `attach` to encode your attachments.
-
-Use `send_email` referencing your request object to send a transactional message. [Learn more about transactional messages and `sendEmailRequest` properties](https://customer.io/docs/transactional-api).
+Use `send_email` referencing your request to send a transactional message. [Learn more about transactional messages and `SendEmailRequest` properties](https://customer.io/docs/transactional-api).
 
 
 ```ruby
