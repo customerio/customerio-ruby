@@ -1,0 +1,25 @@
+name: ruby_ci
+
+on: [push]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        ruby: [2.5, 2.6, 2.7]
+    runs-on: ubuntu-latest 
+
+  steps:
+  - uses: actions/checkout@v2
+  - name: set up ruby
+    uses: actions/setup-ruby@v1
+    with:
+      ruby-version: ${{ matrix.ruby }}
+    - name: Cache dependencies
+      uses: actions/cache@v2
+      with:
+        path: vendor/bundle
+        key: customerio-ruby-${{ hashFiles('customerio.gemspec') }}
+    - name: Install dependencies
+      run: bundle install --path vendor/bundle
+    - run: bundle exec rspec
