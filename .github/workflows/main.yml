@@ -11,14 +11,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: set up ruby
-      uses: actions/setup-ruby@v1
+      uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
-    - name: Cache dependencies
-      uses: actions/cache@v2
-      with:
-        path: vendor/bundle
-        key: customerio-ruby-${{ hashFiles('customerio.gemspec') }}
-    - name: Install dependencies
-      run: bundle install --path vendor/bundle
+        bundle-cache: true
     - run: bundle exec rspec
