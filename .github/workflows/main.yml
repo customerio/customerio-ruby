@@ -11,8 +11,20 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: set up ruby
-      uses: ruby/setup-ruby@v1
+      uses: actions/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
-        bundle-cache: true
+    - name: install bundle
+      run: |
+         sudo apt-get -yqq install libpq-dev
+         gem install bundler
+    - name: Cache dependencies
+      uses: actions/cache@v2
+      with:
+        path: vendor/bundle
+        key: customerio-ruby-${{ hashFiles('customerio.gemspec') }}
+        restore-keys: |
+          customerio-ruby-
+    - name: Install dependencies
+      run: bundle install --path vendor/bundle
     - run: bundle exec rspec
