@@ -69,13 +69,6 @@ module Customerio
       @client.request_and_verify_response(:delete, device_id_path(customer_id, device_id))
     end
 
-    private
-
-    def escape(val)
-      # CGI.escape is recommended for escaping, however, it doesn't correctly escape spaces.
-      Addressable::URI.encode_component(val.to_s, Addressable::URI::CharacterClasses::UNRESERVED)
-    end
-
     def track_push_notification_open(attributes = {})
         keys = [:delivery_id, :device_id, :timestamp]
         attributes = Hash[attributes.map { |(k,v)| [ k.to_sym, v ] }].
@@ -91,6 +84,11 @@ module Customerio
     end
 
     private
+
+    def escape(val)
+      # CGI.escape is recommended for escaping, however, it doesn't correctly escape spaces.
+      Addressable::URI.encode_component(val.to_s, Addressable::URI::CharacterClasses::UNRESERVED)
+    end
 
     def device_path(customer_id)
       "/api/v1/customers/#{escape(customer_id)}/devices"
