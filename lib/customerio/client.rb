@@ -1,29 +1,15 @@
-require 'net/http'
-require 'multi_json'
+require "addressable/uri"
 
 module Customerio
-  DEFAULT_BASE_URI = 'https://track.customer.io'
-  DEFAULT_TIMEOUT  = 10
-
   class Client
+    DEFAULT_TRACK_URL = 'https://track.customer.io'
+
     class MissingIdAttributeError < RuntimeError; end
     class ParamError < RuntimeError; end
-    class InvalidRequest < RuntimeError; end
-    class InvalidResponse < RuntimeError
-      attr_reader :response
 
-      def initialize(message, response)
-        super(message)
-        @response = response
-      end
-    end
-
-    def initialize(site_id, secret_key, options = {})
-      @username = site_id
-      @password = secret_key
-      @json = options.has_key?(:json) ? options[:json] : true
-      @base_uri = options[:base_uri] || DEFAULT_BASE_URI
-      @timeout = options[:timeout] || DEFAULT_TIMEOUT
+    def initialize(site_id, api_key, options = {})
+      options[:url] = DEFAULT_TRACK_URL if options[:url].nil? || options[:url].empty?
+      @client = Customerio::BaseClient.new({ site_id: site_id, api_key: api_key }, options)
     end
 
     def identify(attributes)
@@ -31,41 +17,36 @@ module Customerio
     end
 
     def delete(customer_id)
-      verify_response(request(:delete, customer_path(customer_id)))
+      raise ParamError.new("customer_id must be a non-empty string") if is_empty?(customer_id)
+      @client.request_and_verify_response(:delete, customer_path(customer_id))
     end
 
     def suppress(customer_id)
-      verify_response(request(:post, suppress_path(customer_id)))
+      raise ParamError.new("customer_id must be a non-empty string") if is_empty?(customer_id)
+      @client.request_and_verify_response(:post, suppress_path(customer_id))
     end
 
     def unsuppress(customer_id)
-      verify_response(request(:post, unsuppress_path(customer_id)))
+      raise ParamError.new("customer_id must be a non-empty string") if is_empty?(customer_id)
+      @client.request_and_verify_response(:post, unsuppress_path(customer_id))
     end
 
-    def track(*args)
-      attributes = extract_attributes(args)
+    def track(customer_id, event_name, attributes = {})
+      raise ParamError.new("customer_id must be a non-empty string") if is_empty?(customer_id)
+      raise ParamError.new("event_name must be a non-empty string") if is_empty?(event_name)
 
-      if args.length == 1
-        # Only passed in an event name, create an anonymous event
-        event_name = args.first
-        create_anonymous_event(event_name, attributes)
-      else
-        # Passed in a customer id and an event name.
-        # Track the event for the given customer
-        customer_id, event_name = args
-
-        create_customer_event(customer_id, event_name, attributes)
-      end
+      create_customer_event(customer_id, event_name, attributes)
     end
 
     def anonymous_track(event_name, attributes = {})
+      raise ParamError.new("event_name must be a non-empty string") if is_empty?(event_name)
       create_anonymous_event(event_name, attributes)
     end
 
     def add_device(customer_id, device_id, platform, data={})
-      raise ParamError.new("customer_id must be a non-empty string") unless customer_id != "" and !customer_id.nil?
-      raise ParamError.new("device_id must be a non-empty string") unless device_id != "" and !device_id.nil?
-      raise ParamError.new("platform must be a non-empty string") unless platform != "" and !platform.nil?
+      raise ParamError.new("customer_id must be a non-empty string") if is_empty?(customer_id)
+      raise ParamError.new("device_id must be a non-empty string") if is_empty?(device_id)
+      raise ParamError.new("platform must be a non-empty string") if is_empty?(platform)
 
       if data.nil?
         data = {}
@@ -73,41 +54,26 @@ module Customerio
 
       raise ParamError.new("data parameter must be a hash") unless data.is_a?(Hash)
 
-      verify_response(request(:put, device_path(customer_id), {
+      @client.request_and_verify_response(:put, device_path(customer_id), {
         :device => data.update({
           :id => device_id,
           :platform => platform,
         })
-      }))
+      })
     end
 
     def delete_device(customer_id, device_id)
-      raise ParamError.new("customer_id must be a non-empty string") unless customer_id != "" and !customer_id.nil?
-      raise ParamError.new("device_id must be a non-empty string") unless device_id != "" and !device_id.nil?
-      
-      verify_response(request(:delete, device_id_path(customer_id, device_id)))
+      raise ParamError.new("customer_id must be a non-empty string") if is_empty?(customer_id)
+      raise ParamError.new("device_id must be a non-empty string") if is_empty?(device_id)
+
+      @client.request_and_verify_response(:delete, device_id_path(customer_id, device_id))
     end
 
-    def add_to_segment(segment_id, customer_ids)
-      raise ParamError.new("segment_id must be an integer") unless segment_id.is_a? Integer
-      raise ParamError.new("customer_ids must be a list of values") unless customer_ids.is_a? Array
+    private
 
-      customer_ids = customer_ids.map{ |id| id.to_s }
-
-      verify_response(request(:post, add_to_segment_path(segment_id), {
-        :ids => customer_ids,
-      }))
-    end
-
-    def remove_from_segment(segment_id, customer_ids)
-      raise ParamError.new("segment_id must be an integer") unless segment_id.is_a? Integer
-      raise ParamError.new("customer_ids must be a list of values") unless customer_ids.is_a? Array
-
-      customer_ids = customer_ids.map{ |id| id.to_s }
-      
-      verify_response(request(:post, remove_from_segment_path(segment_id), {
-        :ids => customer_ids,
-      }))
+    def escape(val)
+      # CGI.escape is recommended for escaping, however, it doesn't correctly escape spaces.
+      Addressable::URI.encode_component(val.to_s, Addressable::URI::CharacterClasses::UNRESERVED)
     end
 
     def track_push_notification_open(attributes = {})
@@ -126,20 +92,24 @@ module Customerio
 
     private
 
-    def add_to_segment_path(segment_id)
-      "/api/v1/segments/#{segment_id}/add_customers"
-    end
-
-    def remove_from_segment_path(segment_id)
-      "/api/v1/segments/#{segment_id}/remove_customers"
-    end
-
     def device_path(customer_id)
-      "/api/v1/customers/#{customer_id}/devices"
+      "/api/v1/customers/#{escape(customer_id)}/devices"
     end
 
     def device_id_path(customer_id, device_id)
-      "/api/v1/customers/#{customer_id}/devices/#{device_id}"
+      "/api/v1/customers/#{escape(customer_id)}/devices/#{escape(device_id)}"
+    end
+
+    def customer_path(id)
+      "/api/v1/customers/#{escape(id)}"
+    end
+
+    def suppress_path(customer_id)
+      "/api/v1/customers/#{escape(customer_id)}/suppress"
+    end
+
+    def unsuppress_path(customer_id)
+      "/api/v1/customers/#{escape(customer_id)}/unsuppress"
     end
 
     def track_push_notification_open_path
@@ -148,12 +118,10 @@ module Customerio
 
     def create_or_update(attributes = {})
       attributes = Hash[attributes.map { |(k,v)| [ k.to_sym, v ] }]
-
-      raise MissingIdAttributeError.new("Must provide a customer id") unless attributes[:id]
+      raise MissingIdAttributeError.new("Must provide a customer id") if is_empty?(attributes[:id])
 
       url = customer_path(attributes[:id])
-
-      verify_response(request(:put, url, attributes))
+      @client.request_and_verify_response(:put, url, attributes)
     end
 
     def create_customer_event(customer_id, event_name, attributes = {})
@@ -167,79 +135,15 @@ module Customerio
     def create_event(url, event_name, attributes = {})
       body = { :name => event_name, :data => attributes }
       body[:timestamp] = attributes[:timestamp] if valid_timestamp?(attributes[:timestamp])
-      verify_response(request(:post, url, body))
-    end
-
-    def customer_path(id)
-      "/api/v1/customers/#{id}"
-    end
-
-    def suppress_path(customer_id)
-      "/api/v1/customers/#{customer_id}/suppress"
-    end
-
-    def unsuppress_path(customer_id)
-      "/api/v1/customers/#{customer_id}/unsuppress"
+      @client.request_and_verify_response(:post, url, body)
     end
 
     def valid_timestamp?(timestamp)
       timestamp && timestamp.is_a?(Integer) && timestamp > 999999999 && timestamp < 100000000000
     end
 
-
-    def verify_response(response)
-      if response.code.to_i >= 200 && response.code.to_i < 300
-        response
-      else
-        raise InvalidResponse.new("Customer.io API returned an invalid response: #{response.code}", response)
-      end
-    end
-
-    def extract_attributes(args)
-      hash = args.last.is_a?(Hash) ? args.pop : {}
-      hash.inject({}){ |hash, (k,v)| hash[k.to_sym] = v; hash }
-    end
-
-    def request(method, path, body = nil, headers = {})
-      uri = URI.join(@base_uri, path)
-
-      session = Net::HTTP.new(uri.host, uri.port)
-      session.use_ssl = (uri.scheme == 'https')
-      session.open_timeout = @timeout
-      session.read_timeout = @timeout
-
-      req = request_class(method).new(uri.path)
-      req.initialize_http_header(headers)
-      req.basic_auth @username, @password
-
-      add_request_body(req, body) unless body.nil?
-
-      session.start do |http|
-        http.request(req)
-      end
-    end
-
-    def request_class(method)
-      case method
-      when :post
-        Net::HTTP::Post
-      when :put
-        Net::HTTP::Put
-      when :delete
-        Net::HTTP::Delete
-      else
-        raise InvalidRequest.new("Invalid request method #{method.inspect}")
-      end
-    end
-
-    def add_request_body(req, body)
-      if @json
-        req.add_field('Content-Type', 'application/json')
-        req.body = MultiJson.dump(body)
-      else
-        req.add_field('Content-Type', 'application/x-www-form-urlencoded')
-        req.body = ParamEncoder.to_params(body)
-      end
+    def is_empty?(val)
+      val.nil? || (val.is_a?(String) && val.strip == "")
     end
   end
 end
