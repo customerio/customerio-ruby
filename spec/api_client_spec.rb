@@ -21,6 +21,48 @@ describe Customerio::APIClient do
     MultiJson.dump(data)
   end
 
+  it "the base client is initialised with the correct values when no region is passed in" do
+    app_key = "appkey"
+
+    expect(Customerio::BaseClient).to(
+      receive(:new)
+        .with(
+          { app_key: app_key },
+          {
+            region: Customerio::Regions::US,
+            url: Customerio::Regions.api_url_for(Customerio::Regions::US),
+          }
+        )
+    )
+
+    client = Customerio::APIClient.new(app_key)
+  end
+
+  it "raises an error when an incorrect region is passed in" do
+    expect {
+      Customerio::APIClient.new("appkey", region: :au)
+    }.to raise_error /region must be one of us or eu/
+  end
+
+  [Customerio::Regions::US, Customerio::Regions::EU].each do |region|
+    it "the base client is initialised with the correct values when the region \"#{region}\" is passed in" do
+      app_key = "appkey"
+
+      expect(Customerio::BaseClient).to(
+        receive(:new)
+          .with(
+            { app_key: app_key },
+            {
+              region: region,
+              url: Customerio::Regions.api_url_for(region),
+            }
+          )
+      )
+
+      client = Customerio::APIClient.new(app_key, { region: region })
+    end
+  end
+
   describe "#send_email" do
     it "sends a POST request to the /api/send/email path" do
       req = Customerio::SendEmailRequest.new(

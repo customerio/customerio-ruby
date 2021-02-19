@@ -40,6 +40,12 @@ describe Customerio::Client do
     client = Customerio::Client.new(site_id, api_key)
   end
 
+  it "raises an error when an incorrect region is passed in" do
+    expect {
+      Customerio::Client.new("siteid", "apikey", region: :au)
+    }.to raise_error /region must be one of us or eu/
+  end
+
   [Customerio::Regions::US, Customerio::Regions::EU].each do |region|
     it "the base client is initialised with the correct values when the region \"#{region}\" is passed in" do
       site_id = "SITE_ID"
