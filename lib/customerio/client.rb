@@ -2,13 +2,13 @@ require "addressable/uri"
 
 module Customerio
   class Client
-    DEFAULT_TRACK_URL = 'https://track.customer.io'
-
     class MissingIdAttributeError < RuntimeError; end
     class ParamError < RuntimeError; end
 
     def initialize(site_id, api_key, options = {})
-      options[:url] = DEFAULT_TRACK_URL if options[:url].nil? || options[:url].empty?
+      options[:region] = Customerio::Regions::US if options[:region].nil? || options[:region].empty?
+      options[:url] = Customerio::Regions.track_url_for(options[:region]) if options[:url].nil? || options[:url].empty?
+
       @client = Customerio::BaseClient.new({ site_id: site_id, api_key: api_key }, options)
     end
 
