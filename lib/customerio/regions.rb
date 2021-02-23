@@ -3,8 +3,8 @@ require 'multi_json'
 
 module Customerio
   class Regions
-    US = :us
-    EU = :eu
+    US = 'us'
+    EU = 'eu'
 
     def self.track_url_for(region)
       ensure_valid(region)
@@ -12,7 +12,7 @@ module Customerio
       {
         us: 'https://track.customer.io',
         eu: 'https://track-eu.customer.io'
-      }[region]
+      }[region.to_sym]
     end
 
     def self.api_url_for(region)
@@ -21,7 +21,7 @@ module Customerio
       {
         us: 'https://api.customer.io',
         eu: 'https://api-eu.customer.io'
-      }[region]
+      }[region.to_sym]
     end
 
     private
