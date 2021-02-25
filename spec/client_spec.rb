@@ -32,7 +32,7 @@ describe Customerio::Client do
           { site_id: site_id, api_key: api_key },
           {
             region: Customerio::Regions::US,
-            url: Customerio::Regions.track_url_for(Customerio::Regions::US),
+            url: Customerio::Regions::US.track_url
           }
         )
     )
@@ -43,7 +43,7 @@ describe Customerio::Client do
   it "raises an error when an incorrect region is passed in" do
     expect {
       Customerio::Client.new("siteid", "apikey", region: :au)
-    }.to raise_error /region must be one of us or eu/
+    }.to raise_error /region must be an instance of Customerio::Regions::Region/
   end
 
   [Customerio::Regions::US, Customerio::Regions::EU].each do |region|
@@ -57,7 +57,7 @@ describe Customerio::Client do
             { site_id: site_id, api_key: api_key },
             {
               region: region,
-              url: Customerio::Regions.track_url_for(region),
+              url: region.track_url
             }
           )
       )

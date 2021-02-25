@@ -30,7 +30,7 @@ describe Customerio::APIClient do
           { app_key: app_key },
           {
             region: Customerio::Regions::US,
-            url: Customerio::Regions.api_url_for(Customerio::Regions::US),
+            url: Customerio::Regions::US.api_url
           }
         )
     )
@@ -41,7 +41,7 @@ describe Customerio::APIClient do
   it "raises an error when an incorrect region is passed in" do
     expect {
       Customerio::APIClient.new("appkey", region: :au)
-    }.to raise_error /region must be one of us or eu/
+    }.to raise_error /region must be an instance of Customerio::Regions::Region/
   end
 
   [Customerio::Regions::US, Customerio::Regions::EU].each do |region|
@@ -54,7 +54,7 @@ describe Customerio::APIClient do
             { app_key: app_key },
             {
               region: region,
-              url: Customerio::Regions.api_url_for(region),
+              url: region.api_url
             }
           )
       )
