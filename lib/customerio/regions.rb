@@ -2,32 +2,10 @@ require 'net/http'
 require 'multi_json'
 
 module Customerio
-  class Regions
-    US = 'us'
-    EU = 'eu'
+  module Regions
+    Region = Struct.new(:track_url, :api_url)
 
-    def self.track_url_for(region)
-      ensure_valid(region)
-
-      {
-        us: 'https://track.customer.io',
-        eu: 'https://track-eu.customer.io'
-      }[region.to_sym]
-    end
-
-    def self.api_url_for(region)
-      ensure_valid(region)
-
-      {
-        us: 'https://api.customer.io',
-        eu: 'https://api-eu.customer.io'
-      }[region.to_sym]
-    end
-
-    private
-
-    def self.ensure_valid(region)
-      raise "region must be one of #{US} or #{EU}" unless [EU, US].include?(region)
-    end
+    US = Customerio::Regions::Region.new('https://track.customer.io', 'https://api.customer.io').freeze
+    EU = Customerio::Regions::Region.new('https://track-eu.customer.io', 'https://api-eu.customer.io').freeze
   end
 end

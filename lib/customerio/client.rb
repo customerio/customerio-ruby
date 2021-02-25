@@ -6,9 +6,10 @@ module Customerio
     class ParamError < RuntimeError; end
 
     def initialize(site_id, api_key, options = {})
-      options[:region] = Customerio::Regions::US if options[:region].nil? || options[:region].empty?
-      options[:url] = Customerio::Regions.track_url_for(options[:region]) if options[:url].nil? || options[:url].empty?
+      options[:region] = Customerio::Regions::US if options[:region].nil?
+      raise "region must be an instance of Customerio::Regions::Region" unless options[:region].is_a?(Customerio::Regions::Region)
 
+      options[:url] = options[:region].track_url if options[:url].nil? || options[:url].empty?
       @client = Customerio::BaseClient.new({ site_id: site_id, api_key: api_key }, options)
     end
 
