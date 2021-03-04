@@ -42,14 +42,15 @@ You'll be able to integrate **fully** with [Customer.io](http://customer.io) wit
 
 ### Setup
 
-Create an instance of the client with your [customer.io](http://customer.io) credentials
-which can be found on the [customer.io integration screen](https://fly.customer.io/account/customerio_integration).
+Create an instance of the client with your [Customer.io credentials](https://fly.customer.io/settings/api_credentials).
 
 If you're using Rails, create an initializer `config/initializers/customerio.rb`:
 
 ```ruby
-$customerio = Customerio::Client.new("YOUR SITE ID", "YOUR API SECRET KEY")
+$customerio = Customerio::Client.new("YOUR SITE ID", "YOUR API SECRET KEY", region: Customerio::Regions::US)
 ```
+
+The `region` is not required and takes one of two values—`US` or `EU`. If you do not specify your region, we assume that your account is based in the US (`US`). If your account is based in the EU and you do not provide the correct region (`EU`), we'll route requests to our EU data centers accordingly, however this may cause data to be logged in the US. 
 
 ### Identify logged in customers
 
@@ -121,7 +122,7 @@ encourage your customers to perform an action.
 $customerio.track(5, "purchase", :type => "socks", :price => "13.99")
 ```
 
-**Note:** If you'd like to track events which occurred in the past, you can include a `timestamp` attribute
+**Note:** If you want to track events which occurred in the past, you can include a `timestamp` attribute
 (in seconds since the epoch), and we'll use that as the date the event occurred.
 
 ```ruby
@@ -195,7 +196,7 @@ Use `send_email` referencing your request to send a transactional message. [Lear
 ```ruby
 require "customerio"
 
-client = Customerio::APIClient.new("your API key")
+client = Customerio::APIClient.new("your API key", region: Customerio::Regions::US)
 
 request = Customerio::SendEmailRequest.new(
   to: "person@example.com",
