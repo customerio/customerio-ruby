@@ -50,7 +50,7 @@ If you're using Rails, create an initializer `config/initializers/customerio.rb`
 $customerio = Customerio::Client.new("YOUR SITE ID", "YOUR API SECRET KEY", region: Customerio::Regions::US)
 ```
 
-The `region` is not required and takes one of two values—`US` or `EU`. If you do not specify your region, we assume that your account is based in the US (`US`). If your account is based in the EU and you do not provide the correct region (`EU`), we'll route requests to our EU data centers accordingly, however this may cause data to be logged in the US. 
+`region` is optional and takes one of two values—`US` or `EU`. If you do not specify your region, we assume that your account is based in the US (`US`). If your account is based in the EU and you do not provide the correct region (`EU`), we'll route requests to our EU data centers accordingly, however this may cause data to be logged in the US. 
 
 ### Identify logged in customers
 
