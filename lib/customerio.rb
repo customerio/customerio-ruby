@@ -1,6 +1,7 @@
 require "customerio/version"
 
 module Customerio
+  require "customerio/regions"
   require "customerio/base_client"
   require "customerio/client"
   require "customerio/requests/send_email_request"

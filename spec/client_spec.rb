@@ -22,6 +22,50 @@ describe Customerio::Client do
     MultiJson.dump(data)
   end
 
+  it "the base client is initialised with the correct values when no region is passed in" do
+    site_id = "SITE_ID"
+    api_key = "API_KEY"
+
+    expect(Customerio::BaseClient).to(
+      receive(:new)
+        .with(
+          { site_id: site_id, api_key: api_key },
+          {
+            region: Customerio::Regions::US,
+            url: Customerio::Regions::US.track_url
+          }
+        )
+    )
+
+    client = Customerio::Client.new(site_id, api_key)
+  end
+
+  it "raises an error when an incorrect region is passed in" do
+    expect {
+      Customerio::Client.new("siteid", "apikey", region: :au)
+    }.to raise_error /region must be an instance of Customerio::Regions::Region/
+  end
+
+  [Customerio::Regions::US, Customerio::Regions::EU].each do |region|
+    it "the base client is initialised with the correct values when the region \"#{region}\" is passed in" do
+      site_id = "SITE_ID"
+      api_key = "API_KEY"
+
+      expect(Customerio::BaseClient).to(
+        receive(:new)
+          .with(
+            { site_id: site_id, api_key: api_key },
+            {
+              region: region,
+              url: region.track_url
+            }
+          )
+      )
+
+      client = Customerio::Client.new(site_id, api_key, { region: region })
+    end
+  end
+
   it "uses json by default" do
     body = { id: 5, name: "Bob" }
     client = Customerio::Client.new("SITE_ID", "API_KEY")
