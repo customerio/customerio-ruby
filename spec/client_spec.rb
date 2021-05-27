@@ -546,4 +546,20 @@ describe Customerio::Client do
        lambda { client.delete_device(5, nil) }.should raise_error(Customerio::Client::ParamError)
     end
   end
+
+  describe "#region" do
+    it "sends a GET request to the customer.io's region API" do
+      stub_request(:get, api_uri('/api/v1/accounts/region')).
+        to_return(status: 200, body: { region: "eu" }.to_json, headers: {})
+
+      expect(client.region).to eq("region" => "eu")
+    end
+
+    it "throws an error when customer_id is missing" do
+      stub_request(:put, /track.customer.io/)
+        .to_return(status: 200, body: "", headers: {})
+
+      lambda { client.suppress(" ") }.should raise_error(Customerio::Client::ParamError, "customer_id must be a non-empty string")
+    end
+  end
 end

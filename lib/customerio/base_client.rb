@@ -64,6 +64,8 @@ module Customerio
 
     def request_class(method)
       case method
+      when :get
+        Net::HTTP::Get
       when :post
         Net::HTTP::Post
       when :put
