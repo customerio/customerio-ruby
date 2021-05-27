@@ -13,6 +13,16 @@ module Customerio
       @client = Customerio::BaseClient.new({ site_id: site_id, api_key: api_key }, options)
     end
 
+    def region
+      response = @client.request(:get, "/api/v1/accounts/region")
+      case response
+      when Net::HTTPSuccess
+        JSON.parse(response.body)
+      else
+        raise InvalidResponse.new(response.code, response.body)
+      end
+    end
+
     def identify(attributes)
       create_or_update(attributes)
     end
