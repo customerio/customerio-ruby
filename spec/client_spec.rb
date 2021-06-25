@@ -150,16 +150,18 @@ describe Customerio::Client do
       time = Time.now.to_i
 
       stub_request(:put, api_uri('/api/v1/customers/5')).with(
-        body: json({
+        body: {
           id: 5,
           email: "customer@example.com",
           created_at: time,
           first_name: "Bob",
-          plan: "basic"
-        })).to_return(status: 200, body: "", headers: {})
+          plan: "basic",
+          anonymous_id: "anon-id"
+        }).to_return(status: 200, body: "", headers: {})
 
       client.identify({
         id: 5,
+        anonymous_id: "anon-id",
         email: "customer@example.com",
         created_at: time,
         first_name: "Bob",
