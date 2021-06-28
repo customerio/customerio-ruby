@@ -2,7 +2,6 @@ require "addressable/uri"
 
 module Customerio
   class Client
-    DEFAULT_TRACK_URL = 'https://track.customer.io'
     VALID_PUSH_EVENTS = ['opened', 'converted', 'delivered']
 
     class MissingIdAttributeError < RuntimeError; end
