@@ -503,8 +503,7 @@ describe Customerio::Client do
     end
   end
 
-  describe "#track_push_notification_open" do
-
+  describe "#track_push_notification_event" do
     attr_accessor :client, :attributes
 
     before(:each) do
@@ -527,7 +526,16 @@ describe Customerio::Client do
           }).
         to_return(:status => 200, :body => "", :headers => {})
 
-      client.track_push_notification_open(attributes)
+      client.track_push_notification_event('opened', attributes)
+    end
+
+    it "should raise if event is invalid" do
+      stub_request(:post, api_uri('/push/events')).
+        to_return(:status => 200, :body => "", :headers => {})
+
+      expect {
+        client.track_push_notification_event('closed', attributes.merge({ :delivery_id => nil }))
+      }.to raise_error(Customerio::Client::ParamError, 'event_name must be one of opened, converted, or delivered')
     end
 
     it "should raise if delivery_id is invalid" do
@@ -535,11 +543,11 @@ describe Customerio::Client do
         to_return(:status => 200, :body => "", :headers => {})
 
       expect {
-        client.track_push_notification_open(attributes.merge({ :delivery_id => nil }))
+        client.track_push_notification_event('opened', attributes.merge({ :delivery_id => nil }))
       }.to raise_error(Customerio::Client::ParamError, 'delivery_id must be a non-empty string')
 
       expect {
-        client.track_push_notification_open(attributes.merge({ :delivery_id => '' }))
+        client.track_push_notification_event('opened', attributes.merge({ :delivery_id => '' }))
       }.to raise_error(Customerio::Client::ParamError, 'delivery_id must be a non-empty string')
     end
 
@@ -548,11 +556,11 @@ describe Customerio::Client do
         to_return(:status => 200, :body => "", :headers => {})
 
       expect {
-        client.track_push_notification_open(attributes.merge({ :device_id => nil }))
+        client.track_push_notification_event('opened', attributes.merge({ :device_id => nil }))
       }.to raise_error(Customerio::Client::ParamError, 'device_id must be a non-empty string')
 
       expect {
-        client.track_push_notification_open(attributes.merge({ :device_id => '' }))
+        client.track_push_notification_event('opened', attributes.merge({ :device_id => '' }))
       }.to raise_error(Customerio::Client::ParamError, 'device_id must be a non-empty string')
     end
 
@@ -561,15 +569,15 @@ describe Customerio::Client do
         to_return(:status => 200, :body => "", :headers => {})
 
       expect {
-        client.track_push_notification_open(attributes.merge({ :timestamp => nil }))
+        client.track_push_notification_event('opened', attributes.merge({ :timestamp => nil }))
       }.to raise_error(Customerio::Client::ParamError, 'timestamp must be a valid timestamp')
 
       expect {
-        client.track_push_notification_open(attributes.merge({ :timestamp => 999999999 }))
+        client.track_push_notification_event('opened', attributes.merge({ :timestamp => 999999999 }))
       }.to raise_error(Customerio::Client::ParamError, 'timestamp must be a valid timestamp')
 
       expect {
-        client.track_push_notification_open(attributes.merge({ :timestamp => 100000000000 }))
+        client.track_push_notification_event('opened', attributes.merge({ :timestamp => 100000000000 }))
       }.to raise_error(Customerio::Client::ParamError, 'timestamp must be a valid timestamp')
     end
   end

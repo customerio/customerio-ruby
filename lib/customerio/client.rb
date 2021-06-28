@@ -3,6 +3,7 @@ require "addressable/uri"
 module Customerio
   class Client
     DEFAULT_TRACK_URL = 'https://track.customer.io'
+    VALID_PUSH_EVENTS = ['opened', 'converted', 'delivered']
 
     class MissingIdAttributeError < RuntimeError; end
     class ParamError < RuntimeError; end
@@ -69,18 +70,17 @@ module Customerio
       @client.request_and_verify_response(:delete, device_id_path(customer_id, device_id))
     end
 
-    def track_push_notification_open(attributes = {})
+    def track_push_notification_event(event_name, attributes = {})
         keys = [:delivery_id, :device_id, :timestamp]
         attributes = Hash[attributes.map { |(k,v)| [ k.to_sym, v ] }].
             select { |k, v| keys.include?(k) }
 
+        raise ParamError.new('event_name must be one of opened, converted, or delivered') unless VALID_PUSH_EVENTS.include?(event_name)
         raise ParamError.new('delivery_id must be a non-empty string') unless attributes[:delivery_id] != "" and !attributes[:delivery_id].nil?
         raise ParamError.new('device_id must be a non-empty string') unless attributes[:device_id] != "" and !attributes[:device_id].nil?
         raise ParamError.new('timestamp must be a valid timestamp') unless valid_timestamp?(attributes[:timestamp])
 
-        verify_response(request(:post, track_push_notification_open_path, attributes.merge({
-            :event => 'opened'
-        })))
+        @client.request_and_verify_response(:post, track_push_notification_event_path, attributes.merge(event: event_name))
     end
 
     private
@@ -110,7 +110,7 @@ module Customerio
       "/api/v1/customers/#{escape(customer_id)}/unsuppress"
     end
 
-    def track_push_notification_open_path
+    def track_push_notification_event_path
         "/push/events"
     end
 
