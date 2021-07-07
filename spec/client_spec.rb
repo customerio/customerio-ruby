@@ -513,4 +513,83 @@ describe Customerio::Client do
        lambda { client.delete_device(5, nil) }.should raise_error(Customerio::Client::ParamError)
     end
   end
+
+  describe "#track_push_notification_event" do
+    attr_accessor :client, :attributes
+
+    before(:each) do
+      @client = Customerio::Client.new("SITE_ID", "API_KEY", :json => true)
+      @attributes = {
+        :delivery_id => 'foo',
+        :device_id => 'bar',
+        :timestamp => Time.now.to_i
+      }
+    end
+
+    it "sends a POST request to customer.io's /push/events endpoint" do
+      stub_request(:post, api_uri('/push/events')).
+        with(
+          :body => json(attributes.merge({
+              :event => 'opened'
+          })),
+          :headers => {
+            'Content-Type' => 'application/json'
+          }).
+        to_return(:status => 200, :body => "", :headers => {})
+
+      client.track_push_notification_event('opened', attributes)
+    end
+
+    it "should raise if event is invalid" do
+      stub_request(:post, api_uri('/push/events')).
+        to_return(:status => 200, :body => "", :headers => {})
+
+      expect {
+        client.track_push_notification_event('closed', attributes.merge({ :delivery_id => nil }))
+      }.to raise_error(Customerio::Client::ParamError, 'event_name must be one of opened, converted, or delivered')
+    end
+
+    it "should raise if delivery_id is invalid" do
+      stub_request(:post, api_uri('/push/events')).
+        to_return(:status => 200, :body => "", :headers => {})
+
+      expect {
+        client.track_push_notification_event('opened', attributes.merge({ :delivery_id => nil }))
+      }.to raise_error(Customerio::Client::ParamError, 'delivery_id must be a non-empty string')
+
+      expect {
+        client.track_push_notification_event('opened', attributes.merge({ :delivery_id => '' }))
+      }.to raise_error(Customerio::Client::ParamError, 'delivery_id must be a non-empty string')
+    end
+
+    it "should raise if device_id is invalid" do
+      stub_request(:post, api_uri('/push/events')).
+        to_return(:status => 200, :body => "", :headers => {})
+
+      expect {
+        client.track_push_notification_event('opened', attributes.merge({ :device_id => nil }))
+      }.to raise_error(Customerio::Client::ParamError, 'device_id must be a non-empty string')
+
+      expect {
+        client.track_push_notification_event('opened', attributes.merge({ :device_id => '' }))
+      }.to raise_error(Customerio::Client::ParamError, 'device_id must be a non-empty string')
+    end
+
+    it "should raise if timestamp is invalid" do
+      stub_request(:post, api_uri('/push/events')).
+        to_return(:status => 200, :body => "", :headers => {})
+
+      expect {
+        client.track_push_notification_event('opened', attributes.merge({ :timestamp => nil }))
+      }.to raise_error(Customerio::Client::ParamError, 'timestamp must be a valid timestamp')
+
+      expect {
+        client.track_push_notification_event('opened', attributes.merge({ :timestamp => 999999999 }))
+      }.to raise_error(Customerio::Client::ParamError, 'timestamp must be a valid timestamp')
+
+      expect {
+        client.track_push_notification_event('opened', attributes.merge({ :timestamp => 100000000000 }))
+      }.to raise_error(Customerio::Client::ParamError, 'timestamp must be a valid timestamp')
+    end
+  end
 end
