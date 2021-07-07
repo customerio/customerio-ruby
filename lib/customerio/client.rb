@@ -45,9 +45,11 @@ module Customerio
       create_customer_event(customer_id, event_name, attributes)
     end
 
-    def anonymous_track(event_name, attributes = {})
+    def track_anonymous(anonymous_id, event_name, attributes = {})
+      raise ParamError.new("anonymous_id must be a non-empty string") if is_empty?(anonymous_id)
       raise ParamError.new("event_name must be a non-empty string") if is_empty?(event_name)
-      create_anonymous_event(event_name, attributes)
+
+      create_anonymous_event(anonymous_id, event_name, attributes)
     end
 
     def add_device(customer_id, device_id, platform, data={})
@@ -129,16 +131,27 @@ module Customerio
     end
 
     def create_customer_event(customer_id, event_name, attributes = {})
-      create_event("#{customer_path(customer_id)}/events", event_name, attributes)
+      create_event(
+        url: "#{customer_path(customer_id)}/events",
+        event_name: event_name,
+        attributes: attributes
+      )
     end
 
-    def create_anonymous_event(event_name, attributes = {})
-      create_event("/api/v1/events", event_name, attributes)
+    def create_anonymous_event(anonymous_id, event_name, attributes = {})
+      create_event(
+        url: "/api/v1/events",
+        event_name: event_name,
+        anonymous_id: anonymous_id,
+        attributes: attributes
+      )
     end
 
-    def create_event(url, event_name, attributes = {})
+    def create_event(url:, event_name:, anonymous_id: nil, attributes: {})
       body = { :name => event_name, :data => attributes }
       body[:timestamp] = attributes[:timestamp] if valid_timestamp?(attributes[:timestamp])
+      body[:anonymous_id] = anonymous_id unless anonymous_id.nil?
+
       @client.request_and_verify_response(:post, url, body)
     end
 
