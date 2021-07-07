@@ -1,3 +1,9 @@
+## Customerio 4.0.0 - July 6, 2021
+### Removed
+- The `anonymous_track` method.
+
+### Added
+- The `track_anonymous` method replaces `anonymous_track`. This method requires an `anonymous_id` parameter and will no longer trigger campaigns. If you previously used anonymous events to trigger campaigns, you can still do so [directly through the API](https://customer.io/docs/api/#operation/trackAnonymous). We now refer to anonymous events that trigger campaigns as ["invite events"](https://customer.io/docs/anonymous-events/#anonymous-or-invite). 
 
 ## Customerio 3.1.0 - March 25, 2021
 ### Added

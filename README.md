@@ -131,10 +131,18 @@ $customerio.track(5, "purchase", :type => "socks", :price => "13.99", :timestamp
 
 ### Tracking anonymous events
 
-You can also send anonymous events, for situations where you don't yet have a customer record but still want to trigger a campaign:
+You can also send anonymous events, for situations where you don't yet have a customer record yet. An anonymous event requires an `anonymous_id` representing the unknown person and an event `name`. When you identify a person, you can set their `anonymous_id` attribute. If [event merging](https://customer.io/docs/anonymous-events/#turn-on-merging) is turned on in your workspace, and the attribute matches the `anonymous_id` in one or more events that were logged within the last 30 days, we associate those events with the person.
+
+Anonymous events cannot trigger campaigns by themselves. To trigger a campaign, the anonymous event must be associated with a person within 72 hours of the `track_anonymous` request.
 
 ```ruby
-$customerio.anonymous_track("help_enquiry", :recipient => 'user@example.com')
+# Arguments
+# anonymous_id (required) - the id representing the unknown person.
+# name (required)         - the name of the event you want to track.
+# attributes (optional)   - any related information you want to attach to the
+#                           event.
+
+$customerio.track_anonymous(anonymous_id, "product_view", :type => "socks" )
 ```
 
 Use the `recipient` attribute to specify the email address to send the messages to. [See our documentation on how to use anonymous events for more details](https://learn.customer.io/recipes/invite-emails.html).
