@@ -2,7 +2,11 @@ require "addressable/uri"
 
 module Customerio
   class Client
-    VALID_PUSH_EVENTS = ['opened', 'converted', 'delivered']
+    PUSH_OPENED = 'opened'
+    PUSH_CONVERTED = 'converted'
+    PUSH_DELIVERED = 'delivered'
+
+    VALID_PUSH_EVENTS = [PUSH_OPENED, PUSH_CONVERTED, PUSH_DELIVERED]
 
     class MissingIdAttributeError < RuntimeError; end
     class ParamError < RuntimeError; end
