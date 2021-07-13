@@ -1,4 +1,4 @@
-## Customerio 4.1.0 - July 13, 2021
+## Customerio 4.0.1 - July 13, 2021
 ### Changed
 - Update addressable gem dependency to v2.8.0
 
