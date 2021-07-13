@@ -17,7 +17,7 @@ Gem::Specification.new do |gem|
   gem.version       = Customerio::VERSION
 
   gem.add_dependency('multi_json', "~> 1.0")
-  gem.add_dependency('addressable', '~> 2.7.0')
+  gem.add_dependency('addressable', '~> 2.8.0')
 
   gem.add_development_dependency('rake', '~> 10.5')
   gem.add_development_dependency('rspec', '3.3.0')
