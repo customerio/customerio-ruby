@@ -1,3 +1,7 @@
+## Customerio 4.0.1 - July 13, 2021
+### Changed
+- Update addressable gem dependency to v2.8.0
+
 ## Customerio 4.0.0 - July 6, 2021
 ### Removed
 - The `anonymous_track` method.
