@@ -122,6 +122,10 @@ module Customerio
         "/push/events"
     end
 
+    def merge_customers_path
+      "/api/v1/merge_customers"
+    end
+
     def create_or_update(attributes = {})
       attributes = Hash[attributes.map { |(k,v)| [ k.to_sym, v ] }]
       raise MissingIdAttributeError.new("Must provide a customer id") if is_empty?(attributes[:id])
@@ -161,6 +165,21 @@ module Customerio
 
     def is_empty?(val)
       val.nil? || (val.is_a?(String) && val.strip == "")
+    end
+
+    def is_valid_id_type?(val)
+      ["id", "cio_id", "email"].include? val
+    end
+
+    def merge_customers(primary_id_tye, primary_id, secondary_id_type, secondary_id)
+      raise ParamError.new("invalid primary_id_type") if is_valid_id_type?(primary_id_tye)
+      raise ParamError.new("primary_id must be a non-empty string") if is_empty?(primary_id)
+      raise ParamError.new("invalid secondary_id_tye") if is_valid_id_type?(secondary_id_tye)
+      raise ParamError.new("secondary_id must be a non-empty string") if is_empty?(secondary_id)
+
+      body = { :primary => {primary_id_type => primary_id}, :secondary => {secondary_id_type => secondary_id} }
+
+      @client.request_and_verify_response(:post, merge_customers_path, body)
     end
   end
 end

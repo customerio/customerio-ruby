@@ -592,4 +592,31 @@ describe Customerio::Client do
       }.to raise_error(Customerio::Client::ParamError, 'timestamp must be a valid timestamp')
     end
   end
+  
+  describe "#merge_customers" do
+    if "should raise validation errors on input params" do
+      expect {
+        client.merge_customers("", "id1", "id", "id2")
+      }.to raise_error(Customerio::Client::ParamError, 'invalid primary_id_type')
+
+      expect {
+        client.merge_customers("id", "", "id", "id2")
+      }.to raise_error(Customerio::Client::ParamError, 'invalid primary_id')
+
+      expect {
+        client.merge_customers("id", "id1", "", "id2")
+      }.to raise_error(Customerio::Client::ParamError, 'invalid secondary_id_type')
+
+      expect {
+        client.merge_customers("id", "id1", "id", "")
+      }.to raise_error(Customerio::Client::ParamError, 'invalid secondary_id')
+    end
+
+    it "requires a valid customer_id when creating" do
+      stub_request(:delete, api_uri('/api/v1/merge_customers')).
+        to_return(status: 200, body: "", headers: {})
+
+      client.merge_customers("id", "ID1", "email", "hello@company.com")
+    end
+  end
 end
