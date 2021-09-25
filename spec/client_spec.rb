@@ -594,6 +594,10 @@ describe Customerio::Client do
   end
   
   describe "#merge_customers" do
+    before(:each) do
+      @client = Customerio::Client.new("SITE_ID", "API_KEY", :json => true)
+    end
+
     it "should raise validation errors on merge params" do
       expect {
         client.merge_customers("", "id1", "id", "id2")
