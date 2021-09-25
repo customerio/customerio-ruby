@@ -1,3 +1,7 @@
+## Customerio 4.0.2 - Sep 27, 2021
+### Added
+- Added support for merge customers api
+
 ## Customerio 4.0.1 - July 13, 2021
 ### Changed
 - Update addressable gem dependency to v2.8.0
