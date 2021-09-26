@@ -111,9 +111,12 @@ When you merge two people, you pick a primary person and merge a secondary, dupl
 The first and third parameters represent the identifier for the primary and secondary people respectively—one of `id`, `email`, or `cio_id`. The second and fourth parameters are the identifier values for the primary and secondary people respectively.
 
 ```ruby
+# $customerio.merge_customers("primaryType", "primaryIdentifier", "secondaryType", "secondaryIdentifier")
+# primaryType / secondaryType are one of "id", "email", or "cio_id"
+# primaryIdentifier / secondaryIdentifier are the identifier value corresponding to the type.
+
 # merge customer "cperson@gmail.com" into "cool.person@company.com"
 $customerio.merge_customers("email", "cool.person@company.com", "email", "cperson@gmail.com")
-)
 ```
 
 ### Tracking a custom event

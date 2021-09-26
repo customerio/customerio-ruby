@@ -1,6 +1,6 @@
 ## Customerio 4.0.2 - Sep 27, 2021
 ### Added
-- Added support for merge customers api
+- Added support for [merge customers](https://customer.io/docs/api/#operation/merge) API
 
 ## Customerio 4.0.1 - July 13, 2021
 ### Changed
