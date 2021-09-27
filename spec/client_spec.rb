@@ -600,19 +600,19 @@ describe Customerio::Client do
 
     it "should raise validation errors on merge params" do
       expect {
-        client.merge_customers("", "id1", "id", "id2")
+        client.merge_customers("", "id1", Customerio::IdentifierType::ID, "id2")
       }.to raise_error(Customerio::Client::ParamError, 'invalid primary_id_type')
 
       expect {
-        client.merge_customers("id", "", "id", "id2")
+        client.merge_customers(Customerio::IdentifierType::EMAIL, "", Customerio::IdentifierType::ID, "id2")
       }.to raise_error(Customerio::Client::ParamError, 'primary_id must be a non-empty string')
 
       expect {
-        client.merge_customers("id", "id1", "", "id2")
+        client.merge_customers(Customerio::IdentifierType::CIOID, "id1", "", "id2")
       }.to raise_error(Customerio::Client::ParamError, 'invalid secondary_id_type')
 
       expect {
-        client.merge_customers("id", "id1", "id", "")
+        client.merge_customers(Customerio::IdentifierType::ID, "id1", Customerio::IdentifierType::ID, "")
       }.to raise_error(Customerio::Client::ParamError, 'secondary_id must be a non-empty string')
     end
 
@@ -620,7 +620,7 @@ describe Customerio::Client do
       stub_request(:post, api_uri('/api/v1/merge_customers')).
         to_return(status: 200, body: "", headers: {})
 
-      client.merge_customers("id", "ID1", "email", "hello@company.com")
+      client.merge_customers(Customerio::IdentifierType::ID, "ID1", Customerio::IdentifierType::EMAIL, "hello@company.com")
     end
   end
 end

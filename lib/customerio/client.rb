@@ -1,6 +1,12 @@
 require "addressable/uri"
 
 module Customerio
+  class IdentifierType
+    ID = "id"
+    EMAIL = "email"
+    CIOID = "cio_id"
+  end
+
   class Client
     PUSH_OPENED = 'opened'
     PUSH_CONVERTED = 'converted'
@@ -179,7 +185,7 @@ module Customerio
     end
 
     def is_valid_id_type?(input)
-      ["id", "cio_id", "email"].include? input
+      [IdentifierType::ID, IdentifierType::CIOID, IdentifierType::EMAIL].include? input
     end
   end
 end
