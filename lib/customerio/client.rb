@@ -1,6 +1,12 @@
 require "addressable/uri"
 
 module Customerio
+  class IdentifierType
+    ID = "id"
+    EMAIL = "email"
+    CIOID = "cio_id"
+  end
+
   class Client
     PUSH_OPENED = 'opened'
     PUSH_CONVERTED = 'converted'
@@ -91,6 +97,17 @@ module Customerio
         @client.request_and_verify_response(:post, track_push_notification_event_path, attributes.merge(event: event_name))
     end
 
+    def merge_customers(primary_id_type, primary_id, secondary_id_type, secondary_id)
+      raise ParamError.new("invalid primary_id_type") if !is_valid_id_type?(primary_id_type)
+      raise ParamError.new("primary_id must be a non-empty string") if is_empty?(primary_id)
+      raise ParamError.new("invalid secondary_id_type") if !is_valid_id_type?(secondary_id_type)
+      raise ParamError.new("secondary_id must be a non-empty string") if is_empty?(secondary_id)
+
+      body = { :primary => {primary_id_type => primary_id}, :secondary => {secondary_id_type => secondary_id} }
+
+      @client.request_and_verify_response(:post, merge_customers_path, body)
+    end
+
     private
 
     def escape(val)
@@ -120,6 +137,10 @@ module Customerio
 
     def track_push_notification_event_path
         "/push/events"
+    end
+
+    def merge_customers_path
+      "/api/v1/merge_customers"
     end
 
     def create_or_update(attributes = {})
@@ -161,6 +182,10 @@ module Customerio
 
     def is_empty?(val)
       val.nil? || (val.is_a?(String) && val.strip == "")
+    end
+
+    def is_valid_id_type?(input)
+      [IdentifierType::ID, IdentifierType::CIOID, IdentifierType::EMAIL].include? input
     end
   end
 end
