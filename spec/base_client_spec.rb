@@ -18,11 +18,11 @@ describe Customerio::BaseClient do
 
   def track_client_request_headers
     token = Base64.strict_encode64("#{site_id}:#{api_key}")
-    { 'Authorization': "Basic #{token}", 'Content-Type': 'application/json' }
+    { 'Authorization': "Basic #{token}", 'Content-Type': 'application/json', 'User-Agent': 'Customer.io Ruby Client/' + Customerio::VERSION }
   end
 
   def api_client_request_headers
-    { 'Authorization': "Bearer #{app_key}", 'Content-Type': 'application/json' }
+    { 'Authorization': "Bearer #{app_key}", 'Content-Type': 'application/json', 'User-Agent': 'Customer.io Ruby Client/' + Customerio::VERSION }
   end
 
   describe "with a site ID and API key" do

@@ -14,7 +14,7 @@ describe Customerio::APIClient do
   end
 
   def request_headers
-    { 'Authorization': "Bearer #{app_key}", 'Content-Type': 'application/json' }
+    { 'Authorization': "Bearer #{app_key}", 'Content-Type': 'application/json', 'User-Agent': 'Customer.io Ruby Client/' + Customerio::VERSION }
   end
 
   def json(data)
