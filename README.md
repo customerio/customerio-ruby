@@ -187,7 +187,7 @@ $customerio.delete_device(5, "my_device_token")
 
 ### Suppress a user
 
-Deletes the customer with the provided id if it exists and suppresses all future events and identifies for for that customer.
+Deletes the customer with the provided id if it exists and suppresses all future events and identifies for that customer.
 
 ```ruby
 $customerio.suppress(5)
