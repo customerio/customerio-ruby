@@ -1,0 +1,10 @@
+tasks:
+  - init: |
+      bundle config set --local path 'vendor/bundle'
+      bundle install
+
+vscode:
+  extensions:
+    - connorshea.vscode-ruby-test-adapter
+    - hbenl.vscode-test-explorer
+    - hbenl.test-adapter-converter
