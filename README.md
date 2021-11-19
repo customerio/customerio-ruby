@@ -1,9 +1,16 @@
-# Customerio
+<p align="center">
+  <a href="https://customer.io">
+    <img src="https://files.gitbook.com/v0/b/gitbook-28427.appspot.com/o/assets%2F-LSFjPaMQn1zKdYh6i89%2F-LU6OglGKqQfqMd5Zl-V%2F-LU6OzOLnOvy8VLwfgdg%2FLogo-Color-Horizontal.png?alt=media&token=add29dd0-cabb-4440-b46b-aed21350ae90" height="60">
+  </a>
+  <p align="center">Power automated communication that people like to receive.</p>
+</p>
 
-A ruby client for the [Customer.io](http://customer.io) [event API](http://learn.customer.io/api/).
+[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blueviolet?logo=gitpod)](https://gitpod.io/#https://github.com/customerio/customerio-ruby/)
+[![ci](https://github.com/customerio/customerio-ruby/actions/workflows/main.yml/badge.svg)](https://github.com/customerio/customerio-ruby/actions/workflows/main.yml)
 
-[![Build Status](https://secure.travis-ci.org/customerio/customerio-ruby.png?branch=master)](http://travis-ci.org/customerio/customerio-ruby)
-[![Code Climate](https://codeclimate.com/github/customerio/customerio-ruby/badges/gpa.svg)](https://codeclimate.com/github/customerio/customerio-ruby)
+# Customer.io Ruby
+
+A ruby client for the [Customer.io Track API](https://customer.io/docs/api/#tag/trackOverview).
 
 ## Installation
 
@@ -24,7 +31,7 @@ Or install it yourself:
 ### Before we get started: API client vs. JavaScript snippet
 
 It's helpful to know that everything below can also be accomplished
-through the [Customer.io JavaScript snippet](http://learn.customer.io/developer-documentation/javascript-quick-start.html).
+through the [Customer.io JavaScript snippet](https://customer.io/docs/javascript-quick-start/).
 
 In many cases, using the JavaScript snippet will be easier to integrate with
 your app, but there are several reasons why using the API client is useful:
@@ -38,7 +45,7 @@ your app, but there are several reasons why using the API client is useful:
 
 In the end, the decision on whether or not to use the API client or
 the JavaScript snippet should be based on what works best for you.
-You'll be able to integrate **fully** with [Customer.io](http://customer.io) with either approach.
+You'll be able to integrate **fully** with [Customer.io](https://customer.io) with either approach.
 
 ### Setup
 
@@ -54,9 +61,9 @@ $customerio = Customerio::Client.new("YOUR SITE ID", "YOUR API SECRET KEY", regi
 
 ### Identify logged in customers
 
-Tracking data of logged in customers is a key part of [Customer.io](http://customer.io). In order to
+Tracking data of logged in customers is a key part of [Customer.io](https://customer.io). In order to
 send triggered emails, we must know the email address of the customer.  You can
-also specify any number of customer attributes which help tailor [Customer.io](http://customer.io) to your
+also specify any number of customer attributes which help tailor [Customer.io](https://customer.io) to your
 business.
 
 Attributes you specify are useful in several ways:
@@ -71,7 +78,7 @@ set up triggers which are only sent to customers who have subscribed to a
 particular plan (e.g. "premium").
 
 You'll want to indentify your customers when they sign up for your app and any time their
-key information changes. This keeps [Customer.io](http://customer.io) up to date with your customer information.
+key information changes. This keeps [Customer.io](https://customer.io) up to date with your customer information.
 
 ```ruby
 # Arguments
@@ -121,7 +128,7 @@ $customerio.merge_customers("email", "cool.person@company.com", "email", "cperso
 
 ### Tracking a custom event
 
-Now that you're identifying your customers with [Customer.io](http://customer.io), you can now send events like
+Now that you're identifying your customers with [Customer.io](https://customer.io), you can now send events like
 "purchased" or "watchedIntroVideo".  These allow you to more specifically target your users
 with automated emails, and track conversions when you're sending automated emails to
 encourage your customers to perform an action.
@@ -160,7 +167,7 @@ Anonymous events cannot trigger campaigns by themselves. To trigger a campaign, 
 $customerio.track_anonymous(anonymous_id, "product_view", :type => "socks" )
 ```
 
-Use the `recipient` attribute to specify the email address to send the messages to. [See our documentation on how to use anonymous events for more details](https://learn.customer.io/recipes/invite-emails.html).
+Use the `recipient` attribute to specify the email address to send the messages to. [See our documentation on how to use anonymous events for more details](https://customer.io/docs/invite-emails/).
 
 ### Adding a mobile device
 

@@ -20,7 +20,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency('addressable', '~> 2.8.0')
 
   gem.add_development_dependency('rake', '~> 10.5')
-  gem.add_development_dependency('rspec', '3.3.0')
+  gem.add_development_dependency('rspec', '~> 3.10')
   gem.add_development_dependency('webmock', '3.6.0')
   gem.add_development_dependency('json')
 end
