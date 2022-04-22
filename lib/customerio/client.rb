@@ -52,7 +52,6 @@ module Customerio
     end
 
     def track_anonymous(anonymous_id, event_name, attributes = {})
-      raise ParamError.new("anonymous_id must be a non-empty string") if is_empty?(anonymous_id)
       raise ParamError.new("event_name must be a non-empty string") if is_empty?(event_name)
 
       create_anonymous_event(anonymous_id, event_name, attributes)
