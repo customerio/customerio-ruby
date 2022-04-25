@@ -52,7 +52,6 @@ module Customerio
     end
 
     def track_anonymous(anonymous_id, event_name, attributes = {})
-      raise ParamError.new("anonymous_id must be a non-empty string") if is_empty?(anonymous_id)
       raise ParamError.new("event_name must be a non-empty string") if is_empty?(event_name)
 
       create_anonymous_event(anonymous_id, event_name, attributes)
@@ -171,7 +170,7 @@ module Customerio
     def create_event(url:, event_name:, anonymous_id: nil, attributes: {})
       body = { :name => event_name, :data => attributes }
       body[:timestamp] = attributes[:timestamp] if valid_timestamp?(attributes[:timestamp])
-      body[:anonymous_id] = anonymous_id unless anonymous_id.nil?
+      body[:anonymous_id] = anonymous_id unless is_empty?(anonymous_id)
 
       @client.request_and_verify_response(:post, url, body)
     end
