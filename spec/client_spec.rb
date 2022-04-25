@@ -433,12 +433,20 @@ describe Customerio::Client do
         lambda { client.track_anonymous(anon_id, "purchase") }.should raise_error(Customerio::InvalidResponse)
       end
 
-      it "throws an error when anonymous_id is missing" do
+      it "doesn't pass along anonymous_id if it is blank" do
           stub_request(:post, api_uri('/api/v1/events')).
-            with(body: { anonymous_id: anon_id, name: "purchase", data: {} }).
-            to_return(status: 500, body: "", headers: {})
+            with(body: { name: "some_event", data: {} }).
+            to_return(status: 200, body: "", headers: {})
 
-        lambda { client.track_anonymous("", "some_event") }.should raise_error(Customerio::Client::ParamError)
+        client.track_anonymous("", "some_event")
+      end
+
+      it "doesn't pass along anonymous_id if it is nil" do
+        stub_request(:post, api_uri('/api/v1/events')).
+          with(body: { name: "some_event", data: {} }).
+          to_return(status: 200, body: "", headers: {})
+
+        client.track_anonymous(nil, "some_event")
       end
 
       it "throws an error when event_name is missing" do
