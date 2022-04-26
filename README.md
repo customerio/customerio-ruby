@@ -159,15 +159,22 @@ Anonymous events cannot trigger campaigns by themselves. To trigger a campaign, 
 
 ```ruby
 # Arguments
-# anonymous_id (required) - the id representing the unknown person.
-# name (required)         - the name of the event you want to track.
-# attributes (optional)   - any related information you want to attach to the
-#                           event.
+# anonymous_id (required, nullable) - the id representing the unknown person.
+# name (required)                   - the name of the event you want to track.
+# attributes (optional)             - related information you want to attach to the event.
 
 $customerio.track_anonymous(anonymous_id, "product_view", :type => "socks" )
 ```
 
 Use the `recipient` attribute to specify the email address to send the messages to. [See our documentation on how to use anonymous events for more details](https://customer.io/docs/invite-emails/).
+
+#### Anonymous invite events
+
+If you previously sent [invite events](https://customer.io/docs/anonymous-invite-emails/), you can achieve the same functionality by sending an anonymous event with `nil` for the anonymous identifier. To send anonymous invites, your event *must* include a `recipient` attribute. 
+
+```ruby
+$customerio.track_anonymous(nil, "invite", :recipient => "new.person@example.com" )
+```
 
 ### Adding a mobile device
 
