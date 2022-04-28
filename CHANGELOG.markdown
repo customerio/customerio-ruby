@@ -1,3 +1,7 @@
+## Customerio 4.3.0 - April 26, 2022
+### Added
+- Support for [anonymous invite events](https://customer.io/docs/anonymous-invite-emails/) by setting `anonymous_id` to `nil`. 
+
 ## Customerio 4.1.0 - Sep 27, 2021
 ### Added
 - Added support for [merge customers](https://customer.io/docs/api/#operation/merge) API
