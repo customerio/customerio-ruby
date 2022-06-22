@@ -170,6 +170,7 @@ module Customerio
     def create_event(url:, event_name:, anonymous_id: nil, attributes: {})
       body = { :name => event_name, :data => attributes }
       body[:timestamp] = attributes[:timestamp] if valid_timestamp?(attributes[:timestamp])
+      body[:id] = attributes[:id] if valid_ulid?(attributes[:id])
       body[:anonymous_id] = anonymous_id unless is_empty?(anonymous_id)
 
       @client.request_and_verify_response(:post, url, body)
@@ -177,6 +178,10 @@ module Customerio
 
     def valid_timestamp?(timestamp)
       timestamp && timestamp.is_a?(Integer) && timestamp > 999999999 && timestamp < 100000000000
+    end
+
+    def valid_ulid?(id)
+      id && id.is_a?(String) && id.length == 26
     end
 
     def is_empty?(val)
