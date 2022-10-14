@@ -77,7 +77,7 @@ if you pass along the current subscription plan (free / basic / premium) for you
 set up triggers which are only sent to customers who have subscribed to a
 particular plan (e.g. "premium").
 
-You'll want to indentify your customers when they sign up for your app and any time their
+You'll want to identify your customers when they sign up for your app and any time their
 key information changes. This keeps [Customer.io](https://customer.io) up to date with your customer information.
 
 ```ruby
@@ -87,6 +87,25 @@ key information changes. This keeps [Customer.io](https://customer.io) up to dat
 #                         must at least pass in an id, email, and created_at timestamp.
 
 $customerio.identify(
+  :id => 5,
+  :email => "bob@example.com",
+  :created_at => customer.created_at.to_i,
+  :first_name => "Bob",
+  :plan => "basic"
+)
+```
+
+If you wish to specify a customer ID that is different than the one used in the `id` attribute, you can do so by using the `identify_customer_id` method:
+```ruby
+# Arguments
+# customer_id (required) - the customer ID to use for this customer, may be an id, email address, or the cio_id. This attribute
+#                         will be used to construct the URL but not sent in the body attributes.
+# attributes (required) - a hash of information about the customer. You can pass any
+#                         information that would be useful in your triggers. You 
+#                         must at least pass in an id, email, and created_at timestamp.
+
+$customerio.identify_customer_id(
+  :customer_id => "cio_5",
   :id => 5,
   :email => "bob@example.com",
   :created_at => customer.created_at.to_i,
