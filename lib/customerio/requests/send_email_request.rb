@@ -36,6 +36,9 @@ module Customerio
       send_to_unsubscribed
       tracked
       queue_draft
+      disable_css_preprocessing
+      send_at
+      language
     )
 
     def invalid_field?(field)
