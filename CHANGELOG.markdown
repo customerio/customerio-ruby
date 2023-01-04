@@ -1,3 +1,7 @@
+## Customerio 4.3.1 - January 5, 2023
+### Added
+- Added the `disable_css_preprocessing` and `language` optional fields to send request
+
 ## Customerio 4.3.0 - April 26, 2022
 ### Added
 - Support for [anonymous invite events](https://customer.io/docs/anonymous-invite-emails/) by setting `anonymous_id` to `nil`. 
