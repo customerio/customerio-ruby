@@ -6,7 +6,7 @@ Gem::Specification.new do |gem|
   gem.email         = ["john@customer.io"]
   gem.description   = "A ruby client for the Customer.io event API."
   gem.summary       = "A ruby client for the Customer.io event API."
-  gem.homepage      = "http://customer.io"
+  gem.homepage      = "https://customer.io"
   gem.license       = "MIT"
 
   gem.files         = `git ls-files`.split($\)
