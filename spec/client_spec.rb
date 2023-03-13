@@ -240,6 +240,16 @@ describe Customerio::Client do
     end
   end
 
+  describe "#pageview" do
+    it "allows sending pageview event" do
+      stub_request(:post, api_uri('/api/v1/customers/5/events')).
+        with(body: json(type: "page", name: "http://customer.io", data: {})).
+        to_return(status: 200, body: "", headers: {})
+
+      client.pageview(5, "http://customer.io")
+    end
+  end
+
   describe "#track" do
     it "raises an error if POST doesn't return a 2xx response code" do
       stub_request(:post, api_uri('/api/v1/customers/5/events')).

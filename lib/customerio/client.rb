@@ -51,6 +51,13 @@ module Customerio
       create_customer_event(customer_id, event_name, attributes)
     end
 
+    def pageview(customer_id, url, attributes = {})
+      raise ParamError.new("customer_id must be a non-empty string") if is_empty?(customer_id)
+      raise ParamError.new("url must be a non-empty string") if is_empty?(event_name)
+
+      create_pageview_event(customer_id, event_name, attributes)
+    end
+
     def track_anonymous(anonymous_id, event_name, attributes = {})
       raise ParamError.new("event_name must be a non-empty string") if is_empty?(event_name)
 
@@ -167,10 +174,20 @@ module Customerio
       )
     end
 
-    def create_event(url:, event_name:, anonymous_id: nil, attributes: {})
+    def create_pageview_event(customer_id, url, attributes = {})
+      create_event(
+        url: "#{customer_path(customer_id)}/events",
+        event_type: "page",
+        event_name: event_name,
+        attributes: attributes
+      )
+    end
+
+    def create_event(url:, event_name:, anonymous_id: nil, event_type: nil, attributes: {})
       body = { :name => event_name, :data => attributes }
       body[:timestamp] = attributes[:timestamp] if valid_timestamp?(attributes[:timestamp])
       body[:anonymous_id] = anonymous_id unless is_empty?(anonymous_id)
+      body[:type] = event_type unless is_empty?(event_type)
 
       @client.request_and_verify_response(:post, url, body)
     end
