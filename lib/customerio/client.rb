@@ -51,11 +51,11 @@ module Customerio
       create_customer_event(customer_id, event_name, attributes)
     end
 
-    def pageview(customer_id, url, attributes = {})
+    def pageview(customer_id, page, attributes = {})
       raise ParamError.new("customer_id must be a non-empty string") if is_empty?(customer_id)
-      raise ParamError.new("url must be a non-empty string") if is_empty?(event_name)
+      raise ParamError.new("page must be a non-empty string") if is_empty?(page)
 
-      create_pageview_event(customer_id, event_name, attributes)
+      create_pageview_event(customer_id, page, attributes)
     end
 
     def track_anonymous(anonymous_id, event_name, attributes = {})
@@ -174,11 +174,11 @@ module Customerio
       )
     end
 
-    def create_pageview_event(customer_id, url, attributes = {})
+    def create_pageview_event(customer_id, page, attributes = {})
       create_event(
         url: "#{customer_path(customer_id)}/events",
         event_type: "page",
-        event_name: event_name,
+        event_name: page,
         attributes: attributes
       )
     end
