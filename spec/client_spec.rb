@@ -243,7 +243,7 @@ describe Customerio::Client do
   describe "#pageview" do
     it "allows sending pageview event" do
       stub_request(:post, api_uri('/api/v1/customers/5/events')).
-        with(body: json(type: "page", name: "http://customer.io", data: {})).
+        with(body: json(name: "http://customer.io", data: {}, type: "page")).
         to_return(status: 200, body: "", headers: {})
 
       client.pageview(5, "http://customer.io")
