@@ -29,7 +29,7 @@ module Customerio
       bcc
       subject
       body
-      body_plaintext
+      body_plain
       body_amp
       fake_bcc
       disable_message_retention
