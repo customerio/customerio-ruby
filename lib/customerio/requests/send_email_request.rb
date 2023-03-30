@@ -29,8 +29,8 @@ module Customerio
       bcc
       subject
       body
-      plaintext_body
-      amp_body
+      body_plaintext
+      body_amp
       fake_bcc
       disable_message_retention
       send_to_unsubscribed
