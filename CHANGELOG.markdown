@@ -1,3 +1,7 @@
+## Customerio 5.1.0 - January 5, 2023
+### Added
+- Added `send_push` to `APIClient` and `SendPushRequest` to support sending transactional push notifications.
+
 ## Customerio 4.3.1 - January 5, 2023
 ### Added
 - Added the `disable_css_preprocessing` and `language` optional fields to send request

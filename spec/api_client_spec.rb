@@ -6,7 +6,7 @@ require 'tempfile'
 describe Customerio::APIClient do
   let(:app_key) { "appkey" }
 
-  let(:client)   { Customerio::APIClient.new(app_key) }
+  let(:client) { Customerio::APIClient.new(app_key) }
   let(:response) { double("Response", code: 200) }
 
   def api_uri(path)
@@ -167,6 +167,89 @@ describe Customerio::APIClient do
 
       lambda { req.attach('test', '') }.should raise_error(/attachment test already exists/)
       req.message[:attachments].should eq({ "test" => Base64.strict_encode64("test-content") })
+    end
+  end
+
+  describe "#send_push" do
+    it "sends a POST request to the /api/send/push path" do
+      req = Customerio::SendPushRequest.new(
+        identifiers: {
+          id: 'c1',
+        },
+        transactional_message_id: 1,
+      )
+
+      stub_request(:post, api_uri('/v1/send/push'))
+        .with(headers: request_headers, body: req.message)
+        .to_return(status: 200, body: { delivery_id: 1 }.to_json, headers: {})
+
+      client.send_push(req).should eq({ "delivery_id" => 1 })
+    end
+
+    it "handles validation failures (400)" do
+      req = Customerio::SendPushRequest.new(
+        identifiers: {
+          id: 'c1',
+        },
+        transactional_message_id: 1,
+      )
+
+      err_json = { meta: { error: "example error" } }.to_json
+
+      stub_request(:post, api_uri('/v1/send/push'))
+        .with(headers: request_headers, body: req.message)
+        .to_return(status: 400, body: err_json, headers: {})
+
+      lambda { client.send_push(req) }.should(
+        raise_error(Customerio::InvalidResponse) { |error|
+          error.message.should eq "example error"
+          error.code.should eq "400"
+        }
+      )
+    end
+
+    it "handles other failures (5xx)" do
+      req = Customerio::SendPushRequest.new(
+        identifiers: {
+          id: 'c1',
+        },
+        transactional_message_id: 1,
+      )
+
+      stub_request(:post, api_uri('/v1/send/push'))
+        .with(headers: request_headers, body: req.message)
+        .to_return(status: 500, body: "Server unavailable", headers: {})
+
+      lambda { client.send_push(req) }.should(
+        raise_error(Customerio::InvalidResponse) { |error|
+          error.message.should eq "Server unavailable"
+          error.code.should eq "500"
+        }
+      )
+    end
+
+    it "sets custom_device correctly if device present in req" do
+      req = Customerio::SendPushRequest.new(
+        identifiers: {
+          id: 'c1',
+        },
+        transactional_message_id: 1,
+        device: {
+          platform: 'ios',
+          token: 'sample-token',
+        }
+      )
+
+      req.message[:custom_device].should eq({
+        platform: 'ios',
+        token: 'sample-token',
+      })
+
+      stub_request(:post, api_uri('/v1/send/push'))
+        .with(headers: request_headers, body: req.message)
+        .to_return(status: 200, body: { delivery_id: 2 }.to_json, headers: {})
+
+      client.send_push(req).should eq({ "delivery_id" => 2 })
     end
   end
 end
