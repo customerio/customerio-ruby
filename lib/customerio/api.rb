@@ -26,10 +26,32 @@ module Customerio
       end
     end
 
+    def trigger_broadcast(req)
+      unless req.is_a?(Customerio::TriggerBroadcastRequest)
+        raise 'request must be an instance of Customerio::TriggerBroadcastRequest'
+      end
+
+      response = @client.request(:post, trigger_broadcast_path(req.broadcast_id), req.payload)
+
+      case response
+      when Net::HTTPSuccess
+        JSON.parse(response.body)
+      when Net::HTTPBadRequest
+        json = JSON.parse(response.body)
+        raise Customerio::InvalidResponse.new(response.code, json['meta']['error'], response)
+      else
+        raise InvalidResponse.new(response.code, response.body)
+      end
+    end
+
     private
 
     def send_email_path
       "/v1/send/email"
+    end
+
+    def trigger_broadcast_path(broadcast_id)
+      "/v1/campaigns/#{broadcast_id}/triggers"
     end
   end
 end
