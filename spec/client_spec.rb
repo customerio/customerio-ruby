@@ -183,6 +183,14 @@ describe Customerio::Client do
 
       lambda { client.identify(attributes) }.should_not raise_error()
     end
+
+    it "uses provided url_id rather than id" do
+      stub_request(:put, api_uri('/api/v1/customers/cio_5')).
+        with(body: json(id: "5")).
+        to_return(status: 200, body: "", headers: {})
+
+      client.identify_customer_id(customer_id: "cio_5", id: "5")
+    end
   end
 
   describe "#delete" do
