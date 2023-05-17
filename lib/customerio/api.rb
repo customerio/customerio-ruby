@@ -26,6 +26,21 @@ module Customerio
       end
     end
 
+    def send_push(req)
+      raise "request must be an instance of Customerio::SendPushRequest" unless req.is_a?(Customerio::SendPushRequest)
+      response = @client.request(:post, send_push_path, req.message)
+
+      case response
+      when Net::HTTPSuccess then
+        JSON.parse(response.body)
+      when Net::HTTPBadRequest then
+        json = JSON.parse(response.body)
+        raise Customerio::InvalidResponse.new(response.code, json['meta']['error'], response)
+      else
+        raise InvalidResponse.new(response.code, response.body)
+      end
+    end
+
     def trigger_broadcast(req)
       unless req.is_a?(Customerio::TriggerBroadcastRequest)
         raise 'request must be an instance of Customerio::TriggerBroadcastRequest'
@@ -48,6 +63,10 @@ module Customerio
 
     def send_email_path
       "/v1/send/email"
+    end
+
+    def send_push_path
+      "/v1/send/push"
     end
 
     def trigger_broadcast_path(broadcast_id)

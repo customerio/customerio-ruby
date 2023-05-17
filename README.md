@@ -217,7 +217,9 @@ $customerio.unsuppress(5)
 
 ### Send Transactional Messages
 
-To use the Customer.io [Transactional API](https://customer.io/docs/transactional-api), create an instance of the API client using an [app key](https://customer.io/docs/managing-credentials#app-api-keys).
+To use the Customer.io [Transactional API](https://customer.io/docs/transactional-api), create an instance of the API client using an [app key](https://customer.io/docs/managing-credentials#app-api-keys) and create a request object of your message type.
+
+#### Email
 
 Create a new `SendEmailRequest` object containing:
 
@@ -256,6 +258,44 @@ request.attach("filename", file.read)
 
 begin
   response = client.send_email(request)
+  puts response
+rescue Customerio::InvalidResponse => e
+  puts e.code, e.message
+end
+```
+
+#### Push
+
+Create a new `SendPushRequest` object containing:
+
+* `transactional_message_id`: the ID or trigger name of the transactional message you want to send.
+* an `identifiers` object containing the `id` or `email` of your recipient. If the profile does not exist, Customer.io creates it.
+
+Use `send_push` referencing your request to send a transactional message. [Learn more about transactional messages and `SendPushRequest` properties](https://customer.io/docs/transactional-api).
+
+
+```ruby
+require "customerio"
+
+client = Customerio::APIClient.new("your API key", region: Customerio::Regions::US)
+
+request = Customerio::SendPushRequest.new(
+  transactional_message_id: "3",
+  message_data: {
+    name: "Person",
+    items: {
+      name: "shoes",
+      price: "59.99",
+    },
+    products: [],
+  },
+  identifiers: {
+    id: "2",
+  },
+)
+
+begin
+  response = client.send_push(request)
   puts response
 rescue Customerio::InvalidResponse => e
   puts e.code, e.message
