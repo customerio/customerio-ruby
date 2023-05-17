@@ -344,9 +344,6 @@ request = Customerio::TriggerBroadcastRequest.new(
   payload: payload
 )
 
-file = File.open('<file-path>', 'r')
-request.attach("filename", file.read)
-
 begin
   response = client.trigger_broadcast(request)
   puts response
