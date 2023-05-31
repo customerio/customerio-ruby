@@ -17,9 +17,9 @@ module Customerio
 
       case response
       when Net::HTTPSuccess then
-        JSON.parse(response.body)
+        MultiJson.load(response.body)
       when Net::HTTPBadRequest then
-        json = JSON.parse(response.body)
+        json = MultiJson.load(response.body)
         raise Customerio::InvalidResponse.new(response.code, json['meta']['error'], response)
       else
         raise InvalidResponse.new(response.code, response.body)
@@ -32,9 +32,9 @@ module Customerio
 
       case response
       when Net::HTTPSuccess then
-        JSON.parse(response.body)
+        MultiJson.load(response.body)
       when Net::HTTPBadRequest then
-        json = JSON.parse(response.body)
+        json = MultiJson.load(response.body)
         raise Customerio::InvalidResponse.new(response.code, json['meta']['error'], response)
       else
         raise InvalidResponse.new(response.code, response.body)
