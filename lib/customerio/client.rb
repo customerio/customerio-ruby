@@ -44,6 +44,14 @@ module Customerio
       @client.request_and_verify_response(:post, unsuppress_path(customer_id))
     end
 
+    def unique_track(event_id, customer_id, event_name, attributes = {})
+      raise ParamError.new("event_id must be a valid ULID") if !valid_ulid?(event_id)
+      raise ParamError.new("customer_id must be a non-empty string") if is_empty?(customer_id)
+      raise ParamError.new("event_name must be a non-empty string") if is_empty?(event_name)
+  
+      create_customer_event(customer_id, event_name, attributes, event_id)
+    end
+
     def track(customer_id, event_name, attributes = {})
       raise ParamError.new("customer_id must be a non-empty string") if is_empty?(customer_id)
       raise ParamError.new("event_name must be a non-empty string") if is_empty?(event_name)
@@ -157,9 +165,11 @@ module Customerio
       @client.request_and_verify_response(:put, url, attributes)
     end
 
-    def create_customer_event(customer_id, event_name, attributes = {})
+    def create_customer_event(customer_id, event_name, attributes = {}, id = nil)
+      url = id ? "#{customer_path(customer_id)}/events/#{id}" : "#{customer_path(customer_id)}/events"
+
       create_event(
-        url: "#{customer_path(customer_id)}/events",
+        url: url,
         event_name: event_name,
         attributes: attributes
       )
@@ -194,6 +204,10 @@ module Customerio
 
     def valid_timestamp?(timestamp)
       timestamp && timestamp.is_a?(Integer) && timestamp > 999999999 && timestamp < 100000000000
+    end
+
+    def valid_ulid?(ulid)
+      !!(ulid =~ /\A[0123456789ABCDEFGHJKMNPQRSTVWXYZabcdefghjkmnpqrstvwxyz]{26}\z/)
     end
 
     def is_empty?(val)
