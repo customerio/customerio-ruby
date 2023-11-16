@@ -197,7 +197,7 @@ module Customerio
       body[:timestamp] = attributes[:timestamp] if valid_timestamp?(attributes[:timestamp])
       body[:anonymous_id] = anonymous_id unless is_empty?(anonymous_id)
       body[:type] = event_type unless is_empty?(event_type)
-      body[:event_id] = event_id unless is_empty?(event_id)
+      body[:id] = event_id unless is_empty?(event_id)
 
       @client.request_and_verify_response(:post, url, body)
     end
