@@ -165,12 +165,11 @@ module Customerio
       @client.request_and_verify_response(:put, url, attributes)
     end
 
-    def create_customer_event(customer_id, event_name, attributes = {}, id = nil)
-      url = id ? "#{customer_path(customer_id)}/events/#{id}" : "#{customer_path(customer_id)}/events"
-
+    def create_customer_event(customer_id, event_name, attributes = {}, event_id = nil)
       create_event(
-        url: url,
+        url: "#{customer_path(customer_id)}/events",
         event_name: event_name,
+        event_id: event_id,
         attributes: attributes
       )
     end
@@ -193,11 +192,12 @@ module Customerio
       )
     end
 
-    def create_event(url:, event_name:, anonymous_id: nil, event_type: nil, attributes: {})
+    def create_event(url:, event_name:, anonymous_id: nil, event_type: nil, event_id: nil, attributes: {})
       body = { :name => event_name, :data => attributes }
       body[:timestamp] = attributes[:timestamp] if valid_timestamp?(attributes[:timestamp])
       body[:anonymous_id] = anonymous_id unless is_empty?(anonymous_id)
       body[:type] = event_type unless is_empty?(event_type)
+      body[:event_id] = event_id unless is_empty?(event_id)
 
       @client.request_and_verify_response(:post, url, body)
     end
