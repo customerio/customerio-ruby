@@ -184,7 +184,7 @@ describe Customerio::Client do
       lambda { client.identify(attributes) }.should_not raise_error()
     end
 
-    it "uses provided url_id rather than id" do
+    it "uses provided customer_id rather than id" do
       stub_request(:put, api_uri('/api/v1/customers/cio_5')).
         with(body: json(id: "5")).
         to_return(status: 200, body: "", headers: {})
@@ -618,7 +618,7 @@ describe Customerio::Client do
       }.to raise_error(Customerio::Client::ParamError, 'timestamp must be a valid timestamp')
     end
   end
-  
+
   describe "#merge_customers" do
     before(:each) do
       @client = Customerio::Client.new("SITE_ID", "API_KEY", :json => true)
