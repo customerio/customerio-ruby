@@ -55,7 +55,7 @@ module Customerio
       param
     end
 
-    # Prefer ERB::Util.url_encode, fall baack to deprecation URI.encode for
+    # Prefer ERB::Util.url_encode, fall back to deprecation URI.encode for
     # old Ruby support
     def self.escape_value(value)
       if ERB::Util.respond_to? :url_encode
