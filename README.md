@@ -95,9 +95,33 @@ $customerio.identify(
 )
 ```
 
-### Updating customers: Using other IDs
+### Updating customers: Changing identifiers
 
-If you wish to specify a customer ID that is different than the one used in the `id` attribute, you can do so by using the `identify_customer_id` method:
+You can use the identify operation to update customers.
+If you need to change the `id` or `email` identifiers for a customer,
+you will need to pass in the `cio_id` identifier.
+`cio_id` is a unique identifier set by Customer.io, used to reference a person,
+and cannot be changed.
+
+E.g.: if the customer created in the identify operation above was given the `cio_id` of `"f000000d"`, you could change its ID and email address using:
+
+```ruby
+$customerio.identify(
+  :cio_id => "f000000d",
+  :id => 1005,
+  :email => "bob.fullname@example.com"
+)
+```
+
+This method requires either the `id` or `cio_id` for the person. It does not work with email addresses.
+
+You can also use this method to make other updates to the person using the `cio_id`.
+
+### Updating customers: Using email address
+
+If you need to identify a person using their email address, then you can do so
+by using the `identify_customer_id` method. This allows you to specify
+a customer ID that is different than the one used in the `id` attribute. E.g.:
 
 ```ruby
 # Arguments
@@ -117,23 +141,7 @@ $customerio.identify_customer_id(
 )
 ```
 
-### Updating customers: Changing identifiers
-
-You can use the identify operation to update customers.
-If you need to change the `id` or `email` identifiers for a customer,
-you will need to pass in the `cio_id` identifier.
-`cio_id` is a unique identifier set by Customer.io, used to reference a person,
-and cannot be changed.
-
-E.g.: if the customer created in the identify operation above was given the `cio_id` of `"f000000d"`, you could change its ID and email address using:
-
-```ruby
-$customerio.identify(
-  :cio_id => "f000000d",
-  :id => 1005,
-  :email => "bob.fullname@example.com"
-)
-```
+Note: If you want to use the `cio_id` in the `customer_id` field of `identify_customer_id`, you will need to prefix it with `"cio_"`. E.g.: `"cio_f000000d"` for a `cio_id` of `f000000d`.
 
 ### Deleting customers
 
