@@ -155,7 +155,7 @@ module Customerio
         raise MissingIdAttributeError.new("Must provide a customer id")
       end
 
-      # Use cio_id as the identifier, as present,
+      # Use cio_id as the identifier, if present,
       # to allow the id and email identifiers to be updated.
       customer_id = attributes[:id]
       if !is_empty?(attributes[:cio_id])
