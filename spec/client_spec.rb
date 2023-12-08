@@ -225,6 +225,50 @@ describe Customerio::Client do
     end
   end
 
+  describe "#identify_customer_id" do
+    it "uses provided id rather than id" do
+      stub_request(:put, api_uri('/api/v1/customers/1234')).
+        with(body: json(id: "5")).
+        to_return(status: 200, body: "", headers: {})
+
+      client.identify_customer_id(
+        customer_id: "1234",
+        id: "5"
+      )
+    end
+
+    it "uses provided cio_id rather than id" do
+      stub_request(:put, api_uri('/api/v1/customers/cio_5')).
+        with(body: json(id: "5")).
+        to_return(status: 200, body: "", headers: {})
+
+      client.identify_customer_id(
+        customer_id: "cio_5",
+        id: "5"
+      )
+    end
+
+    it "uses provided email rather than id" do
+      stub_request(:put, api_uri('/api/v1/customers/customer@example.com')).
+        with(body: json(id: "5")).
+        to_return(status: 200, body: "", headers: {})
+
+      client.identify_customer_id(
+        customer_id: "customer@example.com",
+        id: "5"
+      )
+    end
+
+    it "requires a customer_id attribute" do
+      lambda { client.identify_customer_id() }.should raise_error(Customerio::Client::MissingIdAttributeError)
+      lambda { client.identify_customer_id(customer_id: "") }.should raise_error(Customerio::Client::MissingIdAttributeError)
+      # None of these are customer_id
+      lambda { client.identify_customer_id(id: "5") }.should raise_error(Customerio::Client::MissingIdAttributeError)
+      lambda { client.identify_customer_id(cio_id: "cio_5") }.should raise_error(Customerio::Client::MissingIdAttributeError)
+      lambda { client.identify_customer_id(email: "customer@example.com") }.should raise_error(Customerio::Client::MissingIdAttributeError)
+    end
+  end
+
   describe "#delete" do
     it "sends a DELETE request to the customer.io's event API" do
       stub_request(:delete, api_uri('/api/v1/customers/5')).
@@ -650,7 +694,7 @@ describe Customerio::Client do
       }.to raise_error(Customerio::Client::ParamError, 'timestamp must be a valid timestamp')
     end
   end
-  
+
   describe "#merge_customers" do
     before(:each) do
       @client = Customerio::Client.new("SITE_ID", "API_KEY", :json => true)

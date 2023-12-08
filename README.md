@@ -95,7 +95,29 @@ $customerio.identify(
 )
 ```
 
-### Updating customers
+### Updating customers: Using other IDs
+
+If you wish to specify a customer ID that is different than the one used in the `id` attribute, you can do so by using the `identify_customer_id` method:
+
+```ruby
+# Arguments
+# customer_id (required) - the customer ID to use for this customer, may be an id, email address, or the cio_id.
+#                         This will be used to construct the URL but not sent in the body attributes.
+# attributes (required) - a hash of information about the customer. You can pass any
+#                         information that would be useful in your triggers. You
+#                         must at least pass in an id, email, and created_at timestamp.
+
+$customerio.identify_customer_id(
+  :customer_id => "bob@example.com",
+  :id => 5,
+  :email => "bob@example.com",
+  :created_at => customer.created_at.to_i,
+  :first_name => "Bob",
+  :plan => "basic"
+)
+```
+
+### Updating customers: Changing identifiers
 
 You can use the identify operation to update customers.
 If you need to change the `id` or `email` identifiers for a customer,
