@@ -77,7 +77,7 @@ if you pass along the current subscription plan (free / basic / premium) for you
 set up triggers which are only sent to customers who have subscribed to a
 particular plan (e.g. "premium").
 
-You'll want to indentify your customers when they sign up for your app and any time their
+You'll want to identify your customers when they sign up for your app and any time their
 key information changes. This keeps [Customer.io](https://customer.io) up to date with your customer information.
 
 ```ruby
@@ -92,6 +92,24 @@ $customerio.identify(
   :created_at => customer.created_at.to_i,
   :first_name => "Bob",
   :plan => "basic"
+)
+```
+
+### Updating customers
+
+You can use the identify operation to update customers.
+If you need to change the `id` or `email` identifiers for a customer,
+you will need to pass in the `cio_id` identifier.
+`cio_id` is a unique identifier set by Customer.io, used to reference a person,
+and cannot be changed.
+
+E.g.: if the customer created in the identify operation above was given the `cio_id` of `"f000000d"`, you could change its ID and email address using:
+
+```ruby
+$customerio.identify(
+  :cio_id => "f000000d",
+  :id => 1005,
+  :email => "bob.fullname@example.com"
 )
 ```
 
