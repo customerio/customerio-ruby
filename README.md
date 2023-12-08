@@ -120,7 +120,7 @@ You can also use this method to make other updates to the person using the `cio_
 ### Updating customers: Using email address
 
 If you need to identify a person using their email address, then you can do so
-by using the `identify_customer_id` method. This allows you to specify
+by passing in a customer ID to the `identify` method. This allows you to specify
 a customer ID that is different than the one used in the `id` attribute. E.g.:
 
 ```ruby
@@ -131,17 +131,16 @@ a customer ID that is different than the one used in the `id` attribute. E.g.:
 #                         information that would be useful in your triggers. You
 #                         must at least pass in an id, email, and created_at timestamp.
 
-$customerio.identify_customer_id(
+$customerio.identify(
   :customer_id => "bob@example.com",
-  :id => 5,
-  :email => "bob@example.com",
-  :created_at => customer.created_at.to_i,
-  :first_name => "Bob",
-  :plan => "basic"
+  :location => "Australia"
 )
 ```
 
-Note: If you want to use the `cio_id` in the `customer_id` field of `identify_customer_id`, you will need to prefix it with `"cio_"`. E.g.: `"cio_f000000d"` for a `cio_id` of `f000000d`.
+Note:
+
+ * If you want to use the `cio_id` in the `customer_id` field of `identify_customer_id`, you will need to prefix it with `"cio_"`. E.g.: `"cio_f000000d"` for a `cio_id` of `f000000d`.
+ * The `identify` method can identify the person using one of `customer_id`, `cio_id` or `id`. The order of precedence is `customer_id` > `cio_id` > `id`.
 
 ### Deleting customers
 

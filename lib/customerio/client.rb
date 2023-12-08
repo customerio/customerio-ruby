@@ -29,10 +29,6 @@ module Customerio
       create_or_update(attributes)
     end
 
-    def identify_customer_id(customer_id: nil, **attributes)
-      create_or_update_customer_id(customer_id, **attributes)
-    end
-
     def delete(customer_id)
       raise ParamError.new("customer_id must be a non-empty string") if is_empty?(customer_id)
       @client.request_and_verify_response(:delete, customer_path(customer_id))
@@ -155,24 +151,33 @@ module Customerio
 
     def create_or_update(attributes = {})
       attributes = Hash[attributes.map { |(k,v)| [ k.to_sym, v ] }]
-      if is_empty?(attributes[:id]) && is_empty?(attributes[:cio_id])
+      if is_empty?(attributes[:id]) && is_empty?(attributes[:cio_id]) && is_empty?(attributes[:customer_id])
         raise MissingIdAttributeError.new("Must provide a customer id")
       end
 
       # Use cio_id as the identifier, if present,
       # to allow the id and email identifiers to be updated.
+      # The person is identified by a customer ID, which is included
+      # in the path to the Track v1 API. Choose the ID in this order
+      # from highest to lowest precedence:
+      #
+      # 1. customer_id: "id", an email address, or "cio_id" value.
+      #    Any "cio_id" values need to be prefixed "cio_"
+      #    so that the Track v1 API knows it's a cio_id.
+      #
+      # 2. cio_id: The cio_id value (no prefix required).
+      #
+      # 3. id: The id value.
       customer_id = attributes[:id]
       if !is_empty?(attributes[:cio_id])
         customer_id = "cio_" + attributes[:cio_id]
       end
-      create_or_update_customer_id(customer_id, attributes)
-    end
-
-    def create_or_update_customer_id(customer_id, attributes = {})
-      attributes = Hash[attributes.map { |(k,v)| [ k.to_sym, v ] }]
-      if is_empty?(customer_id)
-        raise MissingIdAttributeError.new("Must provide a customer id")
+      if !is_empty?(attributes[:customer_id])
+        customer_id = attributes[:customer_id]
       end
+      # customer_id is not an attribute, so remove it.
+      attributes.delete(:customer_id)
+
       url = customer_path(customer_id)
       @client.request_and_verify_response(:put, url, attributes)
     end

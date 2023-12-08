@@ -173,6 +173,7 @@ describe Customerio::Client do
       lambda { client.identify(email: "customer@example.com") }.should raise_error(Customerio::Client::MissingIdAttributeError)
       lambda { client.identify(id: "") }.should raise_error(Customerio::Client::MissingIdAttributeError)
       lambda { client.identify(cio_id: "") }.should raise_error(Customerio::Client::MissingIdAttributeError)
+      lambda { client.identify(customer_id: "") }.should raise_error(Customerio::Client::MissingIdAttributeError)
     end
 
     it 'should not raise errors when attribute keys are strings' do
@@ -223,15 +224,13 @@ describe Customerio::Client do
         location: "here"
       })
     end
-  end
 
-  describe "#identify_customer_id" do
     it "uses provided id rather than id" do
       stub_request(:put, api_uri('/api/v1/customers/1234')).
         with(body: json(id: "5")).
         to_return(status: 200, body: "", headers: {})
 
-      client.identify_customer_id(
+      client.identify(
         customer_id: "1234",
         id: "5"
       )
@@ -242,7 +241,7 @@ describe Customerio::Client do
         with(body: json(id: "5")).
         to_return(status: 200, body: "", headers: {})
 
-      client.identify_customer_id(
+      client.identify(
         customer_id: "cio_5",
         id: "5"
       )
@@ -253,19 +252,10 @@ describe Customerio::Client do
         with(body: json(id: "5")).
         to_return(status: 200, body: "", headers: {})
 
-      client.identify_customer_id(
+      client.identify(
         customer_id: "customer@example.com",
         id: "5"
       )
-    end
-
-    it "requires a customer_id attribute" do
-      lambda { client.identify_customer_id() }.should raise_error(Customerio::Client::MissingIdAttributeError)
-      lambda { client.identify_customer_id(customer_id: "") }.should raise_error(Customerio::Client::MissingIdAttributeError)
-      # None of these are customer_id
-      lambda { client.identify_customer_id(id: "5") }.should raise_error(Customerio::Client::MissingIdAttributeError)
-      lambda { client.identify_customer_id(cio_id: "cio_5") }.should raise_error(Customerio::Client::MissingIdAttributeError)
-      lambda { client.identify_customer_id(email: "customer@example.com") }.should raise_error(Customerio::Client::MissingIdAttributeError)
     end
   end
 
