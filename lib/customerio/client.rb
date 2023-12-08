@@ -151,9 +151,17 @@ module Customerio
 
     def create_or_update(attributes = {})
       attributes = Hash[attributes.map { |(k,v)| [ k.to_sym, v ] }]
-      raise MissingIdAttributeError.new("Must provide a customer id") if is_empty?(attributes[:id])
+      if is_empty?(attributes[:id]) && is_empty?(attributes[:cio_id])
+        raise MissingIdAttributeError.new("Must provide a customer id")
+      end
 
-      url = customer_path(attributes[:id])
+      # Use cio_id as the identifier, as present,
+      # to allow the id and email identifiers to be updated.
+      customer_id = attributes[:id]
+      if !is_empty?(attributes[:cio_id])
+        customer_id = "cio_" + attributes[:cio_id]
+      end
+      url = customer_path(customer_id)
       @client.request_and_verify_response(:put, url, attributes)
     end
 

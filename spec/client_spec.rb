@@ -172,6 +172,7 @@ describe Customerio::Client do
     it "requires an id attribute" do
       lambda { client.identify(email: "customer@example.com") }.should raise_error(Customerio::Client::MissingIdAttributeError)
       lambda { client.identify(id: "") }.should raise_error(Customerio::Client::MissingIdAttributeError)
+      lambda { client.identify(cio_id: "") }.should raise_error(Customerio::Client::MissingIdAttributeError)
     end
 
     it 'should not raise errors when attribute keys are strings' do
@@ -182,6 +183,45 @@ describe Customerio::Client do
       attributes = { "id" => 5 }
 
       lambda { client.identify(attributes) }.should_not raise_error()
+    end
+
+    it 'uses cio_id for customer id, when present, for id updates' do
+      stub_request(:put, api_uri('/api/v1/customers/cio_347f00d')).with(
+        body: {
+          cio_id: "347f00d",
+          id: 5
+        }).to_return(status: 200, body: "", headers: {})
+
+      client.identify({
+        cio_id: "347f00d",
+        id: 5
+      })
+    end
+
+    it 'uses cio_id for customer id, when present, for email updates' do
+      stub_request(:put, api_uri('/api/v1/customers/cio_347f00d')).with(
+        body: {
+          cio_id: "347f00d",
+          email: "different.customer@example.com"
+        }).to_return(status: 200, body: "", headers: {})
+
+      client.identify({
+        cio_id: "347f00d",
+        email: "different.customer@example.com"
+      })
+    end
+
+    it 'allows updates with cio_id as the only id' do
+      stub_request(:put, api_uri('/api/v1/customers/cio_347f00d')).with(
+        body: {
+          cio_id: "347f00d",
+          location: "here"
+        }).to_return(status: 200, body: "", headers: {})
+
+      client.identify({
+        cio_id: "347f00d",
+        location: "here"
+      })
     end
   end
 
