@@ -1,6 +1,6 @@
 ## Customerio 5.3.0 - December 8, 2023
-### Added
-- The `identify_customer_id` method has been added. This allows the customer ID to be specified separately from the attributes. This allows a person to be updated by identifying them by e.g.: their email address. Thanks to trwalzer, jrbeck and jeremyw for these changes.
+### Changed
+- The `identify` method has been updated to allow the customer ID to be specified separately from the attributes, using the `customer_id` attribute. This allows a person to be updated by identifying them by e.g.: their email address. Thanks to trwalzer, jrbeck and jeremyw for the original changes that this is based on.
 
 ## Customerio 5.2.0 - December 8, 2023
 ### Changed
