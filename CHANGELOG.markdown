@@ -1,3 +1,7 @@
+## Customerio 5.2.0 - December 8, 2023
+### Changed
+- The `identify` method will now automatically use the `cio_id` attribute as the customer ID when calling the track service. This allows a customer to be updated using `identify` to modify the `id` and `email` attributes.
+
 ## Customerio 5.1.0 - May 5, 2023
 ### Added
 - Added `send_push` to `APIClient` and `SendPushRequest` to support sending transactional push notifications.
