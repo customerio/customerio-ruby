@@ -1,3 +1,8 @@
+## Customerio 5.3.0 - December 8, 2023
+### Changed
+- The `identify` method has been updated to allow the customer ID to be specified separately from the attributes, using the `customer_id` attribute. This allows a person to be updated by identifying them by e.g.: their email address. Thanks to trwalzer, jrbeck and jeremyw for the original changes that this is based on.
+- It is no longer possible to set the `customer_id` attribute on a person. This is a side-effect of the changes to the `identify` method.
+
 ## Customerio 5.2.0 - December 8, 2023
 ### Changed
 - The `identify` method will now automatically use the `cio_id` attribute as the customer ID when calling the track service. This allows a customer to be updated using `identify` to modify the `id` and `email` attributes.

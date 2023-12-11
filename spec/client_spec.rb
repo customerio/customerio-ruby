@@ -173,6 +173,7 @@ describe Customerio::Client do
       lambda { client.identify(email: "customer@example.com") }.should raise_error(Customerio::Client::MissingIdAttributeError)
       lambda { client.identify(id: "") }.should raise_error(Customerio::Client::MissingIdAttributeError)
       lambda { client.identify(cio_id: "") }.should raise_error(Customerio::Client::MissingIdAttributeError)
+      lambda { client.identify(customer_id: "") }.should raise_error(Customerio::Client::MissingIdAttributeError)
     end
 
     it 'should not raise errors when attribute keys are strings' do
@@ -222,6 +223,39 @@ describe Customerio::Client do
         cio_id: "347f00d",
         location: "here"
       })
+    end
+
+    it "uses provided id rather than id" do
+      stub_request(:put, api_uri('/api/v1/customers/1234')).
+        with(body: json(id: "5")).
+        to_return(status: 200, body: "", headers: {})
+
+      client.identify(
+        customer_id: "1234",
+        id: "5"
+      )
+    end
+
+    it "uses provided cio_id rather than id" do
+      stub_request(:put, api_uri('/api/v1/customers/cio_5')).
+        with(body: json(id: "5")).
+        to_return(status: 200, body: "", headers: {})
+
+      client.identify(
+        customer_id: "cio_5",
+        id: "5"
+      )
+    end
+
+    it "uses provided email rather than id" do
+      stub_request(:put, api_uri('/api/v1/customers/customer@example.com')).
+        with(body: json(id: "5")).
+        to_return(status: 200, body: "", headers: {})
+
+      client.identify(
+        customer_id: "customer@example.com",
+        id: "5"
+      )
     end
   end
 
@@ -650,7 +684,7 @@ describe Customerio::Client do
       }.to raise_error(Customerio::Client::ParamError, 'timestamp must be a valid timestamp')
     end
   end
-  
+
   describe "#merge_customers" do
     before(:each) do
       @client = Customerio::Client.new("SITE_ID", "API_KEY", :json => true)
