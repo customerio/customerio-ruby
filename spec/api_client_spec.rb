@@ -252,4 +252,113 @@ describe Customerio::APIClient do
       client.send_push(req).should eq({ "delivery_id" => 2 })
     end
   end
+
+  describe '#trigger_broadcast' do
+    it "sends a POST request to the customer.io's broadcast API" do
+      payload = {
+        data: { name: 'foo' },
+        recipients: {
+          segment: { id: 7 }
+        }
+      }
+      req = Customerio::TriggerBroadcastRequest.new(broadcast_id: 1, payload: payload)
+
+      stub_request(:post, api_uri('/v1/campaigns/1/triggers'))
+        .with(headers: request_headers, body: req.payload)
+        .to_return(status: 200, body: { delivery_id: 1 }.to_json, headers: {})
+
+      expect(client.trigger_broadcast(req)).to eq({ 'delivery_id' => 1 })
+    end
+
+    it "handles validation failures (400)" do
+      payload = {
+        data: { name: 'foo' },
+        emails: ['foo', 'bar'],
+        email_ignore_missing: true,
+        email_add_duplicates: true
+      }
+      req = Customerio::TriggerBroadcastRequest.new(broadcast_id: 1, payload: payload)
+
+      err_json = { meta: { error: "example error" } }.to_json
+
+      stub_request(:post, api_uri('/v1/campaigns/1/triggers'))
+        .with(headers: request_headers, body: req.payload)
+        .to_return(status: 400, body: err_json, headers: {})
+
+      lambda { client.trigger_broadcast(req) }.should(
+        raise_error(Customerio::InvalidResponse) { |error|
+          error.message.should eq "example error"
+          error.code.should eq "400"
+        }
+      )
+    end
+
+    it "handles other failures (5xx)" do
+      payload = {
+        data: { name: 'foo' },
+        emails: ['foo', 'bar'],
+        email_ignore_missing: true,
+        email_add_duplicates: true
+      }
+      req = Customerio::TriggerBroadcastRequest.new(broadcast_id: 1, payload: payload)
+
+      stub_request(:post, api_uri('/v1/campaigns/1/triggers'))
+        .with(headers: request_headers, body: req.payload)
+        .to_return(status: 500, body: "Server unavailable", headers: {})
+
+      lambda { client.trigger_broadcast(req) }.should(
+        raise_error(Customerio::InvalidResponse) { |error|
+          error.message.should eq "Server unavailable"
+          error.code.should eq "500"
+        }
+      )
+    end
+
+    it 'supports campaign triggers based on email fields' do
+      payload = {
+        data: { name: 'foo' },
+        emails: ['foo', 'bar'],
+        email_ignore_missing: true,
+        email_add_duplicates: true
+      }
+      req = Customerio::TriggerBroadcastRequest.new(broadcast_id: 1, payload: payload)
+
+      stub_request(:post, api_uri('/v1/campaigns/1/triggers'))
+        .with(headers: request_headers, body: req.payload)
+        .to_return(status: 200, body: { delivery_id: 1 }.to_json, headers: {})
+
+
+      expect(client.trigger_broadcast(req)).to eq({ 'delivery_id' => 1 })
+    end
+
+    it 'supports campaign triggers based on id fields' do
+      payload = {
+        data: { name: 'foo' },
+        ids: [1, 2, 3],
+        id_ignore_missing: true
+      }
+      req = Customerio::TriggerBroadcastRequest.new(broadcast_id: 1, payload: payload)
+
+      stub_request(:post, api_uri('/v1/campaigns/1/triggers'))
+        .with(headers: request_headers, body: req.payload)
+        .to_return(status: 200, body: { delivery_id: 1 }.to_json, headers: {})
+
+      expect(client.trigger_broadcast(req)).to eq({ 'delivery_id' => 1 })
+    end
+
+    it 'supports campaign triggers based on per user data' do
+      user_data = { id: 1, data: { name: 'foo' } }
+      payload = {
+        data: { name: 'foo' },
+        per_user_data: [user_data]
+      }
+      req = Customerio::TriggerBroadcastRequest.new(broadcast_id: 1, payload: payload)
+
+      stub_request(:post, api_uri('/v1/campaigns/1/triggers'))
+        .with(headers: request_headers, body: req.payload)
+        .to_return(status: 200, body: { delivery_id: 1 }.to_json, headers: {})
+
+      expect(client.trigger_broadcast(req)).to eq({ 'delivery_id' => 1 })
+    end
+  end
 end
