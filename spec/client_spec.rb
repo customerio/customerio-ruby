@@ -466,6 +466,25 @@ describe Customerio::Client do
       client.track(5, "purchase", type: "socks", price: "13.99", timestamp: "Hello world")
     end
 
+    context "tracking a unique event" do
+      let(:event_id) { "01HB4HBDKTFWYZCK01DMRSWRFD" }
+
+      it "throws an error when event_id is invalid ulid" do
+        stub_request(:put, /track.customer.io/)
+          .to_return(status: 200, body: "", headers: {})
+
+        lambda { client.unique_track(" ", 1, "test_event") }.should raise_error(Customerio::Client::ParamError, "event_id must be a valid ULID")
+      end
+
+      it "sends a POST request to the customer.io's anonymous event API" do
+        stub_request(:post, api_uri("/api/v1/customers/5/events/#{event_id}")).
+          with(body: { name: "purchase", data: {} }).
+          to_return(status: 200, body: "", headers: {})
+
+        client.unique_track(event_id, 5, "purchase")
+      end
+    end
+
     context "tracking an anonymous event" do
       let(:anon_id) { "anon-id" }
 
