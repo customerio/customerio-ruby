@@ -102,7 +102,7 @@ module Customerio
 
     # Customer.io deprecated per https://customer.io/docs/api/track/#operation/pushMetrics
     def track_push_notification_event(event_name, attributes = {})
-      keys = [:delivery_id, :device_id, :timestamp]
+        keys = [:delivery_id, :device_id, :timestamp]
         attributes = Hash[attributes.map { |(k,v)| [ k.to_sym, v ] }].
             select { |k, v| keys.include?(k) }
 
