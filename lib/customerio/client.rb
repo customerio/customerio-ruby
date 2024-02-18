@@ -121,8 +121,8 @@ module Customerio
 
       raise ParamError.new('metric_name must be one of bounced, clicked, converted, deferred, delivered, dropped, opened, and spammed') unless VALID_DELIVERY_METRICS.include?(metric_name)
       raise ParamError.new('delivery_id must be a non-empty string') unless attributes[:delivery_id] != "" and !attributes[:delivery_id].nil?
-      raise ParamError.new('timestamp must be a valid timestamp') unless valid_timestamp?(attributes[:timestamp])
-      raise ParamError.new('href must be a valid url') if attributes[:href].present? && ! valid_url?(attributes[:href].present?)
+      raise ParamError.new('timestamp must be a valid timestamp') if attributes[:timestamp] && !valid_timestamp?(attributes[:timestamp])
+      raise ParamError.new('href must be a valid url') if attributes[:href] && !valid_url?(attributes[:href].present?)
 
       @client.request_and_verify_response(:post, track_delivery_metric_path, attributes.merge(metric: metric_name))
     end
