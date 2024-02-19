@@ -699,8 +699,8 @@ describe Customerio::Client do
       }
     end
 
-    it "sends a POST request to customer.io's /metrics endpoint" do
-      stub_request(:post, api_uri('/metrics')).
+    it "sends a POST request to customer.io's /api/v1/metrics endpoint" do
+      stub_request(:post, api_uri('/api/v1/metrics')).
         with(
           :body => json(attributes.merge({
                                            :metric => 'opened'
@@ -714,7 +714,7 @@ describe Customerio::Client do
     end
 
     it "should raise if event is invalid" do
-      stub_request(:post, api_uri('/metrics')).
+      stub_request(:post, api_uri('/api/v1/metrics')).
         to_return(:status => 200, :body => "", :headers => {})
 
       expect {
@@ -723,7 +723,7 @@ describe Customerio::Client do
     end
 
     it "should raise if delivery_id is invalid" do
-      stub_request(:post, api_uri('/metrics')).
+      stub_request(:post, api_uri('/api/v1/metrics')).
         to_return(:status => 200, :body => "", :headers => {})
 
       expect {
@@ -736,7 +736,7 @@ describe Customerio::Client do
     end
 
     it "should raise if timestamp is invalid" do
-      stub_request(:post, api_uri('/metrics')).
+      stub_request(:post, api_uri('/api/v1/metrics')).
         to_return(:status => 200, :body => "", :headers => {})
 
       client.track_delivery_metric('opened', attributes.merge({ :timestamp => nil }))

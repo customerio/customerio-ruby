@@ -166,11 +166,11 @@ module Customerio
     end
 
     def track_push_notification_event_path
-        "/push/events"
+      "/push/events"
     end
 
     def track_delivery_metric_path
-      "/metrics"
+      "/api/v1/metrics"
     end
 
     def merge_customers_path
