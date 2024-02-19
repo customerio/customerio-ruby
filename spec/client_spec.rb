@@ -685,6 +685,72 @@ describe Customerio::Client do
     end
   end
 
+  describe "#track_delivery_metric" do
+    attr_accessor :client, :attributes
+
+    before(:each) do
+      @client = Customerio::Client.new("SITE_ID", "API_KEY", :json => true)
+      @attributes = {
+        :delivery_id => 'foo',
+        :timestamp => Time.now.to_i,
+        :href => nil,
+        :recipient => nil,
+        :reason => nil,
+      }
+    end
+
+    it "sends a POST request to customer.io's /api/v1/metrics endpoint" do
+      stub_request(:post, api_uri('/api/v1/metrics')).
+        with(
+          :body => json(attributes.merge({
+                                           :metric => 'opened'
+                                         })),
+          :headers => {
+            'Content-Type' => 'application/json'
+          }).
+        to_return(:status => 200, :body => "", :headers => {})
+
+      client.track_delivery_metric('opened', attributes)
+    end
+
+    it "should raise if event is invalid" do
+      stub_request(:post, api_uri('/api/v1/metrics')).
+        to_return(:status => 200, :body => "", :headers => {})
+
+      expect {
+        client.track_delivery_metric('closed', attributes.merge({ :delivery_id => nil }))
+      }.to raise_error(Customerio::Client::ParamError, 'metric_name must be one of bounced, clicked, converted, deferred, delivered, dropped, opened, and spammed')
+    end
+
+    it "should raise if delivery_id is invalid" do
+      stub_request(:post, api_uri('/api/v1/metrics')).
+        to_return(:status => 200, :body => "", :headers => {})
+
+      expect {
+        client.track_delivery_metric('opened', attributes.merge({ :delivery_id => nil }))
+      }.to raise_error(Customerio::Client::ParamError, 'delivery_id must be a non-empty string')
+
+      expect {
+        client.track_delivery_metric('opened', attributes.merge({ :delivery_id => '' }))
+      }.to raise_error(Customerio::Client::ParamError, 'delivery_id must be a non-empty string')
+    end
+
+    it "should raise if timestamp is invalid" do
+      stub_request(:post, api_uri('/api/v1/metrics')).
+        to_return(:status => 200, :body => "", :headers => {})
+
+      client.track_delivery_metric('opened', attributes.merge({ :timestamp => nil }))
+
+      expect {
+        client.track_delivery_metric('opened', attributes.merge({ :timestamp => 999999999 }))
+      }.to raise_error(Customerio::Client::ParamError, 'timestamp must be a valid timestamp')
+
+      expect {
+        client.track_delivery_metric('opened', attributes.merge({ :timestamp => 100000000000 }))
+      }.to raise_error(Customerio::Client::ParamError, 'timestamp must be a valid timestamp')
+    end
+  end
+
   describe "#merge_customers" do
     before(:each) do
       @client = Customerio::Client.new("SITE_ID", "API_KEY", :json => true)
