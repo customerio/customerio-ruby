@@ -7,9 +7,9 @@
 [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blueviolet?logo=gitpod)](https://gitpod.io/#https://github.com/customerio/customerio-ruby/)
 [![ci](https://github.com/customerio/customerio-ruby/actions/workflows/main.yml/badge.svg)](https://github.com/customerio/customerio-ruby/actions/workflows/main.yml)
 
-# Customer.io Ruby
+# Customer.io Ruby 
 
-A ruby client for the [Customer.io Track API](https://customer.io/docs/api/#tag/trackOverview).
+A ruby client for the [Customer.io Journeys Track API](https://customer.io/docs/api/track/).
 
 ## Installation
 
