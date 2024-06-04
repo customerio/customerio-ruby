@@ -1,16 +1,15 @@
-<p align="center">
+<p align=center>
   <a href="https://customer.io">
-    <img src="https://files.gitbook.com/v0/b/gitbook-28427.appspot.com/o/assets%2F-LSFjPaMQn1zKdYh6i89%2F-LU6OglGKqQfqMd5Zl-V%2F-LU6OzOLnOvy8VLwfgdg%2FLogo-Color-Horizontal.png?alt=media&token=add29dd0-cabb-4440-b46b-aed21350ae90" height="60">
+    <img src="https://avatars.githubusercontent.com/u/1152079?s=200&v=4" height="60">
   </a>
-  <p align="center">Power automated communication that people like to receive.</p>
 </p>
 
 [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blueviolet?logo=gitpod)](https://gitpod.io/#https://github.com/customerio/customerio-ruby/)
 [![ci](https://github.com/customerio/customerio-ruby/actions/workflows/main.yml/badge.svg)](https://github.com/customerio/customerio-ruby/actions/workflows/main.yml)
 
-# Customer.io Ruby
+# Customer.io Ruby 
 
-A ruby client for the [Customer.io Track API](https://customer.io/docs/api/#tag/trackOverview).
+A ruby client for the [Customer.io Journeys Track API](https://customer.io/docs/api/track/).
 
 ## Installation
 
