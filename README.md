@@ -348,6 +348,56 @@ rescue Customerio::InvalidResponse => e
 end
 ```
 
+### Trigger Broadcasts
+
+To use the Customer.io [Trigger Broadcast API](https://www.customer.io/docs/api/app/#operation/triggerBroadcast), create an instance of the API client using an [app key](https://customer.io/docs/managing-credentials#app-api-keys).
+
+Create a new `TriggerBroadcastRequest` object containing:
+
+* `broadcast_id`: the ID of the broadcast you want to trigger.
+
+Optionally, add a `payload` object with any of the following:
+* one of the audience options to override the default audience: `recipients | emails | ids | per_user_data | data_file_url`.
+* `data`: an object containing information you want to use to populate your broadcast.
+* `email_add_duplicates`: a boolean indicating if an email address associated with more than one profile id is an error (default: false).
+* `email_ignore_missing`: if false, a missing email address is an error (default: false).
+* `id_ignore_missing`: if false, a missing customer ID is an error (default: false).
+
+Use `trigger_broadcast` referencing your request to trigger the broadcast. [Learn more about triggering broadcasts and `TriggerBroadcastRequest` properties](https://customer.io/docs/api-triggered-broadcasts/).
+
+```ruby
+require "customerio"
+
+client = Customerio::APIClient.new("your API key", region: Customerio::Regions::US)
+
+payload = {
+  emails: [
+    "recipient1@example.com",
+    "anotherRecipient@example.com"
+  ],
+  data: {
+    headline: "Roadrunner spotted in Albuquerque!",
+    date: 1511315635,
+    text: "We received reports of a roadrunner in your immediate area! Head to your dashboard to view more information!"
+  },
+  email_add_duplicates: false,
+  email_ignore_missing: false,
+  id_ignore_missing: false
+}
+
+request = Customerio::TriggerBroadcastRequest.new(
+  broadcast_id: 12345,
+  payload: payload
+)
+
+begin
+  response = client.trigger_broadcast(request)
+  puts response
+rescue Customerio::InvalidResponse => e
+  puts e.code, e.message
+end
+```
+
 ## Contributing
 
 1. Fork it
