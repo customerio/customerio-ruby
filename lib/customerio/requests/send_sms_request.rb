@@ -23,6 +23,7 @@ module Customerio
       transactional_message_id
       message_data
       from
+      to
       disable_message_retention
       send_to_unsubscribed
       tracked
