@@ -17,10 +17,9 @@ module Customerio
 
     private
 
-    REQUIRED_FIELDS = %i(identifiers)
+    REQUIRED_FIELDS = %i(identifiers transactional_message_id)
 
     OPTIONAL_FIELDS = %i(
-      transactional_message_id
       message_data
       from
       to
