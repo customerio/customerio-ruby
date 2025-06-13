@@ -1,3 +1,7 @@
+## Customerio 5.4.0 - June 13, 2025
+### Changed
+- Added `send_sms` to `APIClient` and `SendSMSRequest` to support sending transactional push notifications.
+
 ## Customerio 5.3.0 - December 8, 2023
 ### Changed
 - The `identify` method has been updated to allow the customer ID to be specified separately from the attributes, using the `customer_id` attribute. This allows a person to be updated by identifying them by e.g.: their email address. Thanks to trwalzer, jrbeck and jeremyw for the original changes that this is based on.
