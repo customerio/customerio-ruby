@@ -466,6 +466,54 @@ describe Customerio::Client do
       client.track(5, "purchase", type: "socks", price: "13.99", timestamp: "Hello world")
     end
 
+    it "allows sending of an id" do
+      stub_request(:post, api_uri('/api/v1/customers/5/events')).
+        with(body: json({
+          name: "purchase",
+          data: {
+            type: "socks",
+            price: "13.99",
+            id: "01G653VCS2Z4KQYQJCBVVB2CCW"
+          },
+          id: "01G653VCS2Z4KQYQJCBVVB2CCW"
+        })).
+        to_return(status: 200, body: "", headers: {})
+
+      client.track(5, "purchase", type: "socks", price: "13.99", id: "01G653VCS2Z4KQYQJCBVVB2CCW")
+    end
+
+    it "doesn't send id if id isn't a string" do
+      stub_request(:post, api_uri('/api/v1/customers/5/events')).
+        with(body: json({
+          name: "purchase",
+          data: {
+            type: "socks",
+            price: "13.99",
+            id: 1234
+          }
+        })).
+
+        to_return(status: 200, body: "", headers: {})
+
+      client.track(5, "purchase", type: "socks", price: "13.99", id: 1234)
+    end
+
+    it "doesn't send id if id isn't a ULID" do
+      stub_request(:post, api_uri('/api/v1/customers/5/events')).
+        with(body: json({
+          name: "purchase",
+          data: {
+            type: "socks",
+            price: "13.99",
+            id: "1234"
+          }
+        })).
+
+        to_return(status: 200, body: "", headers: {})
+
+      client.track(5, "purchase", type: "socks", price: "13.99", id: "1234")
+    end
+
     context "tracking an anonymous event" do
       let(:anon_id) { "anon-id" }
 
@@ -509,6 +557,23 @@ describe Customerio::Client do
         client.track_anonymous(anon_id, "purchase", type: "socks", price: "13.99", timestamp: 1561231234)
       end
 
+      it "allows sending of an id" do
+        stub_request(:post, api_uri('/api/v1/events')).
+          with(body: {
+            anonymous_id: anon_id,
+            name: "purchase",
+            data: {
+              type: "socks",
+              price: "13.99",
+              id: "01G653VCS2Z4KQYQJCBVVB2CCW"
+            },
+            id: "01G653VCS2Z4KQYQJCBVVB2CCW"
+          }).
+          to_return(status: 200, body: "", headers: {})
+
+        client.track_anonymous(anon_id, "purchase", type: "socks", price: "13.99", id: "01G653VCS2Z4KQYQJCBVVB2CCW")
+      end
+      
       it "raises an error if POST doesn't return a 2xx response code" do
           stub_request(:post, api_uri('/api/v1/events')).
             with(body: { anonymous_id: anon_id, name: "purchase", data: {} }).
