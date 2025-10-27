@@ -30,7 +30,7 @@ Or install it yourself:
 ### Before we get started: API client vs. JavaScript snippet
 
 It's helpful to know that everything below can also be accomplished
-through the [Customer.io JavaScript snippet](https://customer.io/docs/javascript-quick-start/).
+through the [Customer.io JavaScript client](https://docs.customer.io/integrations/data-in/connections/javascript/js-source/).
 
 In many cases, using the JavaScript snippet will be easier to integrate with
 your app, but there are several reasons why using the API client is useful:
