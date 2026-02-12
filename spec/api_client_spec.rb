@@ -311,4 +311,63 @@ describe Customerio::APIClient do
       )
     end
   end
+
+  describe "#send_inbox_message" do
+    it "sends a POST request to the /api/send/inbox_message path" do
+      req = Customerio::SendInboxMessageRequest.new(
+        identifiers: {
+          id: 'c1',
+        },
+        transactional_message_id: 1,
+      )
+
+      stub_request(:post, api_uri('/v1/send/inbox_message'))
+        .with(headers: request_headers, body: req.message)
+        .to_return(status: 200, body: { delivery_id: 1 }.to_json, headers: {})
+
+      client.send_inbox_message(req).should eq({ "delivery_id" => 1 })
+    end
+
+    it "handles validation failures (400)" do
+      req = Customerio::SendInboxMessageRequest.new(
+        identifiers: {
+          id: 'c1',
+        },
+        transactional_message_id: 1,
+      )
+
+      err_json = { meta: { error: "example error" } }.to_json
+
+      stub_request(:post, api_uri('/v1/send/inbox_message'))
+        .with(headers: request_headers, body: req.message)
+        .to_return(status: 400, body: err_json, headers: {})
+
+      lambda { client.send_inbox_message(req) }.should(
+        raise_error(Customerio::InvalidResponse) { |error|
+          error.message.should eq "example error"
+          error.code.should eq "400"
+        }
+      )
+    end
+
+    it "handles other failures (5xx)" do
+      req = Customerio::SendInboxMessageRequest.new(
+        identifiers: {
+          id: 'c1',
+        },
+        transactional_message_id: 1,
+      )
+
+      stub_request(:post, api_uri('/v1/send/inbox_message'))
+        .with(headers: request_headers, body: req.message)
+        .to_return(status: 500, body: "Server unavailable", headers: {})
+
+      lambda { client.send_inbox_message(req) }.should(
+        raise_error(Customerio::InvalidResponse) { |error|
+          error.message.should eq "Server unavailable"
+          error.code.should eq "500"
+        }
+      )
+    end
+  end
 end
