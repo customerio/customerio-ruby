@@ -6,13 +6,6 @@ module Customerio
 
     def initialize(opts)
       @message = opts.delete_if { |field| invalid_field?(field) }
-      @message[:attachments] = {}
-      @message[:headers] = {}
-    end
-
-    def attach(name, data, encode: true)
-      raise "attachment #{name} already exists" if @message[:attachments].has_key?(name)
-      @message[:attachments][name] = encode ? Base64.strict_encode64(data) : data
     end
 
     private
