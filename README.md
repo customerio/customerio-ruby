@@ -271,7 +271,7 @@ Create a new `SendEmailRequest` object containing:
 
 * `transactional_message_id`: the ID of the transactional message you want to send, or the `body`, `from`, and `subject` of a new message.
 * `to`: the email address of your recipients 
-* an `identifiers` object containing the `id` of your recipient. If the `id` does not exist, Customer.io creates it.
+* an `identifiers` object containing the `email` and/or `id` of your recipient. If the person you reference by email or ID does not exist, Customer.io creates them.
 * a `message_data` object containing properties that you want reference in your message using liquid.
 * You can also send attachments with your message. Use `attach` to encode attachments.
 
@@ -295,7 +295,7 @@ request = Customerio::SendEmailRequest.new(
     products: [],
   },
   identifiers: {
-    id: "2",
+    example: "person@example.com",
   },
 )
 
