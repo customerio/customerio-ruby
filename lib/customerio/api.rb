@@ -41,6 +41,36 @@ module Customerio
       end
     end
 
+    def send_sms(req)
+      raise "request must be an instance of Customerio::SendSMSRequest" unless req.is_a?(Customerio::SendSMSRequest)
+      response = @client.request(:post, send_sms_path, req.message)
+
+      case response
+      when Net::HTTPSuccess then
+        JSON.parse(response.body)
+      when Net::HTTPBadRequest then
+        json = JSON.parse(response.body)
+        raise Customerio::InvalidResponse.new(response.code, json['meta']['error'], response)
+      else
+        raise InvalidResponse.new(response.code, response.body)
+      end
+    end
+
+    def send_inbox_message(req)
+      raise "request must be an instance of Customerio::SendInboxMessageRequest" unless req.is_a?(Customerio::SendInboxMessageRequest)
+      response = @client.request(:post, send_inbox_message_path, req.message)
+
+      case response
+      when Net::HTTPSuccess then
+        JSON.parse(response.body)
+      when Net::HTTPBadRequest then
+        json = JSON.parse(response.body)
+        raise Customerio::InvalidResponse.new(response.code, json['meta']['error'], response)
+      else
+        raise InvalidResponse.new(response.code, response.body)
+      end
+    end
+
     private
 
     def send_email_path
@@ -49,6 +79,14 @@ module Customerio
 
     def send_push_path
       "/v1/send/push"
+    end
+
+    def send_sms_path
+      "/v1/send/sms"
+    end
+
+    def send_inbox_message_path
+      "/v1/send/inbox_message"
     end
   end
 end
