@@ -8,11 +8,21 @@ module Customerio
   end
 
   class Client
-    PUSH_OPENED = 'opened'
-    PUSH_CONVERTED = 'converted'
-    PUSH_DELIVERED = 'delivered'
+    DELIVERY_OPENED = 'opened'
+    DELIVERY_CONVERTED = 'converted'
+    DELIVERY_DELIVERED = 'delivered'
+    DELIVERY_BOUNCED = 'bounced'
+    DELIVERY_CLICKED = 'clicked'
+    DELIVERY_DEFERRED = 'deferred'
+    DELIVERY_DROPPED = 'dropped'
+    DELIVERY_SPAMMED = 'spammed'
 
-    VALID_PUSH_EVENTS = [PUSH_OPENED, PUSH_CONVERTED, PUSH_DELIVERED]
+    VALID_PUSH_EVENTS = [DELIVERY_OPENED, DELIVERY_CONVERTED, DELIVERY_DELIVERED]
+
+    # The valid delivery events depend on the channel
+    # However, there is no way to validate the channel prior the API request
+    # https://customer.io/docs/api/track/#operation/metrics
+    VALID_DELIVERY_METRICS = VALID_PUSH_EVENTS + [DELIVERY_BOUNCED, DELIVERY_CLICKED, DELIVERY_DEFERRED, DELIVERY_DROPPED, DELIVERY_SPAMMED]
 
     class MissingIdAttributeError < RuntimeError; end
     class ParamError < RuntimeError; end
@@ -90,6 +100,7 @@ module Customerio
       @client.request_and_verify_response(:delete, device_id_path(customer_id, device_id))
     end
 
+    # Customer.io deprecated per https://customer.io/docs/api/track/#operation/pushMetrics
     def track_push_notification_event(event_name, attributes = {})
         keys = [:delivery_id, :device_id, :timestamp]
         attributes = Hash[attributes.map { |(k,v)| [ k.to_sym, v ] }].
@@ -101,6 +112,19 @@ module Customerio
         raise ParamError.new('timestamp must be a valid timestamp') unless valid_timestamp?(attributes[:timestamp])
 
         @client.request_and_verify_response(:post, track_push_notification_event_path, attributes.merge(event: event_name))
+    end
+
+    def track_delivery_metric(metric_name, attributes = {})
+      keys = [:delivery_id, :timestamp, :recipient, :reason, :href]
+      attributes = Hash[attributes.map { |(k,v)| [ k.to_sym, v ] }].
+        select { |k, v| keys.include?(k) }
+
+      raise ParamError.new('metric_name must be one of bounced, clicked, converted, deferred, delivered, dropped, opened, and spammed') unless VALID_DELIVERY_METRICS.include?(metric_name)
+      raise ParamError.new('delivery_id must be a non-empty string') unless attributes[:delivery_id] != "" and !attributes[:delivery_id].nil?
+      raise ParamError.new('timestamp must be a valid timestamp') if attributes[:timestamp] && !valid_timestamp?(attributes[:timestamp])
+      raise ParamError.new('href must be a valid url') if attributes[:href] && !valid_url?(attributes[:href].present?)
+
+      @client.request_and_verify_response(:post, track_delivery_metric_path, attributes.merge(metric: metric_name))
     end
 
     def merge_customers(primary_id_type, primary_id, secondary_id_type, secondary_id)
@@ -142,7 +166,11 @@ module Customerio
     end
 
     def track_push_notification_event_path
-        "/push/events"
+      "/push/events"
+    end
+
+    def track_delivery_metric_path
+      "/api/v1/metrics"
     end
 
     def merge_customers_path
@@ -219,6 +247,12 @@ module Customerio
 
     def valid_timestamp?(timestamp)
       timestamp && timestamp.is_a?(Integer) && timestamp > 999999999 && timestamp < 100000000000
+    end
+
+    def valid_url?(url)
+      %w[http https].include?(Addressable::URI.parse(url)&.scheme)
+    rescue Addressable::URI::InvalidURIError
+      false
     end
 
     def is_empty?(val)
