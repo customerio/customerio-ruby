@@ -71,6 +71,21 @@ module Customerio
       end
     end
 
+    def send_in_app(req)
+      raise "request must be an instance of Customerio::SendInAppRequest" unless req.is_a?(Customerio::SendInAppRequest)
+      response = @client.request(:post, send_in_app_path, req.message)
+
+      case response
+      when Net::HTTPSuccess then
+        JSON.parse(response.body)
+      when Net::HTTPBadRequest then
+        json = JSON.parse(response.body)
+        raise Customerio::InvalidResponse.new(response.code, json['meta']['error'], response)
+      else
+        raise InvalidResponse.new(response.code, response.body)
+      end
+    end
+
     private
 
     def send_email_path
@@ -87,6 +102,10 @@ module Customerio
 
     def send_inbox_message_path
       "/v1/send/inbox_message"
+    end
+
+    def send_in_app_path
+      "/v1/send/in_app"
     end
   end
 end
