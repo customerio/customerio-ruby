@@ -238,7 +238,7 @@ module Customerio
     end
 
     def symbolize_keys(hash)
-      hash.to_h.transform_keys { |key| key.respond_to?(:to_sym) ? key.to_sym : key }
+      hash.transform_keys(&:to_sym)
     end
   end
 end
