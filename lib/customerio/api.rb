@@ -1,92 +1,72 @@
-require 'net/http'
-require 'multi_json'
+# frozen_string_literal: true
+
+require "multi_json"
+require "net/http"
 
 module Customerio
   class APIClient
     def initialize(app_key, options = {})
-      options[:region] = Customerio::Regions::US if options[:region].nil?
-      raise "region must be an instance of Customerio::Regions::Region" unless options[:region].is_a?(Customerio::Regions::Region)
+      options = options.dup
+      options[:region] = Regions::US if options[:region].nil?
+      unless options[:region].is_a?(Regions::Region)
+        raise ArgumentError, "region must be an instance of Customerio::Regions::Region"
+      end
 
       options[:url] = options[:region].api_url if options[:url].nil? || options[:url].empty?
-      @client = Customerio::BaseClient.new({ app_key: app_key }, options)
+      @client = BaseClient.new({ app_key: app_key }, options)
     end
 
     def send_email(req)
-      raise "request must be an instance of Customerio::SendEmailRequest" unless req.is_a?(Customerio::SendEmailRequest)
-      response = @client.request(:post, send_email_path, req.message)
+      validate_request!(req, SendEmailRequest)
 
-      case response
-      when Net::HTTPSuccess then
-        JSON.parse(response.body)
-      when Net::HTTPBadRequest then
-        json = JSON.parse(response.body)
-        raise Customerio::InvalidResponse.new(response.code, json['meta']['error'], response)
-      else
-        raise InvalidResponse.new(response.code, response.body)
-      end
+      deliver(send_email_path, req.message)
     end
 
     def send_push(req)
-      raise "request must be an instance of Customerio::SendPushRequest" unless req.is_a?(Customerio::SendPushRequest)
-      response = @client.request(:post, send_push_path, req.message)
+      validate_request!(req, SendPushRequest)
 
-      case response
-      when Net::HTTPSuccess then
-        JSON.parse(response.body)
-      when Net::HTTPBadRequest then
-        json = JSON.parse(response.body)
-        raise Customerio::InvalidResponse.new(response.code, json['meta']['error'], response)
-      else
-        raise InvalidResponse.new(response.code, response.body)
-      end
+      deliver(send_push_path, req.message)
     end
 
     def send_sms(req)
-      raise "request must be an instance of Customerio::SendSMSRequest" unless req.is_a?(Customerio::SendSMSRequest)
-      response = @client.request(:post, send_sms_path, req.message)
+      validate_request!(req, SendSMSRequest)
 
-      case response
-      when Net::HTTPSuccess then
-        JSON.parse(response.body)
-      when Net::HTTPBadRequest then
-        json = JSON.parse(response.body)
-        raise Customerio::InvalidResponse.new(response.code, json['meta']['error'], response)
-      else
-        raise InvalidResponse.new(response.code, response.body)
-      end
+      deliver(send_sms_path, req.message)
     end
 
     def send_inbox_message(req)
-      raise "request must be an instance of Customerio::SendInboxMessageRequest" unless req.is_a?(Customerio::SendInboxMessageRequest)
-      response = @client.request(:post, send_inbox_message_path, req.message)
+      validate_request!(req, SendInboxMessageRequest)
 
-      case response
-      when Net::HTTPSuccess then
-        JSON.parse(response.body)
-      when Net::HTTPBadRequest then
-        json = JSON.parse(response.body)
-        raise Customerio::InvalidResponse.new(response.code, json['meta']['error'], response)
-      else
-        raise InvalidResponse.new(response.code, response.body)
-      end
+      deliver(send_inbox_message_path, req.message)
     end
 
     def send_in_app(req)
-      raise "request must be an instance of Customerio::SendInAppRequest" unless req.is_a?(Customerio::SendInAppRequest)
-      response = @client.request(:post, send_in_app_path, req.message)
+      validate_request!(req, SendInAppRequest)
 
-      case response
-      when Net::HTTPSuccess then
-        JSON.parse(response.body)
-      when Net::HTTPBadRequest then
-        json = JSON.parse(response.body)
-        raise Customerio::InvalidResponse.new(response.code, json['meta']['error'], response)
-      else
-        raise InvalidResponse.new(response.code, response.body)
-      end
+      deliver(send_in_app_path, req.message)
     end
 
     private
+
+    def deliver(path, message)
+      response = @client.request(:post, path, message)
+
+      case response
+      when Net::HTTPSuccess
+        MultiJson.load(response.body)
+      when Net::HTTPBadRequest
+        error = MultiJson.load(response.body).dig("meta", "error")
+        raise InvalidResponse.new(response.code, error, response)
+      else
+        raise InvalidResponse.new(response.code, response.body, response)
+      end
+    end
+
+    def validate_request!(request, request_class)
+      return if request.is_a?(request_class)
+
+      raise ArgumentError, "request must be an instance of #{request_class}"
+    end
 
     def send_email_path
       "/v1/send/email"

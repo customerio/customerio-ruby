@@ -1,31 +1,27 @@
-require 'base64'
+# frozen_string_literal: true
 
 module Customerio
   class SendInboxMessageRequest
-    attr_reader :message
+    REQUIRED_FIELDS = %i[identifiers transactional_message_id].freeze
 
-    def initialize(opts)
-      @message = opts.delete_if { |field| invalid_field?(field) }
-    end
-
-    private
-
-    REQUIRED_FIELDS = %i(identifiers transactional_message_id)
-
-    OPTIONAL_FIELDS = %i(
+    OPTIONAL_FIELDS = %i[
       message_data
       disable_message_retention
       queue_draft
       send_at
       language
-    )
+    ].freeze
 
-    def invalid_field?(field)
-      !REQUIRED_FIELDS.include?(field) && !OPTIONAL_FIELDS.include?(field)
+    attr_reader :message
+
+    def initialize(opts)
+      @message = opts.select { |field, _value| valid_field?(field) }
     end
 
-    def encode(data)
-      Base64.strict_encode64(data)
+    private
+
+    def valid_field?(field)
+      REQUIRED_FIELDS.include?(field) || OPTIONAL_FIELDS.include?(field)
     end
   end
 end

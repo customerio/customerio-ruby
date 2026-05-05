@@ -1,0 +1,35 @@
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 3.3
+  SuggestExtensions: false
+  Exclude:
+    - "bin/**/*"
+    - "pkg/**/*"
+    - "spec/**/*"
+    - "tmp/**/*"
+    - "vendor/**/*"
+
+Gemspec/RequireMFA:
+  Enabled: true
+
+Metrics/AbcSize:
+  Max: 35
+
+Metrics/BlockLength:
+  Exclude:
+    - "customerio.gemspec"
+
+Metrics/ClassLength:
+  Max: 200
+
+Metrics/MethodLength:
+  Max: 25
+
+Metrics/PerceivedComplexity:
+  Max: 10
+
+Style/Documentation:
+  Enabled: false
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes

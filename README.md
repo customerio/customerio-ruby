@@ -7,9 +7,11 @@
 [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blueviolet?logo=gitpod)](https://gitpod.io/#https://github.com/customerio/customerio-ruby/)
 [![ci](https://github.com/customerio/customerio-ruby/actions/workflows/main.yml/badge.svg)](https://github.com/customerio/customerio-ruby/actions/workflows/main.yml)
 
-# Customer.io Ruby 
+# Customer.io Ruby
 
 A ruby client for the [Customer.io Journeys Track API](https://customer.io/docs/api/track/).
+
+Supported Ruby versions are the actively maintained Ruby lines, starting at Ruby 3.3.
 
 ## Installation
 
@@ -353,6 +355,8 @@ end
 1. Fork it
 2. Clone your fork (`git clone git@github.com:MY_USERNAME/customerio-ruby.git && cd customerio-ruby`)
 3. Create your feature branch (`git checkout -b my-new-feature`)
-4. Commit your changes (`git commit -am 'Added some feature'`)
-5. Push to the branch (`git push origin my-new-feature`)
-6. Create new Pull Request
+4. Install dependencies (`bundle install`)
+5. Run the test and lint suite (`bundle exec rake`)
+6. Commit your changes (`git commit -am 'Added some feature'`)
+7. Push to the branch (`git push origin my-new-feature`)
+8. Create new Pull Request
