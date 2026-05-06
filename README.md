@@ -249,7 +249,7 @@ request = Customerio::SendEmailRequest.new(
     products: [],
   },
   identifiers: {
-    example: "person@example.com",
+    email: "person@example.com",
   },
 )
 
