@@ -1,17 +1,10 @@
+# frozen_string_literal: true
+
 module Customerio
   class SendPushRequest
-    attr_reader :message
+    REQUIRED_FIELDS = %i[transactional_message_id identifiers].freeze
 
-    def initialize(opts)
-      @message = opts.delete_if { |field| invalid_field?(field) }
-      @message[:custom_device] = opts[:device] if opts[:device]
-    end
-
-    private
-
-    REQUIRED_FIELDS = %i(transactional_message_id identifiers)
-
-    OPTIONAL_FIELDS = %i(
+    OPTIONAL_FIELDS = %i[
       to
       title
       message
@@ -27,10 +20,19 @@ module Customerio
       custom_data
       device
       custom_device
-    )
+    ].freeze
 
-    def invalid_field?(field)
-      !REQUIRED_FIELDS.include?(field) && !OPTIONAL_FIELDS.include?(field)
+    attr_reader :message
+
+    def initialize(opts)
+      @message = opts.select { |field, _value| valid_field?(field) }
+      @message[:custom_device] = opts[:device] if opts[:device]
+    end
+
+    private
+
+    def valid_field?(field)
+      REQUIRED_FIELDS.include?(field) || OPTIONAL_FIELDS.include?(field)
     end
   end
 end

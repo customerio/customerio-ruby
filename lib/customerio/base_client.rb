@@ -1,19 +1,22 @@
-require 'net/http'
-require 'multi_json'
+# frozen_string_literal: true
+
+require "multi_json"
+require "net/http"
+require "uri"
 
 module Customerio
-  DEFAULT_TIMEOUT  = 10
+  DEFAULT_TIMEOUT = 10
 
-  class InvalidRequest < RuntimeError; end
-  class InvalidResponse < RuntimeError
+  class InvalidRequest < StandardError; end
+
+  class InvalidResponse < StandardError
     attr_reader :code, :response
 
-    def initialize(code, body, response=nil)
-      @message = body
+    def initialize(code, body, response = nil)
       @code = code
       @response = response
 
-      super(@message)
+      super(body)
     end
   end
 
@@ -36,26 +39,27 @@ module Customerio
 
     def execute(method, path, body = nil, headers = {})
       uri = URI.join(@base_uri, path)
+      request_headers = headers.dup
 
       session = Net::HTTP.new(uri.host, uri.port)
-      session.use_ssl = (uri.scheme == 'https')
+      session.use_ssl = uri.scheme == "https"
       session.open_timeout = @timeout
       session.read_timeout = @timeout
 
-      req = request_class(method).new(uri.path)
+      req = request_class(method).new(uri.request_uri)
 
-      headers['User-Agent'] = "Customer.io Ruby Client/" + Customerio::VERSION
+      request_headers["User-Agent"] = "Customer.io Ruby Client/#{VERSION}"
 
-      if @auth.has_key?(:site_id) && @auth.has_key?(:api_key)
-        req.initialize_http_header(headers)
+      if @auth.key?(:site_id) && @auth.key?(:api_key)
+        req.initialize_http_header(request_headers)
         req.basic_auth @auth[:site_id], @auth[:api_key]
       else
-        headers['Authorization'] = "Bearer #{@auth[:app_key]}"
-        req.initialize_http_header(headers)
+        request_headers["Authorization"] = "Bearer #{@auth[:app_key]}"
+        req.initialize_http_header(request_headers)
       end
 
-      if !body.nil?
-        req.add_field('Content-Type', 'application/json')
+      unless body.nil?
+        req.add_field("Content-Type", "application/json")
         req.body = MultiJson.dump(body)
       end
 
@@ -73,13 +77,13 @@ module Customerio
       when :delete
         Net::HTTP::Delete
       else
-        raise InvalidRequest.new("Invalid request method #{method.inspect}")
+        raise InvalidRequest, "Invalid request method #{method.inspect}"
       end
     end
 
     def verify_response(response)
       case response
-      when Net::HTTPSuccess then
+      when Net::HTTPSuccess
         response
       else
         raise InvalidResponse.new(response.code, response.body, response)

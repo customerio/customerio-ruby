@@ -1,11 +1,12 @@
+# frozen_string_literal: true
+
 # Based on HTTParty's HashConversions:
 #
 # https://github.com/jnunemaker/httparty/blob/master/lib/httparty/hash_conversions.rb
 #
 # License: MIT https://github.com/jnunemaker/httparty/blob/master/MIT-LICENSE
 
-require 'erb'
-require 'uri'
+require "erb"
 
 module Customerio
   class ParamEncoder
@@ -19,7 +20,7 @@ module Customerio
     #       phones: ['111-111-1111', '222-222-2222']
     #     }
     #   }.to_params
-    #     #=> "name=Bob&address[city]=Ruby Central&address[phones][]=111-111-1111&address[phones][]=222-222-2222&address[street]=111 Ruby Ave."
+    #     #=> "name=Bob&address[city]=Ruby Central&..."
     def self.to_params(hash)
       hash.to_hash.map { |k, v| normalize_param(k, v) }.join.chop
     end
@@ -31,7 +32,7 @@ module Customerio
     #
     # @example normalize_param(:name, "Bob Jones") #=> "name=Bob%20Jones&"
     def self.normalize_param(key, value)
-      param = ''
+      param = String.new
       stack = []
 
       if value.respond_to?(:to_ary)
@@ -55,14 +56,8 @@ module Customerio
       param
     end
 
-    # Prefer ERB::Util.url_encode, fall back to deprecation URI.encode for
-    # old Ruby support
     def self.escape_value(value)
-      if ERB::Util.respond_to? :url_encode
-        ERB::Util.url_encode(value.to_s)
-      else
-        URI.encode(value.to_s, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
-      end
+      ERB::Util.url_encode(value.to_s)
     end
   end
 end

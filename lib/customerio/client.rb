@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "addressable/uri"
 
 module Customerio
@@ -8,21 +10,24 @@ module Customerio
   end
 
   class Client
-    PUSH_OPENED = 'opened'
-    PUSH_CONVERTED = 'converted'
-    PUSH_DELIVERED = 'delivered'
+    PUSH_OPENED = "opened"
+    PUSH_CONVERTED = "converted"
+    PUSH_DELIVERED = "delivered"
 
-    VALID_PUSH_EVENTS = [PUSH_OPENED, PUSH_CONVERTED, PUSH_DELIVERED]
+    VALID_PUSH_EVENTS = [PUSH_OPENED, PUSH_CONVERTED, PUSH_DELIVERED].freeze
 
-    class MissingIdAttributeError < RuntimeError; end
-    class ParamError < RuntimeError; end
+    class MissingIdAttributeError < StandardError; end
+    class ParamError < StandardError; end
 
     def initialize(site_id, api_key, options = {})
-      options[:region] = Customerio::Regions::US if options[:region].nil?
-      raise "region must be an instance of Customerio::Regions::Region" unless options[:region].is_a?(Customerio::Regions::Region)
+      options = options.dup
+      options[:region] = Regions::US if options[:region].nil?
+      unless options[:region].is_a?(Regions::Region)
+        raise ArgumentError, "region must be an instance of Customerio::Regions::Region"
+      end
 
       options[:url] = options[:region].track_url if options[:url].nil? || options[:url].empty?
-      @client = Customerio::BaseClient.new({ site_id: site_id, api_key: api_key }, options)
+      @client = BaseClient.new({ site_id: site_id, api_key: api_key }, options)
     end
 
     def identify(attributes)
@@ -30,86 +35,92 @@ module Customerio
     end
 
     def delete(customer_id)
-      raise ParamError.new("customer_id must be a non-empty string") if is_empty?(customer_id)
+      raise ParamError, "customer_id must be a non-empty string" if empty?(customer_id)
+
       @client.request_and_verify_response(:delete, customer_path(customer_id))
     end
 
     def suppress(customer_id)
-      raise ParamError.new("customer_id must be a non-empty string") if is_empty?(customer_id)
+      raise ParamError, "customer_id must be a non-empty string" if empty?(customer_id)
+
       @client.request_and_verify_response(:post, suppress_path(customer_id))
     end
 
     def unsuppress(customer_id)
-      raise ParamError.new("customer_id must be a non-empty string") if is_empty?(customer_id)
+      raise ParamError, "customer_id must be a non-empty string" if empty?(customer_id)
+
       @client.request_and_verify_response(:post, unsuppress_path(customer_id))
     end
 
     def track(customer_id, event_name, attributes = {})
-      raise ParamError.new("customer_id must be a non-empty string") if is_empty?(customer_id)
-      raise ParamError.new("event_name must be a non-empty string") if is_empty?(event_name)
+      raise ParamError, "customer_id must be a non-empty string" if empty?(customer_id)
+      raise ParamError, "event_name must be a non-empty string" if empty?(event_name)
 
       create_customer_event(customer_id, event_name, attributes)
     end
 
     def pageview(customer_id, page, attributes = {})
-      raise ParamError.new("customer_id must be a non-empty string") if is_empty?(customer_id)
-      raise ParamError.new("page must be a non-empty string") if is_empty?(page)
+      raise ParamError, "customer_id must be a non-empty string" if empty?(customer_id)
+      raise ParamError, "page must be a non-empty string" if empty?(page)
 
       create_pageview_event(customer_id, page, attributes)
     end
 
     def track_anonymous(anonymous_id, event_name, attributes = {})
-      raise ParamError.new("event_name must be a non-empty string") if is_empty?(event_name)
+      raise ParamError, "event_name must be a non-empty string" if empty?(event_name)
 
       create_anonymous_event(anonymous_id, event_name, attributes)
     end
 
-    def add_device(customer_id, device_id, platform, data={})
-      raise ParamError.new("customer_id must be a non-empty string") if is_empty?(customer_id)
-      raise ParamError.new("device_id must be a non-empty string") if is_empty?(device_id)
-      raise ParamError.new("platform must be a non-empty string") if is_empty?(platform)
+    def add_device(customer_id, device_id, platform, data = {})
+      raise ParamError, "customer_id must be a non-empty string" if empty?(customer_id)
+      raise ParamError, "device_id must be a non-empty string" if empty?(device_id)
+      raise ParamError, "platform must be a non-empty string" if empty?(platform)
 
-      if data.nil?
-        data = {}
-      end
+      data = {} if data.nil?
 
-      raise ParamError.new("data parameter must be a hash") unless data.is_a?(Hash)
+      raise ParamError, "data parameter must be a hash" unless data.is_a?(Hash)
 
-      @client.request_and_verify_response(:put, device_path(customer_id), {
-        :device => data.update({
-          :id => device_id,
-          :platform => platform,
-        })
-      })
+      @client.request_and_verify_response(
+        :put,
+        device_path(customer_id),
+        device: data.merge(id: device_id, platform: platform)
+      )
     end
 
     def delete_device(customer_id, device_id)
-      raise ParamError.new("customer_id must be a non-empty string") if is_empty?(customer_id)
-      raise ParamError.new("device_id must be a non-empty string") if is_empty?(device_id)
+      raise ParamError, "customer_id must be a non-empty string" if empty?(customer_id)
+      raise ParamError, "device_id must be a non-empty string" if empty?(device_id)
 
       @client.request_and_verify_response(:delete, device_id_path(customer_id, device_id))
     end
 
     def track_push_notification_event(event_name, attributes = {})
-        keys = [:delivery_id, :device_id, :timestamp]
-        attributes = Hash[attributes.map { |(k,v)| [ k.to_sym, v ] }].
-            select { |k, v| keys.include?(k) }
+      keys = %i[delivery_id device_id timestamp]
+      attributes = symbolize_keys(attributes).slice(*keys)
 
-        raise ParamError.new('event_name must be one of opened, converted, or delivered') unless VALID_PUSH_EVENTS.include?(event_name)
-        raise ParamError.new('delivery_id must be a non-empty string') unless attributes[:delivery_id] != "" and !attributes[:delivery_id].nil?
-        raise ParamError.new('device_id must be a non-empty string') unless attributes[:device_id] != "" and !attributes[:device_id].nil?
-        raise ParamError.new('timestamp must be a valid timestamp') unless valid_timestamp?(attributes[:timestamp])
+      unless VALID_PUSH_EVENTS.include?(event_name)
+        raise ParamError, "event_name must be one of opened, converted, or delivered"
+      end
 
-        @client.request_and_verify_response(:post, track_push_notification_event_path, attributes.merge(event: event_name))
+      raise ParamError, "delivery_id must be a non-empty string" if empty?(attributes[:delivery_id])
+      raise ParamError, "device_id must be a non-empty string" if empty?(attributes[:device_id])
+      raise ParamError, "timestamp must be a valid timestamp" unless valid_timestamp?(attributes[:timestamp])
+
+      @client.request_and_verify_response(
+        :post,
+        track_push_notification_event_path,
+        attributes.merge(event: event_name)
+      )
     end
 
     def merge_customers(primary_id_type, primary_id, secondary_id_type, secondary_id)
-      raise ParamError.new("invalid primary_id_type") if !is_valid_id_type?(primary_id_type)
-      raise ParamError.new("primary_id must be a non-empty string") if is_empty?(primary_id)
-      raise ParamError.new("invalid secondary_id_type") if !is_valid_id_type?(secondary_id_type)
-      raise ParamError.new("secondary_id must be a non-empty string") if is_empty?(secondary_id)
+      raise ParamError, "invalid primary_id_type" unless valid_id_type?(primary_id_type)
+      raise ParamError, "primary_id must be a non-empty string" if empty?(primary_id)
+      raise ParamError, "invalid secondary_id_type" unless valid_id_type?(secondary_id_type)
+      raise ParamError, "secondary_id must be a non-empty string" if empty?(secondary_id)
 
-      body = { :primary => {primary_id_type => primary_id}, :secondary => {secondary_id_type => secondary_id} }
+      body = { primary: { primary_id_type => primary_id }, secondary: { secondary_id_type => secondary_id } }
 
       @client.request_and_verify_response(:post, merge_customers_path, body)
     end
@@ -142,7 +153,7 @@ module Customerio
     end
 
     def track_push_notification_event_path
-        "/push/events"
+      "/push/events"
     end
 
     def merge_customers_path
@@ -150,9 +161,9 @@ module Customerio
     end
 
     def create_or_update(attributes = {})
-      attributes = Hash[attributes.map { |(k,v)| [ k.to_sym, v ] }]
-      if is_empty?(attributes[:id]) && is_empty?(attributes[:cio_id]) && is_empty?(attributes[:customer_id])
-        raise MissingIdAttributeError.new("Must provide a customer id")
+      attributes = symbolize_keys(attributes)
+      if empty?(attributes[:id]) && empty?(attributes[:cio_id]) && empty?(attributes[:customer_id])
+        raise MissingIdAttributeError, "Must provide a customer id"
       end
 
       # Use cio_id as the identifier, if present,
@@ -169,12 +180,9 @@ module Customerio
       #
       # 3. id: The id value.
       customer_id = attributes[:id]
-      if !is_empty?(attributes[:cio_id])
-        customer_id = "cio_" + attributes[:cio_id]
-      end
-      if !is_empty?(attributes[:customer_id])
-        customer_id = attributes[:customer_id]
-      end
+      customer_id = "cio_#{attributes[:cio_id]}" unless empty?(attributes[:cio_id])
+      customer_id = attributes[:customer_id] unless empty?(attributes[:customer_id])
+
       # customer_id is not an attribute, so remove it.
       attributes.delete(:customer_id)
 
@@ -209,24 +217,28 @@ module Customerio
     end
 
     def create_event(url:, event_name:, anonymous_id: nil, event_type: nil, attributes: {})
-      body = { :name => event_name, :data => attributes }
+      body = { name: event_name, data: attributes }
       body[:timestamp] = attributes[:timestamp] if valid_timestamp?(attributes[:timestamp])
-      body[:anonymous_id] = anonymous_id unless is_empty?(anonymous_id)
-      body[:type] = event_type unless is_empty?(event_type)
+      body[:anonymous_id] = anonymous_id unless empty?(anonymous_id)
+      body[:type] = event_type unless empty?(event_type)
 
       @client.request_and_verify_response(:post, url, body)
     end
 
     def valid_timestamp?(timestamp)
-      timestamp && timestamp.is_a?(Integer) && timestamp > 999999999 && timestamp < 100000000000
+      timestamp.is_a?(Integer) && timestamp > 999_999_999 && timestamp < 100_000_000_000
     end
 
-    def is_empty?(val)
-      val.nil? || (val.is_a?(String) && val.strip == "")
+    def empty?(val)
+      val.nil? || (val.is_a?(String) && val.strip.empty?)
     end
 
-    def is_valid_id_type?(input)
+    def valid_id_type?(input)
       [IdentifierType::ID, IdentifierType::CIOID, IdentifierType::EMAIL].include? input
+    end
+
+    def symbolize_keys(hash)
+      hash.transform_keys(&:to_sym)
     end
   end
 end
