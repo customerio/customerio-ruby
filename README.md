@@ -188,15 +188,23 @@ encourage your customers to perform an action.
 # attributes (optional)  - any related information you'd like to attach to this
 #                          event. These attributes can be used in your triggers to control who should
 #                          receive the triggered email. You can set any number of data values.
+# event_options (optional) - top-level event properties. Supports :id, :timestamp, and :type.
 
 $customerio.track(5, "purchase", :type => "socks", :price => "13.99")
 ```
 
-**Note:** If you want to track events which occurred in the past, you can include a `timestamp` attribute
-(in seconds since the epoch), and we'll use that as the date the event occurred.
+Use event options when you need to set top-level event properties like `id`, `timestamp`, or `type`.
+The `id` option must be a ULID and is used to deduplicate events.
 
 ```ruby
-$customerio.track(5, "purchase", :type => "socks", :price => "13.99", :timestamp => 1365436200)
+$customerio.track(
+  5,
+  "purchase",
+  { :type => "socks", :price => "13.99" },
+  :id => "01G653VCS2Z4KQYQJCBVVB2CCW",
+  :timestamp => 1365436200,
+  :type => "event"
+)
 ```
 
 ### Tracking anonymous events
@@ -210,8 +218,20 @@ Anonymous events cannot trigger campaigns by themselves. To trigger a campaign, 
 # anonymous_id (required, nullable) - the id representing the unknown person.
 # name (required)                   - the name of the event you want to track.
 # attributes (optional)             - related information you want to attach to the event.
+# event_options (optional)          - top-level event properties. Supports :id, :timestamp, and :type.
 
 $customerio.track_anonymous(anonymous_id, "product_view", :type => "socks" )
+```
+
+```ruby
+$customerio.track_anonymous(
+  anonymous_id,
+  "product_view",
+  { :type => "socks" },
+  :id => "01G653VCS2Z4KQYQJCBVVB2CCW",
+  :timestamp => 1365436200,
+  :type => "screen"
+)
 ```
 
 Use the `recipient` attribute to specify the email address to send the messages to. [See our documentation on how to use anonymous events for more details](https://customer.io/docs/invite-emails/).

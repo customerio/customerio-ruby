@@ -1,3 +1,7 @@
+## Customerio Next
+### Added
+- Added event options to `track`, `track_anonymous`, and `pageview` for setting top-level event `id`, `timestamp`, and `type` fields separately from event attributes.
+
 ## Customerio 5.4.0 - June 13, 2025
 ### Changed
 - Added `send_sms` to `APIClient` and `SendSMSRequest` to support sending transactional push notifications.

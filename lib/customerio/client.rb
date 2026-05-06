@@ -14,6 +14,11 @@ module Customerio
     PUSH_CONVERTED = "converted"
     PUSH_DELIVERED = "delivered"
 
+    EVENT_TYPE_EVENT = "event"
+    EVENT_TYPE_PAGE = "page"
+    EVENT_TYPE_SCREEN = "screen"
+
+    VALID_EVENT_TYPES = [EVENT_TYPE_EVENT, EVENT_TYPE_PAGE, EVENT_TYPE_SCREEN].freeze
     VALID_PUSH_EVENTS = [PUSH_OPENED, PUSH_CONVERTED, PUSH_DELIVERED].freeze
 
     class MissingIdAttributeError < StandardError; end
@@ -52,24 +57,24 @@ module Customerio
       @client.request_and_verify_response(:post, unsuppress_path(customer_id))
     end
 
-    def track(customer_id, event_name, attributes = {})
+    def track(customer_id, event_name, attributes = {}, event_options = {})
       raise ParamError, "customer_id must be a non-empty string" if empty?(customer_id)
       raise ParamError, "event_name must be a non-empty string" if empty?(event_name)
 
-      create_customer_event(customer_id, event_name, attributes)
+      create_customer_event(customer_id, event_name, attributes, event_options)
     end
 
-    def pageview(customer_id, page, attributes = {})
+    def pageview(customer_id, page, attributes = {}, event_options = {})
       raise ParamError, "customer_id must be a non-empty string" if empty?(customer_id)
       raise ParamError, "page must be a non-empty string" if empty?(page)
 
-      create_pageview_event(customer_id, page, attributes)
+      create_pageview_event(customer_id, page, attributes, event_options)
     end
 
-    def track_anonymous(anonymous_id, event_name, attributes = {})
+    def track_anonymous(anonymous_id, event_name, attributes = {}, event_options = {})
       raise ParamError, "event_name must be a non-empty string" if empty?(event_name)
 
-      create_anonymous_event(anonymous_id, event_name, attributes)
+      create_anonymous_event(anonymous_id, event_name, attributes, event_options)
     end
 
     def add_device(customer_id, device_id, platform, data = {})
@@ -190,39 +195,56 @@ module Customerio
       @client.request_and_verify_response(:put, url, attributes)
     end
 
-    def create_customer_event(customer_id, event_name, attributes = {})
+    def create_customer_event(customer_id, event_name, attributes = {}, event_options = {})
       create_event(
         url: "#{customer_path(customer_id)}/events",
         event_name: event_name,
-        attributes: attributes
+        attributes: attributes,
+        event_options: event_options
       )
     end
 
-    def create_anonymous_event(anonymous_id, event_name, attributes = {})
+    def create_anonymous_event(anonymous_id, event_name, attributes = {}, event_options = {})
       create_event(
         url: "/api/v1/events",
         event_name: event_name,
         anonymous_id: anonymous_id,
-        attributes: attributes
+        attributes: attributes,
+        event_options: event_options
       )
     end
 
-    def create_pageview_event(customer_id, page, attributes = {})
+    def create_pageview_event(customer_id, page, attributes = {}, event_options = {})
       create_event(
         url: "#{customer_path(customer_id)}/events",
-        event_type: "page",
         event_name: page,
-        attributes: attributes
+        attributes: attributes,
+        event_options: event_options.merge(type: EVENT_TYPE_PAGE)
       )
     end
 
-    def create_event(url:, event_name:, anonymous_id: nil, event_type: nil, attributes: {})
+    def create_event(url:, event_name:, anonymous_id: nil, attributes: {}, event_options: {})
+      event_options = symbolize_keys(event_options)
       body = { name: event_name, data: attributes }
-      body[:timestamp] = attributes[:timestamp] if valid_timestamp?(attributes[:timestamp])
+      add_event_options(body, event_options)
+      body[:timestamp] = attributes[:timestamp] if !body.key?(:timestamp) && valid_timestamp?(attributes[:timestamp])
       body[:anonymous_id] = anonymous_id unless empty?(anonymous_id)
-      body[:type] = event_type unless empty?(event_type)
 
       @client.request_and_verify_response(:post, url, body)
+    end
+
+    def add_event_options(body, event_options)
+      body[:id] = event_options[:id] if valid_event_id?(event_options[:id])
+      body[:timestamp] = event_options[:timestamp] if valid_timestamp?(event_options[:timestamp])
+      body[:type] = event_options[:type] if valid_event_type?(event_options[:type])
+    end
+
+    def valid_event_id?(id)
+      id.is_a?(String) && !empty?(id)
+    end
+
+    def valid_event_type?(event_type)
+      VALID_EVENT_TYPES.include?(event_type)
     end
 
     def valid_timestamp?(timestamp)

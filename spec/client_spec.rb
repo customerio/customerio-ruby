@@ -322,6 +322,29 @@ describe Customerio::Client do
 
       client.pageview(5, "http://customer.io")
     end
+
+    it "allows sending top-level event options" do
+      stub_request(:post, api_uri('/api/v1/customers/5/events')).
+        with(body: json({
+          name: "http://customer.io",
+          data: {
+            title: "Home"
+          },
+          id: "01G653VCS2Z4KQYQJCBVVB2CCW",
+          timestamp: 1561231234,
+          type: "page"
+        })).
+        to_return(status: 200, body: "", headers: {})
+
+      client.pageview(
+        5,
+        "http://customer.io",
+        { title: "Home" },
+        id: "01G653VCS2Z4KQYQJCBVVB2CCW",
+        timestamp: 1561231234,
+        type: "screen"
+      )
+    end
   end
 
   describe "#track" do
@@ -418,6 +441,78 @@ describe Customerio::Client do
       client.track(5, "purchase", type: "socks", price: "13.99", timestamp: 1561231234)
     end
 
+    it "allows sending top-level event options" do
+      stub_request(:post, api_uri('/api/v1/customers/5/events')).
+        with(body: json({
+          name: "purchase",
+          data: {
+            type: "socks",
+            price: "13.99",
+            id: "product-123",
+            timestamp: 1561231000
+          },
+          id: "01G653VCS2Z4KQYQJCBVVB2CCW",
+          timestamp: 1561231234,
+          type: "screen"
+        })).
+        to_return(status: 200, body: "", headers: {})
+
+      client.track(
+        5,
+        "purchase",
+        { type: "socks", price: "13.99", id: "product-123", timestamp: 1561231000 },
+        id: "01G653VCS2Z4KQYQJCBVVB2CCW",
+        timestamp: 1561231234,
+        type: "screen"
+      )
+    end
+
+    it "doesn't promote event id from attributes" do
+      stub_request(:post, api_uri('/api/v1/customers/5/events')).
+        with(body: json({
+          name: "purchase",
+          data: {
+            type: "socks",
+            id: "01G653VCS2Z4KQYQJCBVVB2CCW"
+          }
+        })).
+        to_return(status: 200, body: "", headers: {})
+
+      client.track(5, "purchase", type: "socks", id: "01G653VCS2Z4KQYQJCBVVB2CCW")
+    end
+
+    it "accepts event options with string keys" do
+      stub_request(:post, api_uri('/api/v1/customers/5/events')).
+        with(body: json({
+          name: "purchase",
+          data: {},
+          id: "01G653VCS2Z4KQYQJCBVVB2CCW",
+          timestamp: 1561231234,
+          type: "event"
+        })).
+        to_return(status: 200, body: "", headers: {})
+
+      client.track(
+        5,
+        "purchase",
+        {},
+        "id" => "01G653VCS2Z4KQYQJCBVVB2CCW",
+        "timestamp" => 1561231234,
+        "type" => "event"
+      )
+    end
+
+    it "doesn't send invalid event options" do
+      stub_request(:post, api_uri('/api/v1/customers/5/events')).
+        with(body: json({
+          name: "purchase",
+          data: {}
+        })).
+        to_return(status: 200, body: "", headers: {})
+
+      client.track(5, "purchase", {}, id: "", timestamp: 1561231234000, type: "mobile")
+    end
+
     it "doesn't send timestamp if timestamp is in milliseconds" do
       stub_request(:post, api_uri('/api/v1/customers/5/events')).
         with(body: json({
@@ -507,6 +602,31 @@ describe Customerio::Client do
           to_return(status: 200, body: "", headers: {})
 
         client.track_anonymous(anon_id, "purchase", type: "socks", price: "13.99", timestamp: 1561231234)
+      end
+
+      it "allows sending top-level event options" do
+        stub_request(:post, api_uri('/api/v1/events')).
+          with(body: {
+            anonymous_id: anon_id,
+            name: "purchase",
+            data: {
+              type: "socks",
+              price: "13.99"
+            },
+            id: "01G653VCS2Z4KQYQJCBVVB2CCW",
+            timestamp: 1561231234,
+            type: "screen"
+          }).
+          to_return(status: 200, body: "", headers: {})
+
+        client.track_anonymous(
+          anon_id,
+          "purchase",
+          { type: "socks", price: "13.99" },
+          id: "01G653VCS2Z4KQYQJCBVVB2CCW",
+          timestamp: 1561231234,
+          type: "screen"
+        )
       end
 
       it "raises an error if POST doesn't return a 2xx response code" do
