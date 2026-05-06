@@ -22,6 +22,10 @@ describe Customerio::Client do
     MultiJson.dump(data)
   end
 
+  def reset_attribute_timestamp_deprecation_warning
+    Customerio::Client.instance_variable_set(:@attribute_timestamp_deprecation_warning_emitted, false)
+  end
+
   it "the base client is initialised with the correct values when no region is passed in" do
     site_id = "SITE_ID"
     api_key = "API_KEY"
@@ -426,6 +430,9 @@ describe Customerio::Client do
     end
 
     it "allows sending of a timestamp" do
+      reset_attribute_timestamp_deprecation_warning
+      expect(client).to receive(:warn).with(Customerio::Client::DEPRECATED_ATTRIBUTE_TIMESTAMP_WARNING)
+
       stub_request(:post, api_uri('/api/v1/customers/5/events')).
         with(body: json({
           name: "purchase",
@@ -442,6 +449,8 @@ describe Customerio::Client do
     end
 
     it "allows sending top-level event options" do
+      expect(client).not_to receive(:warn)
+
       stub_request(:post, api_uri('/api/v1/customers/5/events')).
         with(body: json({
           name: "purchase",
@@ -465,6 +474,25 @@ describe Customerio::Client do
         timestamp: 1561231234,
         type: "screen"
       )
+    end
+
+    it "only warns once when promoting timestamps from attributes" do
+      reset_attribute_timestamp_deprecation_warning
+      expect(client).to receive(:warn).with(Customerio::Client::DEPRECATED_ATTRIBUTE_TIMESTAMP_WARNING).once
+
+      stub_request(:post, api_uri('/api/v1/customers/5/events')).
+        with(body: json({
+          name: "purchase",
+          data: {
+            timestamp: 1561231234
+          },
+          timestamp: 1561231234
+        })).
+        to_return(status: 200, body: "", headers: {})
+
+      2.times do
+        client.track(5, "purchase", timestamp: 1561231234)
+      end
     end
 
     it "doesn't promote event id from attributes" do
@@ -588,6 +616,9 @@ describe Customerio::Client do
       end
 
       it "allows sending of a timestamp" do
+        reset_attribute_timestamp_deprecation_warning
+        expect(client).to receive(:warn).with(Customerio::Client::DEPRECATED_ATTRIBUTE_TIMESTAMP_WARNING)
+
         stub_request(:post, api_uri('/api/v1/events')).
           with(body: {
             anonymous_id: anon_id,

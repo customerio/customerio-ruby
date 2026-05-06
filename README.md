@@ -195,6 +195,8 @@ $customerio.track(5, "purchase", :type => "socks", :price => "13.99")
 
 Use event options when you need to set top-level event properties like `id`, `timestamp`, or `type`.
 The `id` option must be a ULID and is used to deduplicate events.
+Passing `:timestamp` in event attributes to set the top-level event timestamp is deprecated. It still
+works for now, but emits a warning. Pass `:timestamp` as an event option instead.
 
 ```ruby
 $customerio.track(

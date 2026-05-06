@@ -20,6 +20,9 @@ module Customerio
 
     VALID_EVENT_TYPES = [EVENT_TYPE_EVENT, EVENT_TYPE_PAGE, EVENT_TYPE_SCREEN].freeze
     VALID_PUSH_EVENTS = [PUSH_OPENED, PUSH_CONVERTED, PUSH_DELIVERED].freeze
+    DEPRECATED_ATTRIBUTE_TIMESTAMP_WARNING = "DEPRECATION: Passing :timestamp in event attributes to set " \
+                                             "the top-level event timestamp is deprecated. Pass :timestamp " \
+                                             "as an event option instead."
 
     class MissingIdAttributeError < StandardError; end
     class ParamError < StandardError; end
@@ -219,7 +222,7 @@ module Customerio
       event_options = symbolize_keys(event_options)
       body = { name: event_name, data: attributes }
       add_event_options(body, event_options)
-      body[:timestamp] = attributes[:timestamp] if !body.key?(:timestamp) && valid_timestamp?(attributes[:timestamp])
+      add_deprecated_attribute_timestamp(body, attributes)
       body[:anonymous_id] = anonymous_id unless empty?(anonymous_id)
 
       @client.request_and_verify_response(:post, path, body)
@@ -229,6 +232,20 @@ module Customerio
       body[:id] = event_options[:id] if valid_event_id?(event_options[:id])
       body[:timestamp] = event_options[:timestamp] if valid_timestamp?(event_options[:timestamp])
       body[:type] = event_options[:type] if valid_event_type?(event_options[:type])
+    end
+
+    def add_deprecated_attribute_timestamp(body, attributes)
+      return if body.key?(:timestamp) || !valid_timestamp?(attributes[:timestamp])
+
+      warn_deprecated_attribute_timestamp
+      body[:timestamp] = attributes[:timestamp]
+    end
+
+    def warn_deprecated_attribute_timestamp
+      return if self.class.instance_variable_get(:@attribute_timestamp_deprecation_warning_emitted)
+
+      warn(DEPRECATED_ATTRIBUTE_TIMESTAMP_WARNING)
+      self.class.instance_variable_set(:@attribute_timestamp_deprecation_warning_emitted, true)
     end
 
     def valid_event_id?(id)
