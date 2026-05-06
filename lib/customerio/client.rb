@@ -61,20 +61,36 @@ module Customerio
       raise ParamError, "customer_id must be a non-empty string" if empty?(customer_id)
       raise ParamError, "event_name must be a non-empty string" if empty?(event_name)
 
-      create_customer_event(customer_id, event_name, attributes, event_options)
+      create_event(
+        path: customer_events_path(customer_id),
+        event_name: event_name,
+        attributes: attributes,
+        event_options: event_options
+      )
     end
 
     def pageview(customer_id, page, attributes = {}, event_options = {})
       raise ParamError, "customer_id must be a non-empty string" if empty?(customer_id)
       raise ParamError, "page must be a non-empty string" if empty?(page)
 
-      create_pageview_event(customer_id, page, attributes, event_options)
+      create_event(
+        path: customer_events_path(customer_id),
+        event_name: page,
+        attributes: attributes,
+        event_options: event_options.merge(type: EVENT_TYPE_PAGE)
+      )
     end
 
     def track_anonymous(anonymous_id, event_name, attributes = {}, event_options = {})
       raise ParamError, "event_name must be a non-empty string" if empty?(event_name)
 
-      create_anonymous_event(anonymous_id, event_name, attributes, event_options)
+      create_event(
+        path: "/api/v1/events",
+        event_name: event_name,
+        anonymous_id: anonymous_id,
+        attributes: attributes,
+        event_options: event_options
+      )
     end
 
     def add_device(customer_id, device_id, platform, data = {})
@@ -149,6 +165,10 @@ module Customerio
       "/api/v1/customers/#{escape(id)}"
     end
 
+    def customer_events_path(customer_id)
+      "#{customer_path(customer_id)}/events"
+    end
+
     def suppress_path(customer_id)
       "/api/v1/customers/#{escape(customer_id)}/suppress"
     end
@@ -195,42 +215,14 @@ module Customerio
       @client.request_and_verify_response(:put, url, attributes)
     end
 
-    def create_customer_event(customer_id, event_name, attributes = {}, event_options = {})
-      create_event(
-        url: "#{customer_path(customer_id)}/events",
-        event_name: event_name,
-        attributes: attributes,
-        event_options: event_options
-      )
-    end
-
-    def create_anonymous_event(anonymous_id, event_name, attributes = {}, event_options = {})
-      create_event(
-        url: "/api/v1/events",
-        event_name: event_name,
-        anonymous_id: anonymous_id,
-        attributes: attributes,
-        event_options: event_options
-      )
-    end
-
-    def create_pageview_event(customer_id, page, attributes = {}, event_options = {})
-      create_event(
-        url: "#{customer_path(customer_id)}/events",
-        event_name: page,
-        attributes: attributes,
-        event_options: event_options.merge(type: EVENT_TYPE_PAGE)
-      )
-    end
-
-    def create_event(url:, event_name:, anonymous_id: nil, attributes: {}, event_options: {})
+    def create_event(path:, event_name:, anonymous_id: nil, attributes: {}, event_options: {})
       event_options = symbolize_keys(event_options)
       body = { name: event_name, data: attributes }
       add_event_options(body, event_options)
       body[:timestamp] = attributes[:timestamp] if !body.key?(:timestamp) && valid_timestamp?(attributes[:timestamp])
       body[:anonymous_id] = anonymous_id unless empty?(anonymous_id)
 
-      @client.request_and_verify_response(:post, url, body)
+      @client.request_and_verify_response(:post, path, body)
     end
 
     def add_event_options(body, event_options)
