@@ -10,12 +10,6 @@ module Customerio
   end
 
   class Client
-    PUSH_OPENED = "opened"
-    PUSH_CONVERTED = "converted"
-    PUSH_DELIVERED = "delivered"
-
-    VALID_PUSH_EVENTS = [PUSH_OPENED, PUSH_CONVERTED, PUSH_DELIVERED].freeze
-
     DELIVERY_OPENED = "opened"
     DELIVERY_CLICKED = "clicked"
     DELIVERY_CONVERTED = "converted"
@@ -30,6 +24,8 @@ module Customerio
       DELIVERY_DELIVERED, DELIVERY_BOUNCED, DELIVERY_DEFERRED,
       DELIVERY_DROPPED, DELIVERY_SPAMMED
     ].freeze
+
+    VALID_PUSH_EVENTS = [DELIVERY_OPENED, DELIVERY_CONVERTED, DELIVERY_DELIVERED].freeze
 
     class MissingIdAttributeError < StandardError; end
     class ParamError < StandardError; end
