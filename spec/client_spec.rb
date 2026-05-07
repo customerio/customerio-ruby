@@ -715,4 +715,77 @@ describe Customerio::Client do
       client.merge_customers(Customerio::IdentifierType::ID, "ID1", Customerio::IdentifierType::EMAIL, "hello@company.com")
     end
   end
+
+  describe "#batch" do
+    it "sends a POST request to the batch API with mixed operations" do
+      operations = [
+        {
+          type: "person",
+          identifiers: { id: "42" },
+          action: "identify",
+          attributes: { first_name: "Jane", plan: "premium" }
+        },
+        {
+          type: "person",
+          identifiers: { id: "42" },
+          action: "event",
+          name: "purchase",
+          data: { amount: 99 }
+        },
+        {
+          type: "person",
+          identifiers: { id: "99" },
+          action: "delete"
+        }
+      ]
+
+      stub_request(:post, api_uri('/api/v2/batch')).
+        with(body: json({ batch: operations })).
+        to_return(status: 200, body: "", headers: {})
+
+      client.batch(operations)
+    end
+
+    it "sends object operations" do
+      operations = [
+        {
+          type: "object",
+          identifiers: { object_type_id: "1", object_id: "acme" },
+          action: "identify",
+          attributes: { name: "Acme Corp" }
+        }
+      ]
+
+      stub_request(:post, api_uri('/api/v2/batch')).
+        with(body: json({ batch: operations })).
+        to_return(status: 200, body: "", headers: {})
+
+      client.batch(operations)
+    end
+
+    it "raises an error when operations is empty" do
+      lambda { client.batch([]) }.should raise_error(Customerio::Client::ParamError)
+    end
+
+    it "raises an error when operations is not an array" do
+      lambda { client.batch("not an array") }.should raise_error(Customerio::Client::ParamError)
+    end
+
+    it "raises an error on non-2xx response" do
+      operations = [
+        {
+          type: "person",
+          identifiers: { id: "42" },
+          action: "identify",
+          attributes: { first_name: "Jane" }
+        }
+      ]
+
+      stub_request(:post, api_uri('/api/v2/batch')).
+        with(body: json({ batch: operations })).
+        to_return(status: 400, body: "Bad request", headers: {})
+
+      lambda { client.batch(operations) }.should raise_error(Customerio::InvalidResponse)
+    end
+  end
 end

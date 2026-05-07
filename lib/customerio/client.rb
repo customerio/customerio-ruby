@@ -125,6 +125,12 @@ module Customerio
       @client.request_and_verify_response(:post, merge_customers_path, body)
     end
 
+    def batch(operations)
+      raise ParamError, "operations must be a non-empty array" unless operations.is_a?(Array) && !operations.empty?
+
+      @client.request_and_verify_response(:post, batch_path, batch: operations)
+    end
+
     private
 
     def escape(val)
@@ -158,6 +164,10 @@ module Customerio
 
     def merge_customers_path
       "/api/v1/merge_customers"
+    end
+
+    def batch_path
+      "/api/v2/batch"
     end
 
     def create_or_update(attributes = {})
