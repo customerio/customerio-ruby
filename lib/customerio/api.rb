@@ -46,6 +46,12 @@ module Customerio
       deliver(send_in_app_path, req.message)
     end
 
+    def trigger_broadcast(req)
+      validate_request!(req, TriggerBroadcastRequest)
+
+      deliver(trigger_broadcast_path(req.broadcast_id), req.message)
+    end
+
     private
 
     def deliver(path, message)
@@ -86,6 +92,10 @@ module Customerio
 
     def send_in_app_path
       "/v1/send/in_app"
+    end
+
+    def trigger_broadcast_path(broadcast_id)
+      "/v1/campaigns/#{broadcast_id}/triggers"
     end
   end
 end

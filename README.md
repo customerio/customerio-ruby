@@ -372,6 +372,45 @@ rescue Customerio::InvalidResponse => e
 end
 ```
 
+### Trigger Broadcasts
+
+You can trigger [API-triggered broadcasts](https://customer.io/docs/api-triggered-broadcasts/) using the `APIClient`. Create a `TriggerBroadcastRequest` with the broadcast's numeric ID and optional audience/data parameters.
+
+```ruby
+require "customerio"
+
+client = Customerio::APIClient.new("your API key", region: Customerio::Regions::US)
+
+request = Customerio::TriggerBroadcastRequest.new(
+  broadcast_id: 12,
+  emails: ["recipient@example.com"],
+  data: {
+    headline: "Roadrunner spotted in Albuquerque!",
+    date: 1511315635,
+  },
+  email_add_duplicates: false,
+  email_ignore_missing: false,
+  id_ignore_missing: false,
+)
+
+begin
+  response = client.trigger_broadcast(request)
+  puts response
+rescue Customerio::InvalidResponse => e
+  puts e.code, e.message
+end
+```
+
+You can target the broadcast audience in several ways. Only one audience option can be present per request:
+
+- `recipients`: a hash with filter conditions (e.g., `{ segment: { id: 7 } }`)
+- `emails`: an array of email addresses
+- `ids`: an array of customer IDs
+- `per_user_data`: an array of per-user objects
+- `data_file_url`: a URL to a JSON lines file
+
+If you omit the audience option, the broadcast uses its default audience configured in the UI.
+
 ## Contributing
 
 1. Fork it
