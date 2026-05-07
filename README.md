@@ -199,6 +199,16 @@ $customerio.track(5, "purchase", :type => "socks", :price => "13.99")
 $customerio.track(5, "purchase", :type => "socks", :price => "13.99", :timestamp => 1365436200)
 ```
 
+#### Deduplicating events
+
+You can provide a [ULID](https://github.com/ulid/spec) `id` to deduplicate events. If two events have the same `id`, Customer.io won't process the event a second time.
+
+```ruby
+$customerio.track(5, "purchase", { :type => "socks" }, id: "01BX5ZZKBKACTAV9WEVGEMMVRY")
+
+$customerio.track_anonymous("anon-id", "purchase", { :type => "socks" }, id: "01BX5ZZKBKACTAV9WEVGEMMVRY")
+```
+
 ### Tracking anonymous events
 
 You can also send anonymous events, for situations where you don't yet have a customer record yet. An anonymous event requires an `anonymous_id` representing the unknown person and an event `name`. When you identify a person, you can set their `anonymous_id` attribute. If [event merging](https://customer.io/docs/anonymous-events/#turn-on-merging) is turned on in your workspace, and the attribute matches the `anonymous_id` in one or more events that were logged within the last 30 days, we associate those events with the person.

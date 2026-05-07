@@ -466,6 +466,29 @@ describe Customerio::Client do
       client.track(5, "purchase", type: "socks", price: "13.99", timestamp: "Hello world")
     end
 
+    it "sends an event id for deduplication when provided" do
+      stub_request(:post, api_uri('/api/v1/customers/5/events')).
+        with(body: json({
+          name: "purchase",
+          data: { type: "socks" },
+          id: "01HB4HBDKTFWYZCK01DMRSWRFD"
+        })).
+        to_return(status: 200, body: "", headers: {})
+
+      client.track(5, "purchase", { type: "socks" }, id: "01HB4HBDKTFWYZCK01DMRSWRFD")
+    end
+
+    it "doesn't send id when not provided" do
+      stub_request(:post, api_uri('/api/v1/customers/5/events')).
+        with(body: json({
+          name: "purchase",
+          data: { type: "socks" }
+        })).
+        to_return(status: 200, body: "", headers: {})
+
+      client.track(5, "purchase", type: "socks")
+    end
+
     context "tracking an anonymous event" do
       let(:anon_id) { "anon-id" }
 
@@ -539,6 +562,19 @@ describe Customerio::Client do
             to_return(status: 500, body: "", headers: {})
 
         lambda { client.track_anonymous(anon_id, "") }.should raise_error(Customerio::Client::ParamError)
+      end
+
+      it "sends an event id for deduplication when provided" do
+        stub_request(:post, api_uri('/api/v1/events')).
+          with(body: {
+            anonymous_id: anon_id,
+            name: "purchase",
+            data: {},
+            id: "01HB4HBDKTFWYZCK01DMRSWRFD"
+          }).
+          to_return(status: 200, body: "", headers: {})
+
+        client.track_anonymous(anon_id, "purchase", {}, id: "01HB4HBDKTFWYZCK01DMRSWRFD")
       end
     end
   end
