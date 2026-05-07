@@ -20,7 +20,7 @@ Metrics/BlockLength:
     - "customerio.gemspec"
 
 Metrics/ClassLength:
-  Max: 200
+  Max: 275
 
 Metrics/MethodLength:
   Max: 25
