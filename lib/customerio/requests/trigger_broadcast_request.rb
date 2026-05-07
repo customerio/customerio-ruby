@@ -16,9 +16,7 @@ module Customerio
       @message = opts.select { |field, _value| valid_field?(field) }
 
       audience = AUDIENCE_FIELDS.select { |field| @message.key?(field) }
-      if audience.length > 1
-        raise ArgumentError, "only one of #{AUDIENCE_FIELDS.join(", ")} can be present"
-      end
+      raise ArgumentError, "only one of #{AUDIENCE_FIELDS.join(", ")} can be present" if audience.length > 1
     end
 
     private
