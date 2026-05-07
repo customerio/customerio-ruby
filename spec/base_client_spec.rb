@@ -45,6 +45,28 @@ describe Customerio::BaseClient do
     end
   end
 
+  describe "GET requests" do
+    describe "with a site ID and API key" do
+      it "sends a GET request with basic auth" do
+        stub_request(:get, api_uri('/some/path')).
+          with(headers: track_client_request_headers).
+          to_return(status: 200, body: "", headers: {})
+
+        track_client.request(:get, '/some/path', "")
+      end
+    end
+
+    describe "with an app key" do
+      it "sends a GET request with bearer token" do
+        stub_request(:get, api_uri('/some/path')).
+          with(headers: api_client_request_headers).
+          to_return(status: 200, body: "", headers: {})
+
+        api_client.request(:get, '/some/path', "")
+      end
+    end
+  end
+
   describe "#verify_response" do
     it "throws an error when the response isn't between 200 and 300" do
       stub_request(:put, api_uri('/some/path')).

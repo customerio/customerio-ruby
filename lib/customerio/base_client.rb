@@ -76,6 +76,8 @@ module Customerio
         Net::HTTP::Put
       when :delete
         Net::HTTP::Delete
+      when :get
+        Net::HTTP::Get
       else
         raise InvalidRequest, "Invalid request method #{method.inspect}"
       end
