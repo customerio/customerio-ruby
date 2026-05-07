@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'multi_json'
+require 'json'
 require 'base64'
 
 describe Customerio::BaseClient do

@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'multi_json'
+require 'json'
 require 'base64'
 require 'tempfile'
 
@@ -18,7 +18,7 @@ describe Customerio::APIClient do
   end
 
   def json(data)
-    MultiJson.dump(data)
+    JSON.generate(data)
   end
 
   it "the base client is initialised with the correct values when no region is passed in" do

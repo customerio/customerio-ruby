@@ -27,5 +27,4 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency "addressable", "~> 2.9"
   gem.add_dependency "base64", "~> 0.3"
-  gem.add_dependency "multi_json", "~> 1.20"
 end

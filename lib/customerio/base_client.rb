@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "multi_json"
+require "json"
 require "net/http"
 require "uri"
 
@@ -60,7 +60,7 @@ module Customerio
 
       unless body.nil?
         req.add_field("Content-Type", "application/json")
-        req.body = MultiJson.dump(body)
+        req.body = JSON.generate(body)
       end
 
       session.start do |http|

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "multi_json"
+require "json"
 require "net/http"
 
 module Customerio
@@ -53,9 +53,9 @@ module Customerio
 
       case response
       when Net::HTTPSuccess
-        MultiJson.load(response.body)
+        JSON.parse(response.body)
       when Net::HTTPBadRequest
-        error = MultiJson.load(response.body).dig("meta", "error")
+        error = JSON.parse(response.body).dig("meta", "error")
         raise InvalidResponse.new(response.code, error, response)
       else
         raise InvalidResponse.new(response.code, response.body, response)
