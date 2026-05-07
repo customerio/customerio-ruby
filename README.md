@@ -189,14 +189,32 @@ encourage your customers to perform an action.
 #                          event. These attributes can be used in your triggers to control who should
 #                          receive the triggered email. You can set any number of data values.
 
-$customerio.track(5, "purchase", :type => "socks", :price => "13.99")
+$customerio.track(5, "purchase", { :type => "socks", :price => "13.99" })
 ```
 
-**Note:** If you want to track events which occurred in the past, you can include a `timestamp` attribute
+**Note:** If you want to track events which occurred in the past, you can pass a `timestamp` keyword argument
 (in seconds since the epoch), and we'll use that as the date the event occurred.
 
 ```ruby
-$customerio.track(5, "purchase", :type => "socks", :price => "13.99", :timestamp => 1365436200)
+$customerio.track(5, "purchase", { :type => "socks", :price => "13.99" }, timestamp: 1365436200)
+```
+
+#### Deduplicating events
+
+You can provide a [ULID](https://github.com/ulid/spec) `id` to deduplicate events. If two events have the same `id`, Customer.io won't process the event a second time.
+
+```ruby
+$customerio.track(5, "purchase", { :type => "socks" }, id: "01BX5ZZKBKACTAV9WEVGEMMVRY")
+
+$customerio.track_anonymous("anon-id", "purchase", { :type => "socks" }, id: "01BX5ZZKBKACTAV9WEVGEMMVRY")
+```
+
+You can also pass `timestamp` as a keyword argument (epoch seconds) instead of including it in the attributes hash:
+
+```ruby
+$customerio.track(5, "purchase", { :type => "socks" }, timestamp: 1561231234)
+
+$customerio.track(5, "purchase", { :type => "socks" }, id: "01BX5ZZKBKACTAV9WEVGEMMVRY", timestamp: 1561231234)
 ```
 
 ### Tracking anonymous events
@@ -211,7 +229,7 @@ Anonymous events cannot trigger campaigns by themselves. To trigger a campaign, 
 # name (required)                   - the name of the event you want to track.
 # attributes (optional)             - related information you want to attach to the event.
 
-$customerio.track_anonymous(anonymous_id, "product_view", :type => "socks" )
+$customerio.track_anonymous(anonymous_id, "product_view", { :type => "socks" })
 ```
 
 Use the `recipient` attribute to specify the email address to send the messages to. [See our documentation on how to use anonymous events for more details](https://customer.io/docs/invite-emails/).
@@ -221,7 +239,7 @@ Use the `recipient` attribute to specify the email address to send the messages 
 If you previously sent [invite events](https://customer.io/docs/anonymous-invite-emails/), you can achieve the same functionality by sending an anonymous event with `nil` for the anonymous identifier. To send anonymous invites, your event *must* include a `recipient` attribute. 
 
 ```ruby
-$customerio.track_anonymous(nil, "invite", :recipient => "new.person@example.com" )
+$customerio.track_anonymous(nil, "invite", { :recipient => "new.person@example.com" })
 ```
 
 ### Adding a mobile device
