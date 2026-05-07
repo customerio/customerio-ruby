@@ -429,4 +429,127 @@ describe Customerio::APIClient do
       )
     end
   end
+
+  describe "#trigger_broadcast" do
+    it "sends a POST request to the broadcast triggers path" do
+      req = Customerio::TriggerBroadcastRequest.new(
+        broadcast_id: 12,
+        data: { headline: "Test" },
+        recipients: { segment: { id: 7 } },
+      )
+
+      stub_request(:post, api_uri('/v1/campaigns/12/triggers'))
+        .with(headers: request_headers, body: req.message)
+        .to_return(status: 200, body: { trigger_id: "abc123" }.to_json, headers: {})
+
+      client.trigger_broadcast(req).should eq({ "trigger_id" => "abc123" })
+    end
+
+    it "sends with email list audience" do
+      req = Customerio::TriggerBroadcastRequest.new(
+        broadcast_id: 12,
+        emails: ["a@example.com", "b@example.com"],
+        email_add_duplicates: false,
+        email_ignore_missing: true,
+      )
+
+      stub_request(:post, api_uri('/v1/campaigns/12/triggers'))
+        .with(headers: request_headers, body: req.message)
+        .to_return(status: 200, body: { trigger_id: "abc123" }.to_json, headers: {})
+
+      client.trigger_broadcast(req).should eq({ "trigger_id" => "abc123" })
+    end
+
+    it "sends with id list audience" do
+      req = Customerio::TriggerBroadcastRequest.new(
+        broadcast_id: 12,
+        ids: [1, 2, 3],
+        id_ignore_missing: true,
+      )
+
+      stub_request(:post, api_uri('/v1/campaigns/12/triggers'))
+        .with(headers: request_headers, body: req.message)
+        .to_return(status: 200, body: { trigger_id: "abc123" }.to_json, headers: {})
+
+      client.trigger_broadcast(req).should eq({ "trigger_id" => "abc123" })
+    end
+
+    it "sends with data_file_url audience" do
+      req = Customerio::TriggerBroadcastRequest.new(
+        broadcast_id: 12,
+        data_file_url: "https://example.com/data.json",
+      )
+
+      stub_request(:post, api_uri('/v1/campaigns/12/triggers'))
+        .with(headers: request_headers, body: req.message)
+        .to_return(status: 200, body: { trigger_id: "abc123" }.to_json, headers: {})
+
+      client.trigger_broadcast(req).should eq({ "trigger_id" => "abc123" })
+    end
+
+    it "raises an error when broadcast_id is missing" do
+      lambda {
+        Customerio::TriggerBroadcastRequest.new(data: { headline: "Test" })
+      }.should raise_error(ArgumentError, "broadcast_id is required")
+    end
+
+    it "raises an error when broadcast_id is not an integer" do
+      lambda {
+        Customerio::TriggerBroadcastRequest.new(broadcast_id: "12")
+      }.should raise_error(ArgumentError, "broadcast_id must be an integer")
+    end
+
+    it "raises an error when multiple audience fields are provided" do
+      lambda {
+        Customerio::TriggerBroadcastRequest.new(
+          broadcast_id: 12,
+          emails: ["a@example.com"],
+          ids: [1, 2],
+        )
+      }.should raise_error(ArgumentError, /only one of/)
+    end
+
+    it "raises an error when request is not a TriggerBroadcastRequest" do
+      lambda {
+        client.trigger_broadcast("not a request")
+      }.should raise_error(ArgumentError, /must be an instance of/)
+    end
+
+    it "handles validation failures (400)" do
+      req = Customerio::TriggerBroadcastRequest.new(
+        broadcast_id: 12,
+        emails: ["a@example.com"],
+      )
+
+      err_json = { meta: { error: "example error" } }.to_json
+
+      stub_request(:post, api_uri('/v1/campaigns/12/triggers'))
+        .with(headers: request_headers, body: req.message)
+        .to_return(status: 400, body: err_json, headers: {})
+
+      lambda { client.trigger_broadcast(req) }.should(
+        raise_error(Customerio::InvalidResponse) { |error|
+          error.message.should eq "example error"
+          error.code.should eq "400"
+        }
+      )
+    end
+
+    it "handles other failures (5xx)" do
+      req = Customerio::TriggerBroadcastRequest.new(
+        broadcast_id: 12,
+      )
+
+      stub_request(:post, api_uri('/v1/campaigns/12/triggers'))
+        .with(headers: request_headers, body: req.message)
+        .to_return(status: 500, body: "Server unavailable", headers: {})
+
+      lambda { client.trigger_broadcast(req) }.should(
+        raise_error(Customerio::InvalidResponse) { |error|
+          error.message.should eq "Server unavailable"
+          error.code.should eq "500"
+        }
+      )
+    end
+  end
 end
