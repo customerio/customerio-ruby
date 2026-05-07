@@ -285,6 +285,35 @@ Start tracking events and identifies again for a previously suppressed customer.
 $customerio.unsuppress(5)
 ```
 
+### Batch operations
+
+You can send up to 500KB of operations in a single request using the [Track v2 batch endpoint](https://customer.io/docs/api/track/#tag/Track-v2/operation/batch). Each operation can identify, track events, or delete people and objects.
+
+```ruby
+$customerio.batch([
+  {
+    type: "person",
+    identifiers: { id: "42" },
+    action: "identify",
+    attributes: { first_name: "Jane", plan: "premium" },
+  },
+  {
+    type: "person",
+    identifiers: { id: "42" },
+    action: "event",
+    name: "purchase",
+    data: { amount: 99 },
+  },
+  {
+    type: "person",
+    identifiers: { id: "99" },
+    action: "delete",
+  },
+])
+```
+
+See the [Track v2 API docs](https://customer.io/docs/api/track/#tag/Track-v2/operation/batch) for the full list of supported actions and fields.
+
 ### Send Transactional Messages
 
 To use the Customer.io [Transactional API](https://customer.io/docs/transactional-api), create an instance of the API client using an [app key](https://customer.io/docs/managing-credentials#app-api-keys) and create a request object of your message type.
