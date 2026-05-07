@@ -220,7 +220,7 @@ module Customerio
       )
     end
 
-    def create_event(url:, event_name:, anonymous_id: nil, event_type: nil, attributes: {}, id: nil, timestamp: nil)
+    def create_event(url:, event_name:, anonymous_id: nil, event_type: nil, attributes: {}, id: nil, timestamp: nil) # rubocop:disable Metrics/ParameterLists
       body = { name: event_name, data: attributes }
       body[:timestamp] = timestamp if valid_timestamp?(timestamp)
       body[:timestamp] = attributes[:timestamp] if body[:timestamp].nil? && valid_timestamp?(attributes[:timestamp])

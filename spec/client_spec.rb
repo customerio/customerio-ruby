@@ -518,8 +518,8 @@ describe Customerio::Client do
         with(body: json({
           name: "purchase",
           data: { type: "socks" },
-          id: "01HB4HBDKTFWYZCK01DMRSWRFD",
-          timestamp: 1561231234
+          timestamp: 1561231234,
+          id: "01HB4HBDKTFWYZCK01DMRSWRFD"
         })).
         to_return(status: 200, body: "", headers: {})
 
