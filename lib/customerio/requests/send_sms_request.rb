@@ -23,7 +23,6 @@ module Customerio
     def initialize(opts)
       @message = opts.select { |field, _value| valid_field?(field) }
       @message[:attachments] ||= {}
-      @message[:headers] ||= {}
     end
 
     def attach(name, data, encode: true)
