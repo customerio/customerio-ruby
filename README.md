@@ -60,6 +60,28 @@ $customerio = Customerio::Client.new("YOUR SITE ID", "YOUR API SECRET KEY", regi
 
 `region` is optional and takes one of two values—`US` or `EU`. If you do not specify your region, we assume that your account is based in the US (`US`). If your account is based in the EU and you do not provide the correct region (`EU`), we'll route requests to our EU data centers accordingly, however this may cause data to be logged in the US. 
 
+#### Timeouts
+
+Both clients accept a `timeout` option (in seconds) that controls the HTTP connect and read timeouts. The default is 10 seconds.
+
+```ruby
+# Track API client with a 3-second timeout
+$customerio = Customerio::Client.new("YOUR SITE ID", "YOUR API SECRET KEY", timeout: 3)
+
+# Transactional API client with a 3-second timeout
+client = Customerio::APIClient.new("your API key", timeout: 3)
+```
+
+When a request exceeds the timeout, Ruby raises `Net::OpenTimeout` (connection phase) or `Net::ReadTimeout` (waiting for response). You can rescue both:
+
+```ruby
+begin
+  $customerio.identify(id: 5, email: "person@example.com")
+rescue Net::OpenTimeout, Net::ReadTimeout => e
+  # handle timeout
+end
+```
+
 ### Identify logged in customers
 
 Tracking data of logged in customers is a key part of [Customer.io](https://customer.io). In order to
