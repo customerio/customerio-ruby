@@ -209,6 +209,14 @@ $customerio.track(5, "purchase", { :type => "socks" }, id: "01BX5ZZKBKACTAV9WEVG
 $customerio.track_anonymous("anon-id", "purchase", { :type => "socks" }, id: "01BX5ZZKBKACTAV9WEVGEMMVRY")
 ```
 
+You can also pass `timestamp` as a keyword argument (epoch seconds) instead of including it in the attributes hash:
+
+```ruby
+$customerio.track(5, "purchase", { :type => "socks" }, timestamp: 1561231234)
+
+$customerio.track(5, "purchase", { :type => "socks" }, id: "01BX5ZZKBKACTAV9WEVGEMMVRY", timestamp: 1561231234)
+```
+
 ### Tracking anonymous events
 
 You can also send anonymous events, for situations where you don't yet have a customer record yet. An anonymous event requires an `anonymous_id` representing the unknown person and an event `name`. When you identify a person, you can set their `anonymous_id` attribute. If [event merging](https://customer.io/docs/anonymous-events/#turn-on-merging) is turned on in your workspace, and the attribute matches the `anonymous_id` in one or more events that were logged within the last 30 days, we associate those events with the person.

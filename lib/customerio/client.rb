@@ -52,11 +52,11 @@ module Customerio
       @client.request_and_verify_response(:post, unsuppress_path(customer_id))
     end
 
-    def track(customer_id, event_name, attributes = {}, id: nil)
+    def track(customer_id, event_name, attributes = {}, id: nil, timestamp: nil)
       raise ParamError, "customer_id must be a non-empty string" if empty?(customer_id)
       raise ParamError, "event_name must be a non-empty string" if empty?(event_name)
 
-      create_customer_event(customer_id, event_name, attributes, id: id)
+      create_customer_event(customer_id, event_name, attributes, id: id, timestamp: timestamp)
     end
 
     def pageview(customer_id, page, attributes = {})
@@ -66,10 +66,10 @@ module Customerio
       create_pageview_event(customer_id, page, attributes)
     end
 
-    def track_anonymous(anonymous_id, event_name, attributes = {}, id: nil)
+    def track_anonymous(anonymous_id, event_name, attributes = {}, id: nil, timestamp: nil)
       raise ParamError, "event_name must be a non-empty string" if empty?(event_name)
 
-      create_anonymous_event(anonymous_id, event_name, attributes, id: id)
+      create_anonymous_event(anonymous_id, event_name, attributes, id: id, timestamp: timestamp)
     end
 
     def add_device(customer_id, device_id, platform, data = {})
@@ -190,22 +190,24 @@ module Customerio
       @client.request_and_verify_response(:put, url, attributes)
     end
 
-    def create_customer_event(customer_id, event_name, attributes = {}, id: nil)
+    def create_customer_event(customer_id, event_name, attributes = {}, id: nil, timestamp: nil)
       create_event(
         url: "#{customer_path(customer_id)}/events",
         event_name: event_name,
         attributes: attributes,
-        id: id
+        id: id,
+        timestamp: timestamp
       )
     end
 
-    def create_anonymous_event(anonymous_id, event_name, attributes = {}, id: nil)
+    def create_anonymous_event(anonymous_id, event_name, attributes = {}, id: nil, timestamp: nil)
       create_event(
         url: "/api/v1/events",
         event_name: event_name,
         anonymous_id: anonymous_id,
         attributes: attributes,
-        id: id
+        id: id,
+        timestamp: timestamp
       )
     end
 
@@ -218,9 +220,10 @@ module Customerio
       )
     end
 
-    def create_event(url:, event_name:, anonymous_id: nil, event_type: nil, attributes: {}, id: nil)
+    def create_event(url:, event_name:, anonymous_id: nil, event_type: nil, attributes: {}, id: nil, timestamp: nil)
       body = { name: event_name, data: attributes }
-      body[:timestamp] = attributes[:timestamp] if valid_timestamp?(attributes[:timestamp])
+      body[:timestamp] = timestamp if valid_timestamp?(timestamp)
+      body[:timestamp] = attributes[:timestamp] if body[:timestamp].nil? && valid_timestamp?(attributes[:timestamp])
       body[:anonymous_id] = anonymous_id unless empty?(anonymous_id)
       body[:type] = event_type unless empty?(event_type)
       body[:id] = id unless empty?(id)

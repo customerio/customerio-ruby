@@ -489,6 +489,31 @@ describe Customerio::Client do
       client.track(5, "purchase", type: "socks")
     end
 
+    it "sends a timestamp as a top-level field when provided as keyword arg" do
+      stub_request(:post, api_uri('/api/v1/customers/5/events')).
+        with(body: json({
+          name: "purchase",
+          data: { type: "socks" },
+          timestamp: 1561231234
+        })).
+        to_return(status: 200, body: "", headers: {})
+
+      client.track(5, "purchase", { type: "socks" }, timestamp: 1561231234)
+    end
+
+    it "supports both id and timestamp keyword args together" do
+      stub_request(:post, api_uri('/api/v1/customers/5/events')).
+        with(body: json({
+          name: "purchase",
+          data: { type: "socks" },
+          id: "01HB4HBDKTFWYZCK01DMRSWRFD",
+          timestamp: 1561231234
+        })).
+        to_return(status: 200, body: "", headers: {})
+
+      client.track(5, "purchase", { type: "socks" }, id: "01HB4HBDKTFWYZCK01DMRSWRFD", timestamp: 1561231234)
+    end
+
     context "tracking an anonymous event" do
       let(:anon_id) { "anon-id" }
 
