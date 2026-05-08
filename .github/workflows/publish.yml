@@ -1,0 +1,30 @@
+name: Publish to RubyGems
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    name: Build and publish
+    runs-on: ubuntu-latest
+    environment: rubygems
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Build gem
+        run: gem build customerio.gemspec
+
+      - name: Publish to RubyGems
+        uses: rubygems/release-gem@v1
