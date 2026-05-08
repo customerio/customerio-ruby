@@ -27,6 +27,11 @@ module Customerio
 
     VALID_PUSH_EVENTS = [DELIVERY_OPENED, DELIVERY_CONVERTED, DELIVERY_DELIVERED].freeze
 
+    # @deprecated Use DELIVERY_OPENED, DELIVERY_CONVERTED, DELIVERY_DELIVERED instead.
+    PUSH_OPENED = DELIVERY_OPENED
+    PUSH_CONVERTED = DELIVERY_CONVERTED
+    PUSH_DELIVERED = DELIVERY_DELIVERED
+
     class MissingIdAttributeError < StandardError; end
     class ParamError < StandardError; end
 
