@@ -269,6 +269,26 @@ Deleting a device token will remove it from the associated customer to stop furt
 $customerio.delete_device(5, "my_device_token")
 ```
 
+### Tracking delivery metrics
+
+Report delivery metrics using the `track_delivery_metric` method, which calls the `/api/v1/metrics` endpoint. This replaces the deprecated `/push/events` endpoint. The `delivery_id` is required. Valid metrics are: `opened`, `clicked`, `converted`, `delivered`, `bounced`, `deferred`, `dropped`, `spammed`.
+
+```ruby
+$customerio.track_delivery_metric("opened", delivery_id: "RPILAgUBcRillFPDbQQ=")
+
+$customerio.track_delivery_metric("clicked", {
+  delivery_id: "RPILAgUBcRillFPDbQQ=",
+  timestamp: 1561231234,
+  href: "https://example.com/link",
+  recipient: "user@example.com"
+})
+
+$customerio.track_delivery_metric("bounced", {
+  delivery_id: "RPILAgUBcRillFPDbQQ=",
+  reason: "mailbox full"
+})
+```
+
 ### Suppress a user
 
 Deletes the customer with the provided id if it exists and suppresses all future events and identifies for that customer.

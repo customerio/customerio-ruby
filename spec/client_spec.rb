@@ -685,6 +685,170 @@ describe Customerio::Client do
     end
   end
 
+  describe "#track_delivery_metric" do
+    attr_accessor :client, :attributes
+
+    before(:each) do
+      @client = Customerio::Client.new("SITE_ID", "API_KEY", :json => true)
+      @attributes = {
+        :delivery_id => "abc123"
+      }
+    end
+
+    it "sends a POST request to customer.io's /api/v1/metrics endpoint" do
+      stub_request(:post, api_uri("/api/v1/metrics")).
+        with(
+          :body => json({
+            :delivery_id => "abc123",
+            :metric => "opened"
+          }),
+          :headers => {
+            "Content-Type" => "application/json"
+          }).
+        to_return(:status => 200, :body => "", :headers => {})
+
+      client.track_delivery_metric("opened", attributes)
+    end
+
+    it "sends optional attributes when provided" do
+      time = Time.now.to_i
+
+      stub_request(:post, api_uri("/api/v1/metrics")).
+        with(
+          :body => json({
+            :delivery_id => "abc123",
+            :metric => "clicked",
+            :timestamp => time,
+            :recipient => "user@example.com",
+            :href => "https://example.com/page"
+          }),
+          :headers => {
+            "Content-Type" => "application/json"
+          }).
+        to_return(:status => 200, :body => "", :headers => {})
+
+      client.track_delivery_metric("clicked", {
+        :delivery_id => "abc123",
+        :timestamp => time,
+        :recipient => "user@example.com",
+        :href => "https://example.com/page"
+      })
+    end
+
+    it "sends reason attribute for bounced metrics" do
+      stub_request(:post, api_uri("/api/v1/metrics")).
+        with(
+          :body => json({
+            :delivery_id => "abc123",
+            :metric => "bounced",
+            :reason => "mailbox full"
+          }),
+          :headers => {
+            "Content-Type" => "application/json"
+          }).
+        to_return(:status => 200, :body => "", :headers => {})
+
+      client.track_delivery_metric("bounced", {
+        :delivery_id => "abc123",
+        :reason => "mailbox full"
+      })
+    end
+
+    it "ignores attributes not in the allowed list" do
+      stub_request(:post, api_uri("/api/v1/metrics")).
+        with(
+          :body => json({
+            :delivery_id => "abc123",
+            :metric => "opened"
+          }),
+          :headers => {
+            "Content-Type" => "application/json"
+          }).
+        to_return(:status => 200, :body => "", :headers => {})
+
+      client.track_delivery_metric("opened", {
+        :delivery_id => "abc123",
+        :device_id => "should_be_ignored",
+        :extra => "also_ignored"
+      })
+    end
+
+    it "omits timestamp when not a valid integer" do
+      stub_request(:post, api_uri("/api/v1/metrics")).
+        with(
+          :body => json({
+            :delivery_id => "abc123",
+            :metric => "delivered"
+          }),
+          :headers => {
+            "Content-Type" => "application/json"
+          }).
+        to_return(:status => 200, :body => "", :headers => {})
+
+      client.track_delivery_metric("delivered", {
+        :delivery_id => "abc123",
+        :timestamp => "not-a-timestamp"
+      })
+    end
+
+    it "should raise if metric_name is invalid" do
+      expect {
+        client.track_delivery_metric("closed", attributes)
+      }.to raise_error(Customerio::Client::ParamError, /metric_name must be one of/)
+    end
+
+    it "should raise if delivery_id is missing" do
+      expect {
+        client.track_delivery_metric("opened", { :delivery_id => nil })
+      }.to raise_error(Customerio::Client::ParamError, "delivery_id must be a non-empty string")
+
+      expect {
+        client.track_delivery_metric("opened", { :delivery_id => "" })
+      }.to raise_error(Customerio::Client::ParamError, "delivery_id must be a non-empty string")
+    end
+
+    it "should raise if delivery_id is whitespace" do
+      expect {
+        client.track_delivery_metric("opened", { :delivery_id => "   " })
+      }.to raise_error(Customerio::Client::ParamError, "delivery_id must be a non-empty string")
+    end
+
+    %w[opened clicked converted delivered bounced deferred dropped spammed].each do |metric|
+      it "accepts '#{metric}' as a valid metric" do
+        stub_request(:post, api_uri("/api/v1/metrics")).
+          to_return(:status => 200, :body => "", :headers => {})
+
+        client.track_delivery_metric(metric, attributes)
+      end
+    end
+
+    it "works with string keys in the attributes hash" do
+      stub_request(:post, api_uri("/api/v1/metrics")).
+        with(
+          :body => json({
+            :delivery_id => "abc123",
+            :metric => "opened"
+          }),
+          :headers => {
+            "Content-Type" => "application/json"
+          }).
+        to_return(:status => 200, :body => "", :headers => {})
+
+      client.track_delivery_metric("opened", {
+        "delivery_id" => "abc123"
+      })
+    end
+
+    it "raises an error if POST doesn't return a 2xx response code" do
+      stub_request(:post, api_uri("/api/v1/metrics")).
+        to_return(:status => 500, :body => "Server Error", :headers => {})
+
+      expect {
+        client.track_delivery_metric("opened", attributes)
+      }.to raise_error(Customerio::InvalidResponse)
+    end
+  end
+
   describe "#merge_customers" do
     before(:each) do
       @client = Customerio::Client.new("SITE_ID", "API_KEY", :json => true)

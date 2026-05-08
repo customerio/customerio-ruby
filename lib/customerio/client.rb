@@ -10,11 +10,27 @@ module Customerio
   end
 
   class Client
-    PUSH_OPENED = "opened"
-    PUSH_CONVERTED = "converted"
-    PUSH_DELIVERED = "delivered"
+    DELIVERY_OPENED = "opened"
+    DELIVERY_CLICKED = "clicked"
+    DELIVERY_CONVERTED = "converted"
+    DELIVERY_DELIVERED = "delivered"
+    DELIVERY_BOUNCED = "bounced"
+    DELIVERY_DEFERRED = "deferred"
+    DELIVERY_DROPPED = "dropped"
+    DELIVERY_SPAMMED = "spammed"
 
-    VALID_PUSH_EVENTS = [PUSH_OPENED, PUSH_CONVERTED, PUSH_DELIVERED].freeze
+    VALID_DELIVERY_METRICS = [
+      DELIVERY_OPENED, DELIVERY_CLICKED, DELIVERY_CONVERTED,
+      DELIVERY_DELIVERED, DELIVERY_BOUNCED, DELIVERY_DEFERRED,
+      DELIVERY_DROPPED, DELIVERY_SPAMMED
+    ].freeze
+
+    VALID_PUSH_EVENTS = [DELIVERY_OPENED, DELIVERY_CONVERTED, DELIVERY_DELIVERED].freeze
+
+    # @deprecated Use DELIVERY_OPENED, DELIVERY_CONVERTED, DELIVERY_DELIVERED instead.
+    PUSH_OPENED = DELIVERY_OPENED
+    PUSH_CONVERTED = DELIVERY_CONVERTED
+    PUSH_DELIVERED = DELIVERY_DELIVERED
 
     class MissingIdAttributeError < StandardError; end
     class ParamError < StandardError; end
@@ -114,6 +130,25 @@ module Customerio
       )
     end
 
+    def track_delivery_metric(metric_name, attributes = {})
+      keys = %i[delivery_id timestamp recipient reason href]
+      attributes = symbolize_keys(attributes).slice(*keys)
+
+      unless VALID_DELIVERY_METRICS.include?(metric_name)
+        raise ParamError, "metric_name must be one of: #{VALID_DELIVERY_METRICS.join(', ')}"
+      end
+
+      raise ParamError, "delivery_id must be a non-empty string" if empty?(attributes[:delivery_id])
+
+      body = { delivery_id: attributes[:delivery_id], metric: metric_name }
+      body[:timestamp] = attributes[:timestamp] if valid_timestamp?(attributes[:timestamp])
+      body[:recipient] = attributes[:recipient] unless empty?(attributes[:recipient])
+      body[:reason] = attributes[:reason] unless empty?(attributes[:reason])
+      body[:href] = attributes[:href] unless empty?(attributes[:href])
+
+      @client.request_and_verify_response(:post, delivery_metrics_path, body)
+    end
+
     def merge_customers(primary_id_type, primary_id, secondary_id_type, secondary_id)
       raise ParamError, "invalid primary_id_type" unless valid_id_type?(primary_id_type)
       raise ParamError, "primary_id must be a non-empty string" if empty?(primary_id)
@@ -160,6 +195,10 @@ module Customerio
 
     def track_push_notification_event_path
       "/push/events"
+    end
+
+    def delivery_metrics_path
+      "/api/v1/metrics"
     end
 
     def merge_customers_path
