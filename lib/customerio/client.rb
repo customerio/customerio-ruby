@@ -130,7 +130,7 @@ module Customerio
       attributes = symbolize_keys(attributes).slice(*keys)
 
       unless VALID_DELIVERY_METRICS.include?(metric_name)
-        raise ParamError, "metric_name must be one of: #{VALID_DELIVERY_METRICS.join(", ")}"
+        raise ParamError, "metric_name must be one of: #{VALID_DELIVERY_METRICS.join(', ')}"
       end
 
       raise ParamError, "delivery_id must be a non-empty string" if empty?(attributes[:delivery_id])
