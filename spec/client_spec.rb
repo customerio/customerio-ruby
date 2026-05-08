@@ -360,7 +360,7 @@ describe Customerio::Client do
         })).
         to_return(status: 200, body: "", headers: {})
 
-      client.track(5, "purchase", type: "socks", price: "13.99")
+      client.track(5, "purchase", {type: "socks", price: "13.99"})
     end
 
     it "copes with arrays" do
@@ -373,7 +373,7 @@ describe Customerio::Client do
         }).
         to_return(status: 200, body: "", headers: {})
 
-      client.track(5, "event", things: ["a", "b", "c"])
+      client.track(5, "event", {things: ["a", "b", "c"]})
     end
 
     it "copes with hashes" do
@@ -386,7 +386,7 @@ describe Customerio::Client do
         }).
         to_return(status: 200, body: "", headers: {})
 
-      client.track(5, "event", stuff: { a: "b" })
+      client.track(5, "event", {stuff: { a: "b" }})
     end
 
     it "sends a POST request as json using json headers" do
@@ -402,7 +402,22 @@ describe Customerio::Client do
       client.track(5, "purchase", data)
     end
 
-    it "allows sending of a timestamp" do
+    it "allows sending of a timestamp via keyword arg" do
+      stub_request(:post, api_uri('/api/v1/customers/5/events')).
+        with(body: json({
+          name: "purchase",
+          data: {
+            type: "socks",
+            price: "13.99"
+          },
+          timestamp: 1561231234
+        })).
+        to_return(status: 200, body: "", headers: {})
+
+      client.track(5, "purchase", {type: "socks", price: "13.99"}, timestamp: 1561231234)
+    end
+
+    it "allows sending of a timestamp via attributes for backwards compat" do
       stub_request(:post, api_uri('/api/v1/customers/5/events')).
         with(body: json({
           name: "purchase",
@@ -415,7 +430,7 @@ describe Customerio::Client do
         })).
         to_return(status: 200, body: "", headers: {})
 
-      client.track(5, "purchase", type: "socks", price: "13.99", timestamp: 1561231234)
+      client.track(5, "purchase", {type: "socks", price: "13.99", timestamp: 1561231234})
     end
 
     it "doesn't send timestamp if timestamp is in milliseconds" do
@@ -424,13 +439,12 @@ describe Customerio::Client do
           name: "purchase",
           data: {
             type: "socks",
-            price: "13.99",
-            timestamp: 1561231234000
+            price: "13.99"
           }
         })).
         to_return(status: 200, body: "", headers: {})
 
-      client.track(5, "purchase", type: "socks", price: "13.99", timestamp: 1561231234000)
+      client.track(5, "purchase", {type: "socks", price: "13.99"}, timestamp: 1561231234000)
     end
 
     it "doesn't send timestamp if timestamp is a date" do
@@ -441,13 +455,12 @@ describe Customerio::Client do
           name: "purchase",
           data: {
             type: "socks",
-            price: "13.99",
-            timestamp: Time.now.to_s
+            price: "13.99"
           }
         }).
         to_return(status: 200, body: "", headers: {})
 
-      client.track(5, "purchase", type: "socks", price: "13.99", timestamp: date)
+      client.track(5, "purchase", {type: "socks", price: "13.99"}, timestamp: date)
     end
 
     it "doesn't send timestamp if timestamp isn't an integer" do
@@ -456,14 +469,61 @@ describe Customerio::Client do
           name: "purchase",
           data: {
             type: "socks",
-            price: "13.99",
-            timestamp: "Hello world"
+            price: "13.99"
           }
         })).
 
         to_return(status: 200, body: "", headers: {})
 
-      client.track(5, "purchase", type: "socks", price: "13.99", timestamp: "Hello world")
+      client.track(5, "purchase", {type: "socks", price: "13.99"}, timestamp: "Hello world")
+    end
+
+    it "sends an event id for deduplication when provided" do
+      stub_request(:post, api_uri('/api/v1/customers/5/events')).
+        with(body: json({
+          name: "purchase",
+          data: { type: "socks" },
+          id: "01HB4HBDKTFWYZCK01DMRSWRFD"
+        })).
+        to_return(status: 200, body: "", headers: {})
+
+      client.track(5, "purchase", { type: "socks" }, id: "01HB4HBDKTFWYZCK01DMRSWRFD")
+    end
+
+    it "doesn't send id when not provided" do
+      stub_request(:post, api_uri('/api/v1/customers/5/events')).
+        with(body: json({
+          name: "purchase",
+          data: { type: "socks" }
+        })).
+        to_return(status: 200, body: "", headers: {})
+
+      client.track(5, "purchase", { type: "socks" })
+    end
+
+    it "sends a timestamp as a top-level field when provided as keyword arg" do
+      stub_request(:post, api_uri('/api/v1/customers/5/events')).
+        with(body: json({
+          name: "purchase",
+          data: { type: "socks" },
+          timestamp: 1561231234
+        })).
+        to_return(status: 200, body: "", headers: {})
+
+      client.track(5, "purchase", { type: "socks" }, timestamp: 1561231234)
+    end
+
+    it "supports both id and timestamp keyword args together" do
+      stub_request(:post, api_uri('/api/v1/customers/5/events')).
+        with(body: json({
+          name: "purchase",
+          data: { type: "socks" },
+          timestamp: 1561231234,
+          id: "01HB4HBDKTFWYZCK01DMRSWRFD"
+        })).
+        to_return(status: 200, body: "", headers: {})
+
+      client.track(5, "purchase", { type: "socks" }, id: "01HB4HBDKTFWYZCK01DMRSWRFD", timestamp: 1561231234)
     end
 
     context "tracking an anonymous event" do
@@ -489,24 +549,23 @@ describe Customerio::Client do
           }).
           to_return(status: 200, body: "", headers: {})
 
-        client.track_anonymous(anon_id, "purchase", type: "socks", price: "13.99")
+        client.track_anonymous(anon_id, "purchase", { type: "socks", price: "13.99" })
       end
 
-      it "allows sending of a timestamp" do
+      it "allows sending of a timestamp via keyword arg" do
         stub_request(:post, api_uri('/api/v1/events')).
           with(body: {
             anonymous_id: anon_id,
             name: "purchase",
             data: {
               type: "socks",
-              price: "13.99",
-              timestamp: 1561231234
+              price: "13.99"
             },
             timestamp: 1561231234
           }).
           to_return(status: 200, body: "", headers: {})
 
-        client.track_anonymous(anon_id, "purchase", type: "socks", price: "13.99", timestamp: 1561231234)
+        client.track_anonymous(anon_id, "purchase", { type: "socks", price: "13.99" }, timestamp: 1561231234)
       end
 
       it "raises an error if POST doesn't return a 2xx response code" do
@@ -539,6 +598,19 @@ describe Customerio::Client do
             to_return(status: 500, body: "", headers: {})
 
         lambda { client.track_anonymous(anon_id, "") }.should raise_error(Customerio::Client::ParamError)
+      end
+
+      it "sends an event id for deduplication when provided" do
+        stub_request(:post, api_uri('/api/v1/events')).
+          with(body: {
+            anonymous_id: anon_id,
+            name: "purchase",
+            data: {},
+            id: "01HB4HBDKTFWYZCK01DMRSWRFD"
+          }).
+          to_return(status: 200, body: "", headers: {})
+
+        client.track_anonymous(anon_id, "purchase", {}, id: "01HB4HBDKTFWYZCK01DMRSWRFD")
       end
     end
   end
