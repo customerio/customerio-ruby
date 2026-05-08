@@ -1,3 +1,8 @@
+## Customerio 5.7.0 - Unreleased
+### Added
+- Added `track_delivery_metric` to `Client` for reporting delivery metrics via the `/api/v1/metrics` endpoint, replacing the deprecated `/push/events` endpoint. Supports metrics: opened, clicked, converted, delivered, bounced, deferred, dropped, and spammed.
+- Added `DELIVERY_*` constants and `VALID_DELIVERY_METRICS` to `Customerio::Client`.
+
 ## Customerio 5.4.0 - June 13, 2025
 ### Changed
 - Added `send_sms` to `APIClient` and `SendSMSRequest` to support sending transactional push notifications.
