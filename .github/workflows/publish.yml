@@ -1,0 +1,39 @@
+name: Publish to RubyGems
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  publish:
+    name: Build and publish
+    runs-on: ubuntu-latest
+    environment: rubygems
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Verify tag matches gem version
+        run: |
+          tag="${GITHUB_REF#refs/tags/v}"
+          version=$(ruby -r ./lib/customerio/version -e "puts Customerio::VERSION")
+          if [ "$tag" != "$version" ]; then
+            echo "::error::Tag v$tag does not match Customerio::VERSION ($version)"
+            exit 1
+          fi
+
+      - name: Publish to RubyGems
+        uses: rubygems/release-gem@v1
