@@ -23,8 +23,5 @@ jobs:
           ruby-version: "3.4"
           bundler-cache: true
 
-      - name: Build gem
-        run: gem build customerio.gemspec
-
       - name: Publish to RubyGems
         uses: rubygems/release-gem@v1
