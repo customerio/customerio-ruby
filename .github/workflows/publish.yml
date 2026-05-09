@@ -26,5 +26,14 @@ jobs:
           ruby-version: "3.4"
           bundler-cache: true
 
+      - name: Verify tag matches gem version
+        run: |
+          tag="${GITHUB_REF#refs/tags/v}"
+          version=$(ruby -r ./lib/customerio/version -e "puts Customerio::VERSION")
+          if [ "$tag" != "$version" ]; then
+            echo "::error::Tag v$tag does not match Customerio::VERSION ($version)"
+            exit 1
+          fi
+
       - name: Publish to RubyGems
         uses: rubygems/release-gem@v1
