@@ -10,7 +10,7 @@ Gem::Specification.new do |gem|
   gem.homepage = "https://customer.io"
   gem.license = "MIT"
 
-  gem.files = Dir["CHANGELOG.markdown", "LICENSE", "README.md", "lib/**/*.rb"]
+  gem.files = Dir["LICENSE", "README.md", "lib/**/*.rb"]
   gem.executables = gem.files.grep(%r{\Abin/}).map { |file| File.basename(file) }
   gem.name = "customerio"
   gem.require_paths = ["lib"]
@@ -19,7 +19,7 @@ Gem::Specification.new do |gem|
 
   gem.metadata = {
     "bug_tracker_uri" => "https://github.com/customerio/customerio-ruby/issues",
-    "changelog_uri" => "https://github.com/customerio/customerio-ruby/blob/main/CHANGELOG.markdown",
+    "changelog_uri" => "https://github.com/customerio/customerio-ruby/releases",
     "homepage_uri" => "https://customer.io",
     "rubygems_mfa_required" => "true",
     "source_code_uri" => "https://github.com/customerio/customerio-ruby"
