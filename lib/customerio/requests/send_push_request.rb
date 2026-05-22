@@ -18,7 +18,6 @@ module Customerio
       link
       sound
       custom_data
-      device
       custom_device
     ].freeze
 
