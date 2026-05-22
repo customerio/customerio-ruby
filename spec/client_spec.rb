@@ -140,9 +140,9 @@ describe Customerio::Client do
         to_return(status: 500, body: "Server unavailable", headers: {})
 
       expect { client.identify(id: 5) }.to raise_error {|error|
-      expect(  error).to be_a(Customerio::InvalidResponse)
-      expect(  error.code).to eq("500")
-      expect(  error.message).to eq("Server unavailable")
+      expect(error).to be_a(Customerio::InvalidResponse)
+      expect(error.code).to eq("500")
+      expect(error.message).to eq("Server unavailable")
       }
     end
 

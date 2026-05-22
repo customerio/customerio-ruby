@@ -95,8 +95,8 @@ describe Customerio::APIClient do
 
       expect { client.send_email(req) }.to(
         raise_error(Customerio::InvalidResponse) { |error|
-      expect(    error.message).to eq("example error")
-      expect(    error.code).to eq("400")
+      expect(error.message).to eq("example error")
+      expect(error.code).to eq("400")
         }
       )
     end
@@ -115,8 +115,8 @@ describe Customerio::APIClient do
 
       expect { client.send_email(req) }.to(
         raise_error(Customerio::InvalidResponse) { |error|
-      expect(    error.message).to eq("Server unavailable")
-      expect(    error.code).to eq("500")
+      expect(error.message).to eq("Server unavailable")
+      expect(error.code).to eq("500")
         }
       )
     end
@@ -202,8 +202,8 @@ describe Customerio::APIClient do
 
       expect { client.send_push(req) }.to(
         raise_error(Customerio::InvalidResponse) { |error|
-      expect(    error.message).to eq("example error")
-      expect(    error.code).to eq("400")
+      expect(error.message).to eq("example error")
+      expect(error.code).to eq("400")
         }
       )
     end
@@ -222,8 +222,8 @@ describe Customerio::APIClient do
 
       expect { client.send_push(req) }.to(
         raise_error(Customerio::InvalidResponse) { |error|
-      expect(    error.message).to eq("Server unavailable")
-      expect(    error.code).to eq("500")
+      expect(error.message).to eq("Server unavailable")
+      expect(error.code).to eq("500")
         }
       )
     end
@@ -285,8 +285,8 @@ describe Customerio::APIClient do
 
       expect { client.send_sms(req) }.to(
         raise_error(Customerio::InvalidResponse) { |error|
-      expect(    error.message).to eq("example error")
-      expect(    error.code).to eq("400")
+      expect(error.message).to eq("example error")
+      expect(error.code).to eq("400")
         }
       )
     end
@@ -305,8 +305,8 @@ describe Customerio::APIClient do
 
       expect { client.send_sms(req) }.to(
         raise_error(Customerio::InvalidResponse) { |error|
-      expect(    error.message).to eq("Server unavailable")
-      expect(    error.code).to eq("500")
+      expect(error.message).to eq("Server unavailable")
+      expect(error.code).to eq("500")
         }
       )
     end
@@ -344,8 +344,8 @@ describe Customerio::APIClient do
 
       expect { client.send_inbox_message(req) }.to(
         raise_error(Customerio::InvalidResponse) { |error|
-      expect(    error.message).to eq("example error")
-      expect(    error.code).to eq("400")
+      expect(error.message).to eq("example error")
+      expect(error.code).to eq("400")
         }
       )
     end
@@ -364,8 +364,8 @@ describe Customerio::APIClient do
 
       expect { client.send_inbox_message(req) }.to(
         raise_error(Customerio::InvalidResponse) { |error|
-      expect(    error.message).to eq("Server unavailable")
-      expect(    error.code).to eq("500")
+      expect(error.message).to eq("Server unavailable")
+      expect(error.code).to eq("500")
         }
       )
     end
@@ -403,8 +403,8 @@ describe Customerio::APIClient do
 
       expect { client.send_in_app(req) }.to(
         raise_error(Customerio::InvalidResponse) { |error|
-      expect(    error.message).to eq("example error")
-      expect(    error.code).to eq("400")
+      expect(error.message).to eq("example error")
+      expect(error.code).to eq("400")
         }
       )
     end
@@ -423,8 +423,8 @@ describe Customerio::APIClient do
 
       expect { client.send_in_app(req) }.to(
         raise_error(Customerio::InvalidResponse) { |error|
-      expect(    error.message).to eq("Server unavailable")
-      expect(    error.code).to eq("500")
+      expect(error.message).to eq("Server unavailable")
+      expect(error.code).to eq("500")
         }
       )
     end
@@ -529,8 +529,8 @@ describe Customerio::APIClient do
 
       expect { client.trigger_broadcast(req) }.to(
         raise_error(Customerio::InvalidResponse) { |error|
-      expect(    error.message).to eq("example error")
-      expect(    error.code).to eq("400")
+      expect(error.message).to eq("example error")
+      expect(error.code).to eq("400")
         }
       )
     end
@@ -546,8 +546,8 @@ describe Customerio::APIClient do
 
       expect { client.trigger_broadcast(req) }.to(
         raise_error(Customerio::InvalidResponse) { |error|
-      expect(    error.message).to eq("Server unavailable")
-      expect(    error.code).to eq("500")
+      expect(error.message).to eq("Server unavailable")
+      expect(error.code).to eq("500")
         }
       )
     end
