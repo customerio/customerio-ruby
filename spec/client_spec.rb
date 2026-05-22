@@ -434,21 +434,21 @@ describe Customerio::Client do
     end
 
     it "raises an error if timestamp is in milliseconds" do
-      lambda {
+      expect {
         client.track(5, "purchase", {type: "socks", price: "13.99"}, timestamp: 1561231234000)
-      }.should raise_error(Customerio::Client::ParamError, /timestamp must be a valid integer/)
+      }.to raise_error(Customerio::Client::ParamError, /timestamp must be a valid integer/)
     end
 
     it "raises an error if timestamp is a date" do
-      lambda {
+      expect {
         client.track(5, "purchase", {type: "socks", price: "13.99"}, timestamp: Time.now)
-      }.should raise_error(Customerio::Client::ParamError, /timestamp must be a valid integer/)
+      }.to raise_error(Customerio::Client::ParamError, /timestamp must be a valid integer/)
     end
 
     it "raises an error if timestamp isn't an integer" do
-      lambda {
+      expect {
         client.track(5, "purchase", {type: "socks", price: "13.99"}, timestamp: "Hello world")
-      }.should raise_error(Customerio::Client::ParamError, /timestamp must be a valid integer/)
+      }.to raise_error(Customerio::Client::ParamError, /timestamp must be a valid integer/)
     end
 
     it "sends an event id for deduplication when provided" do
@@ -819,12 +819,12 @@ describe Customerio::Client do
     end
 
     it "raises an error when timestamp is not a valid integer" do
-      lambda {
+      expect {
         client.track_delivery_metric("delivered", {
           :delivery_id => "abc123",
           :timestamp => "not-a-timestamp"
         })
-      }.should raise_error(Customerio::Client::ParamError, /timestamp must be a valid integer/)
+      }.to raise_error(Customerio::Client::ParamError, /timestamp must be a valid integer/)
     end
 
     it "should raise if metric_name is invalid" do
