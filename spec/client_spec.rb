@@ -131,7 +131,7 @@ describe Customerio::Client do
         with(body: json(id: 5)).
         to_return(status: 500, body: "", headers: {})
 
-      lambda { client.identify(id: 5) }.should raise_error(Customerio::InvalidResponse)
+      expect { client.identify(id: 5) }.to raise_error(Customerio::InvalidResponse)
     end
 
     it "includes the HTTP response with raised errors" do
@@ -139,10 +139,10 @@ describe Customerio::Client do
         with(body: json(id: 5)).
         to_return(status: 500, body: "Server unavailable", headers: {})
 
-      lambda { client.identify(id: 5) }.should raise_error {|error|
-        error.should be_a Customerio::InvalidResponse
-        error.code.should eq "500"
-        error.message.should eq "Server unavailable"
+      expect { client.identify(id: 5) }.to raise_error {|error|
+      expect(  error).to be_a(Customerio::InvalidResponse)
+      expect(  error.code).to eq("500")
+      expect(  error.message).to eq("Server unavailable")
       }
     end
 
@@ -170,10 +170,10 @@ describe Customerio::Client do
     end
 
     it "requires an id attribute" do
-      lambda { client.identify(email: "customer@example.com") }.should raise_error(Customerio::Client::MissingIdAttributeError)
-      lambda { client.identify(id: "") }.should raise_error(Customerio::Client::MissingIdAttributeError)
-      lambda { client.identify(cio_id: "") }.should raise_error(Customerio::Client::MissingIdAttributeError)
-      lambda { client.identify(customer_id: "") }.should raise_error(Customerio::Client::MissingIdAttributeError)
+      expect { client.identify(email: "customer@example.com") }.to raise_error(Customerio::Client::MissingIdAttributeError)
+      expect { client.identify(id: "") }.to raise_error(Customerio::Client::MissingIdAttributeError)
+      expect { client.identify(cio_id: "") }.to raise_error(Customerio::Client::MissingIdAttributeError)
+      expect { client.identify(customer_id: "") }.to raise_error(Customerio::Client::MissingIdAttributeError)
     end
 
     it 'should not raise errors when attribute keys are strings' do
@@ -183,7 +183,7 @@ describe Customerio::Client do
 
       attributes = { "id" => 5 }
 
-      lambda { client.identify(attributes) }.should_not raise_error()
+      expect { client.identify(attributes) }.not_to raise_error
     end
 
     it 'uses cio_id for customer id, when present, for id updates' do
@@ -271,7 +271,7 @@ describe Customerio::Client do
       stub_request(:put, /track.customer.io/)
         .to_return(status: 200, body: "", headers: {})
 
-      lambda { client.delete(" ") }.should raise_error(Customerio::Client::ParamError, "customer_id must be a non-empty string")
+      expect { client.delete(" ") }.to raise_error(Customerio::Client::ParamError, "customer_id must be a non-empty string")
     end
 
     it "escapes customer IDs" do
@@ -294,7 +294,7 @@ describe Customerio::Client do
       stub_request(:put, /track.customer.io/)
         .to_return(status: 200, body: "", headers: {})
 
-      lambda { client.suppress(" ") }.should raise_error(Customerio::Client::ParamError, "customer_id must be a non-empty string")
+      expect { client.suppress(" ") }.to raise_error(Customerio::Client::ParamError, "customer_id must be a non-empty string")
     end
   end
 
@@ -310,7 +310,7 @@ describe Customerio::Client do
       stub_request(:put, /track.customer.io/)
         .to_return(status: 200, body: "", headers: {})
 
-      lambda { client.suppress(" ") }.should raise_error(Customerio::Client::ParamError, "customer_id must be a non-empty string")
+      expect { client.suppress(" ") }.to raise_error(Customerio::Client::ParamError, "customer_id must be a non-empty string")
     end
   end
 
@@ -330,15 +330,15 @@ describe Customerio::Client do
         with(body: json(name: "purchase", data: {})).
         to_return(status: 500, body: "", headers: {})
 
-      lambda { client.track(5, "purchase") }.should raise_error(Customerio::InvalidResponse)
+      expect { client.track(5, "purchase") }.to raise_error(Customerio::InvalidResponse)
     end
 
     it "throws an error when customer_id or event_name is missing" do
       stub_request(:put, /track.customer.io/)
         .to_return(status: 200, body: "", headers: {})
 
-      lambda { client.track(" ", "test_event") }.should raise_error(Customerio::Client::ParamError, "customer_id must be a non-empty string")
-      lambda { client.track(5, " ") }.should raise_error(Customerio::Client::ParamError, "event_name must be a non-empty string")
+      expect { client.track(" ", "test_event") }.to raise_error(Customerio::Client::ParamError, "customer_id must be a non-empty string")
+      expect { client.track(5, " ") }.to raise_error(Customerio::Client::ParamError, "event_name must be a non-empty string")
     end
 
     it "uses the site_id and api key for basic auth and sends the event name" do
@@ -573,7 +573,7 @@ describe Customerio::Client do
             with(body: { anonymous_id: anon_id, name: "purchase", data: {} }).
             to_return(status: 500, body: "", headers: {})
 
-        lambda { client.track_anonymous(anon_id, "purchase") }.should raise_error(Customerio::InvalidResponse)
+        expect { client.track_anonymous(anon_id, "purchase") }.to raise_error(Customerio::InvalidResponse)
       end
 
       it "doesn't pass along anonymous_id if it is blank" do
@@ -597,7 +597,7 @@ describe Customerio::Client do
             with(body: { anonymous_id: anon_id, name: "purchase", data: {} }).
             to_return(status: 500, body: "", headers: {})
 
-        lambda { client.track_anonymous(anon_id, "") }.should raise_error(Customerio::Client::ParamError)
+        expect { client.track_anonymous(anon_id, "") }.to raise_error(Customerio::Client::ParamError)
       end
 
       it "sends an event id for deduplication when provided" do
@@ -627,22 +627,22 @@ describe Customerio::Client do
       stub_request(:put, api_uri('/api/v1/customers/5/devices')).
         to_return(status: 200, body: "", headers: {})
 
-       lambda { client.add_device("", "ios", "myDeviceID") }.should raise_error(Customerio::Client::ParamError)
-       lambda { client.add_device(nil, "ios", "myDeviceID", {last_used: 1561235678}) }.should raise_error(Customerio::Client::ParamError)
+       expect { client.add_device("", "ios", "myDeviceID") }.to raise_error(Customerio::Client::ParamError)
+       expect { client.add_device(nil, "ios", "myDeviceID", {last_used: 1561235678}) }.to raise_error(Customerio::Client::ParamError)
     end
     it "requires a valid token when creating" do
       stub_request(:put, api_uri('/api/v1/customers/5/devices')).
         to_return(status: 200, body: "", headers: {})
 
-       lambda { client.add_device(5, "", "ios") }.should raise_error(Customerio::Client::ParamError)
-       lambda { client.add_device(5, nil, "ios", {last_used: 1561235678}) }.should raise_error(Customerio::Client::ParamError)
+       expect { client.add_device(5, "", "ios") }.to raise_error(Customerio::Client::ParamError)
+       expect { client.add_device(5, nil, "ios", {last_used: 1561235678}) }.to raise_error(Customerio::Client::ParamError)
     end
     it "requires a valid platform when creating" do
       stub_request(:put, api_uri('/api/v1/customers/5/devices')).
         to_return(status: 200, body: "", headers: {})
 
-       lambda { client.add_device(5, "token", "") }.should raise_error(Customerio::Client::ParamError)
-       lambda { client.add_device(5, "toke", nil, {last_used: 1561235678}) }.should raise_error(Customerio::Client::ParamError)
+       expect { client.add_device(5, "token", "") }.to raise_error(Customerio::Client::ParamError)
+       expect { client.add_device(5, "toke", nil, {last_used: 1561235678}) }.to raise_error(Customerio::Client::ParamError)
     end
     it "accepts a nil data param" do
       stub_request(:put, api_uri('/api/v1/customers/5/devices')).
@@ -654,7 +654,7 @@ describe Customerio::Client do
       stub_request(:put, api_uri('/api/v1/customers/5/devices')).
         to_return(status: 200, body: "", headers: {})
 
-       lambda { client.add_device(5, "ios", "myDeviceID", 1000) }.should raise_error(Customerio::Client::ParamError)
+       expect { client.add_device(5, "ios", "myDeviceID", 1000) }.to raise_error(Customerio::Client::ParamError)
     end
     it "supports deletion of devices by token" do
       stub_request(:delete, api_uri('/api/v1/customers/5/devices/myDeviceID')).
@@ -666,15 +666,15 @@ describe Customerio::Client do
       stub_request(:delete, api_uri('/api/v1/customers/5/devices/myDeviceID')).
         to_return(status: 200, body: "", headers: {})
 
-       lambda { client.delete_device("", "myDeviceID") }.should raise_error(Customerio::Client::ParamError)
-       lambda { client.delete_device(nil, "myDeviceID") }.should raise_error(Customerio::Client::ParamError)
+       expect { client.delete_device("", "myDeviceID") }.to raise_error(Customerio::Client::ParamError)
+       expect { client.delete_device(nil, "myDeviceID") }.to raise_error(Customerio::Client::ParamError)
     end
     it "requires a valid device_id when deleting" do
       stub_request(:delete, api_uri('/api/v1/customers/5/devices/myDeviceID')).
         to_return(status: 200, body: "", headers: {})
 
-       lambda { client.delete_device(5, "") }.should raise_error(Customerio::Client::ParamError)
-       lambda { client.delete_device(5, nil) }.should raise_error(Customerio::Client::ParamError)
+       expect { client.delete_device(5, "") }.to raise_error(Customerio::Client::ParamError)
+       expect { client.delete_device(5, nil) }.to raise_error(Customerio::Client::ParamError)
     end
   end
 
@@ -1000,11 +1000,11 @@ describe Customerio::Client do
     end
 
     it "raises an error when operations is empty" do
-      lambda { client.batch([]) }.should raise_error(Customerio::Client::ParamError)
+      expect { client.batch([]) }.to raise_error(Customerio::Client::ParamError)
     end
 
     it "raises an error when operations is not an array" do
-      lambda { client.batch("not an array") }.should raise_error(Customerio::Client::ParamError)
+      expect { client.batch("not an array") }.to raise_error(Customerio::Client::ParamError)
     end
 
     it "raises an error on non-2xx response" do
@@ -1021,7 +1021,7 @@ describe Customerio::Client do
         with(body: json({ batch: operations })).
         to_return(status: 400, body: "Bad request", headers: {})
 
-      lambda { client.batch(operations) }.should raise_error(Customerio::InvalidResponse)
+      expect { client.batch(operations) }.to raise_error(Customerio::InvalidResponse)
     end
   end
 end

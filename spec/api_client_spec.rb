@@ -76,7 +76,7 @@ describe Customerio::APIClient do
         .with(headers: request_headers, body: req.message)
         .to_return(status: 200, body: { delivery_id: 1 }.to_json, headers: {})
 
-      client.send_email(req).should eq({ "delivery_id" => 1 })
+      expect(client.send_email(req)).to eq({ "delivery_id" => 1 })
     end
 
     it "handles validation failures (400)" do
@@ -93,10 +93,10 @@ describe Customerio::APIClient do
         .with(headers: request_headers, body: req.message)
         .to_return(status: 400, body: err_json, headers: {})
 
-      lambda { client.send_email(req) }.should(
+      expect { client.send_email(req) }.to(
         raise_error(Customerio::InvalidResponse) { |error|
-          error.message.should eq "example error"
-          error.code.should eq "400"
+      expect(    error.message).to eq("example error")
+      expect(    error.code).to eq("400")
         }
       )
     end
@@ -113,10 +113,10 @@ describe Customerio::APIClient do
         .with(headers: request_headers, body: req.message)
         .to_return(status: 500, body: "Server unavailable", headers: {})
 
-      lambda { client.send_email(req) }.should(
+      expect { client.send_email(req) }.to(
         raise_error(Customerio::InvalidResponse) { |error|
-          error.message.should eq "Server unavailable"
-          error.code.should eq "500"
+      expect(    error.message).to eq("Server unavailable")
+      expect(    error.code).to eq("500")
         }
       )
     end
@@ -130,7 +130,7 @@ describe Customerio::APIClient do
       )
 
       req.attach('test', content, encode: false)
-      req.message[:attachments]['test'].should eq content
+      expect(req.message[:attachments]['test']).to eq(content)
 
       stub_request(:post, api_uri('/v1/send/email'))
         .with(headers: request_headers, body: req.message)
@@ -148,7 +148,7 @@ describe Customerio::APIClient do
       )
 
       req.attach('test', content)
-      req.message[:attachments]['test'].should eq Base64.strict_encode64(content)
+      expect(req.message[:attachments]['test']).to eq(Base64.strict_encode64(content))
 
       stub_request(:post, api_uri('/v1/send/email'))
         .with(headers: request_headers, body: req.message)
@@ -165,8 +165,8 @@ describe Customerio::APIClient do
 
       req.attach('test', 'test-content')
 
-      lambda { req.attach('test', '') }.should raise_error(/attachment test already exists/)
-      req.message[:attachments].should eq({ "test" => Base64.strict_encode64("test-content") })
+      expect { req.attach('test', '') }.to raise_error(/attachment test already exists/)
+      expect(req.message[:attachments]).to eq({ "test" => Base64.strict_encode64("test-content") })
     end
   end
 
@@ -183,7 +183,7 @@ describe Customerio::APIClient do
         .with(headers: request_headers, body: req.message)
         .to_return(status: 200, body: { delivery_id: 1 }.to_json, headers: {})
 
-      client.send_push(req).should eq({ "delivery_id" => 1 })
+      expect(client.send_push(req)).to eq({ "delivery_id" => 1 })
     end
 
     it "handles validation failures (400)" do
@@ -200,10 +200,10 @@ describe Customerio::APIClient do
         .with(headers: request_headers, body: req.message)
         .to_return(status: 400, body: err_json, headers: {})
 
-      lambda { client.send_push(req) }.should(
+      expect { client.send_push(req) }.to(
         raise_error(Customerio::InvalidResponse) { |error|
-          error.message.should eq "example error"
-          error.code.should eq "400"
+      expect(    error.message).to eq("example error")
+      expect(    error.code).to eq("400")
         }
       )
     end
@@ -220,10 +220,10 @@ describe Customerio::APIClient do
         .with(headers: request_headers, body: req.message)
         .to_return(status: 500, body: "Server unavailable", headers: {})
 
-      lambda { client.send_push(req) }.should(
+      expect { client.send_push(req) }.to(
         raise_error(Customerio::InvalidResponse) { |error|
-          error.message.should eq "Server unavailable"
-          error.code.should eq "500"
+      expect(    error.message).to eq("Server unavailable")
+      expect(    error.code).to eq("500")
         }
       )
     end
@@ -240,7 +240,7 @@ describe Customerio::APIClient do
         }
       )
 
-      req.message[:custom_device].should eq({
+      expect(req.message[:custom_device]).to eq({
         platform: 'ios',
         token: 'sample-token',
       })
@@ -249,7 +249,7 @@ describe Customerio::APIClient do
         .with(headers: request_headers, body: req.message)
         .to_return(status: 200, body: { delivery_id: 2 }.to_json, headers: {})
 
-      client.send_push(req).should eq({ "delivery_id" => 2 })
+      expect(client.send_push(req)).to eq({ "delivery_id" => 2 })
     end
   end
 
@@ -266,7 +266,7 @@ describe Customerio::APIClient do
         .with(headers: request_headers, body: req.message)
         .to_return(status: 200, body: { delivery_id: 1 }.to_json, headers: {})
 
-      client.send_sms(req).should eq({ "delivery_id" => 1 })
+      expect(client.send_sms(req)).to eq({ "delivery_id" => 1 })
     end
 
     it "handles validation failures (400)" do
@@ -283,10 +283,10 @@ describe Customerio::APIClient do
         .with(headers: request_headers, body: req.message)
         .to_return(status: 400, body: err_json, headers: {})
 
-      lambda { client.send_sms(req) }.should(
+      expect { client.send_sms(req) }.to(
         raise_error(Customerio::InvalidResponse) { |error|
-          error.message.should eq "example error"
-          error.code.should eq "400"
+      expect(    error.message).to eq("example error")
+      expect(    error.code).to eq("400")
         }
       )
     end
@@ -303,10 +303,10 @@ describe Customerio::APIClient do
         .with(headers: request_headers, body: req.message)
         .to_return(status: 500, body: "Server unavailable", headers: {})
 
-      lambda { client.send_sms(req) }.should(
+      expect { client.send_sms(req) }.to(
         raise_error(Customerio::InvalidResponse) { |error|
-          error.message.should eq "Server unavailable"
-          error.code.should eq "500"
+      expect(    error.message).to eq("Server unavailable")
+      expect(    error.code).to eq("500")
         }
       )
     end
@@ -325,7 +325,7 @@ describe Customerio::APIClient do
         .with(headers: request_headers, body: req.message)
         .to_return(status: 200, body: { delivery_id: 1 }.to_json, headers: {})
 
-      client.send_inbox_message(req).should eq({ "delivery_id" => 1 })
+      expect(client.send_inbox_message(req)).to eq({ "delivery_id" => 1 })
     end
 
     it "handles validation failures (400)" do
@@ -342,10 +342,10 @@ describe Customerio::APIClient do
         .with(headers: request_headers, body: req.message)
         .to_return(status: 400, body: err_json, headers: {})
 
-      lambda { client.send_inbox_message(req) }.should(
+      expect { client.send_inbox_message(req) }.to(
         raise_error(Customerio::InvalidResponse) { |error|
-          error.message.should eq "example error"
-          error.code.should eq "400"
+      expect(    error.message).to eq("example error")
+      expect(    error.code).to eq("400")
         }
       )
     end
@@ -362,10 +362,10 @@ describe Customerio::APIClient do
         .with(headers: request_headers, body: req.message)
         .to_return(status: 500, body: "Server unavailable", headers: {})
 
-      lambda { client.send_inbox_message(req) }.should(
+      expect { client.send_inbox_message(req) }.to(
         raise_error(Customerio::InvalidResponse) { |error|
-          error.message.should eq "Server unavailable"
-          error.code.should eq "500"
+      expect(    error.message).to eq("Server unavailable")
+      expect(    error.code).to eq("500")
         }
       )
     end
@@ -384,7 +384,7 @@ describe Customerio::APIClient do
         .with(headers: request_headers, body: req.message)
         .to_return(status: 200, body: { delivery_id: 1 }.to_json, headers: {})
 
-      client.send_in_app(req).should eq({ "delivery_id" => 1 })
+      expect(client.send_in_app(req)).to eq({ "delivery_id" => 1 })
     end
 
     it "handles validation failures (400)" do
@@ -401,10 +401,10 @@ describe Customerio::APIClient do
         .with(headers: request_headers, body: req.message)
         .to_return(status: 400, body: err_json, headers: {})
 
-      lambda { client.send_in_app(req) }.should(
+      expect { client.send_in_app(req) }.to(
         raise_error(Customerio::InvalidResponse) { |error|
-          error.message.should eq "example error"
-          error.code.should eq "400"
+      expect(    error.message).to eq("example error")
+      expect(    error.code).to eq("400")
         }
       )
     end
@@ -421,10 +421,10 @@ describe Customerio::APIClient do
         .with(headers: request_headers, body: req.message)
         .to_return(status: 500, body: "Server unavailable", headers: {})
 
-      lambda { client.send_in_app(req) }.should(
+      expect { client.send_in_app(req) }.to(
         raise_error(Customerio::InvalidResponse) { |error|
-          error.message.should eq "Server unavailable"
-          error.code.should eq "500"
+      expect(    error.message).to eq("Server unavailable")
+      expect(    error.code).to eq("500")
         }
       )
     end
@@ -442,7 +442,7 @@ describe Customerio::APIClient do
         .with(headers: request_headers, body: req.message)
         .to_return(status: 200, body: { trigger_id: "abc123" }.to_json, headers: {})
 
-      client.trigger_broadcast(req).should eq({ "trigger_id" => "abc123" })
+      expect(client.trigger_broadcast(req)).to eq({ "trigger_id" => "abc123" })
     end
 
     it "sends with email list audience" do
@@ -457,7 +457,7 @@ describe Customerio::APIClient do
         .with(headers: request_headers, body: req.message)
         .to_return(status: 200, body: { trigger_id: "abc123" }.to_json, headers: {})
 
-      client.trigger_broadcast(req).should eq({ "trigger_id" => "abc123" })
+      expect(client.trigger_broadcast(req)).to eq({ "trigger_id" => "abc123" })
     end
 
     it "sends with id list audience" do
@@ -471,7 +471,7 @@ describe Customerio::APIClient do
         .with(headers: request_headers, body: req.message)
         .to_return(status: 200, body: { trigger_id: "abc123" }.to_json, headers: {})
 
-      client.trigger_broadcast(req).should eq({ "trigger_id" => "abc123" })
+      expect(client.trigger_broadcast(req)).to eq({ "trigger_id" => "abc123" })
     end
 
     it "sends with data_file_url audience" do
@@ -484,35 +484,35 @@ describe Customerio::APIClient do
         .with(headers: request_headers, body: req.message)
         .to_return(status: 200, body: { trigger_id: "abc123" }.to_json, headers: {})
 
-      client.trigger_broadcast(req).should eq({ "trigger_id" => "abc123" })
+      expect(client.trigger_broadcast(req)).to eq({ "trigger_id" => "abc123" })
     end
 
     it "raises an error when broadcast_id is missing" do
-      lambda {
+      expect {
         Customerio::TriggerBroadcastRequest.new(data: { headline: "Test" })
-      }.should raise_error(ArgumentError, "broadcast_id is required")
+      }.to raise_error(ArgumentError, "broadcast_id is required")
     end
 
     it "raises an error when broadcast_id is not an integer" do
-      lambda {
+      expect {
         Customerio::TriggerBroadcastRequest.new(broadcast_id: "12")
-      }.should raise_error(ArgumentError, "broadcast_id must be an integer")
+      }.to raise_error(ArgumentError, "broadcast_id must be an integer")
     end
 
     it "raises an error when multiple audience fields are provided" do
-      lambda {
+      expect {
         Customerio::TriggerBroadcastRequest.new(
           broadcast_id: 12,
           emails: ["a@example.com"],
           ids: [1, 2],
         )
-      }.should raise_error(ArgumentError, /only one of/)
+      }.to raise_error(ArgumentError, /only one of/)
     end
 
     it "raises an error when request is not a TriggerBroadcastRequest" do
-      lambda {
+      expect {
         client.trigger_broadcast("not a request")
-      }.should raise_error(ArgumentError, /must be an instance of/)
+      }.to raise_error(ArgumentError, /must be an instance of/)
     end
 
     it "handles validation failures (400)" do
@@ -527,10 +527,10 @@ describe Customerio::APIClient do
         .with(headers: request_headers, body: req.message)
         .to_return(status: 400, body: err_json, headers: {})
 
-      lambda { client.trigger_broadcast(req) }.should(
+      expect { client.trigger_broadcast(req) }.to(
         raise_error(Customerio::InvalidResponse) { |error|
-          error.message.should eq "example error"
-          error.code.should eq "400"
+      expect(    error.message).to eq("example error")
+      expect(    error.code).to eq("400")
         }
       )
     end
@@ -544,10 +544,10 @@ describe Customerio::APIClient do
         .with(headers: request_headers, body: req.message)
         .to_return(status: 500, body: "Server unavailable", headers: {})
 
-      lambda { client.trigger_broadcast(req) }.should(
+      expect { client.trigger_broadcast(req) }.to(
         raise_error(Customerio::InvalidResponse) { |error|
-          error.message.should eq "Server unavailable"
-          error.code.should eq "500"
+      expect(    error.message).to eq("Server unavailable")
+      expect(    error.code).to eq("500")
         }
       )
     end
