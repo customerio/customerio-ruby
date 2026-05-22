@@ -433,49 +433,22 @@ describe Customerio::Client do
       client.track(5, "purchase", {type: "socks", price: "13.99", timestamp: 1561231234})
     end
 
-    it "doesn't send timestamp if timestamp is in milliseconds" do
-      stub_request(:post, api_uri('/api/v1/customers/5/events')).
-        with(body: json({
-          name: "purchase",
-          data: {
-            type: "socks",
-            price: "13.99"
-          }
-        })).
-        to_return(status: 200, body: "", headers: {})
-
-      client.track(5, "purchase", {type: "socks", price: "13.99"}, timestamp: 1561231234000)
+    it "raises an error if timestamp is in milliseconds" do
+      lambda {
+        client.track(5, "purchase", {type: "socks", price: "13.99"}, timestamp: 1561231234000)
+      }.should raise_error(Customerio::Client::ParamError, /timestamp must be a valid integer/)
     end
 
-    it "doesn't send timestamp if timestamp is a date" do
-      date = Time.now
-
-      stub_request(:post, api_uri('/api/v1/customers/5/events')).
-        with(body: {
-          name: "purchase",
-          data: {
-            type: "socks",
-            price: "13.99"
-          }
-        }).
-        to_return(status: 200, body: "", headers: {})
-
-      client.track(5, "purchase", {type: "socks", price: "13.99"}, timestamp: date)
+    it "raises an error if timestamp is a date" do
+      lambda {
+        client.track(5, "purchase", {type: "socks", price: "13.99"}, timestamp: Time.now)
+      }.should raise_error(Customerio::Client::ParamError, /timestamp must be a valid integer/)
     end
 
-    it "doesn't send timestamp if timestamp isn't an integer" do
-      stub_request(:post, api_uri('/api/v1/customers/5/events')).
-        with(body: json({
-          name: "purchase",
-          data: {
-            type: "socks",
-            price: "13.99"
-          }
-        })).
-
-        to_return(status: 200, body: "", headers: {})
-
-      client.track(5, "purchase", {type: "socks", price: "13.99"}, timestamp: "Hello world")
+    it "raises an error if timestamp isn't an integer" do
+      lambda {
+        client.track(5, "purchase", {type: "socks", price: "13.99"}, timestamp: "Hello world")
+      }.should raise_error(Customerio::Client::ParamError, /timestamp must be a valid integer/)
     end
 
     it "sends an event id for deduplication when provided" do
@@ -845,22 +818,13 @@ describe Customerio::Client do
       })
     end
 
-    it "omits timestamp when not a valid integer" do
-      stub_request(:post, api_uri("/api/v1/metrics")).
-        with(
-          :body => json({
-            :delivery_id => "abc123",
-            :metric => "delivered"
-          }),
-          :headers => {
-            "Content-Type" => "application/json"
-          }).
-        to_return(:status => 200, :body => "", :headers => {})
-
-      client.track_delivery_metric("delivered", {
-        :delivery_id => "abc123",
-        :timestamp => "not-a-timestamp"
-      })
+    it "raises an error when timestamp is not a valid integer" do
+      lambda {
+        client.track_delivery_metric("delivered", {
+          :delivery_id => "abc123",
+          :timestamp => "not-a-timestamp"
+        })
+      }.should raise_error(Customerio::Client::ParamError, /timestamp must be a valid integer/)
     end
 
     it "should raise if metric_name is invalid" do
