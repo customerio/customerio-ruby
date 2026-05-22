@@ -17,8 +17,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-        with:
-          persist-credentials: false
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -26,14 +24,22 @@ jobs:
           ruby-version: "3.4"
           bundler-cache: true
 
-      - name: Verify tag matches gem version
+      - name: Set gem version from tag
         run: |
           tag="${GITHUB_REF#refs/tags/v}"
-          version=$(ruby -r ./lib/customerio/version -e "puts Customerio::VERSION")
-          if [ "$tag" != "$version" ]; then
-            echo "::error::Tag v$tag does not match Customerio::VERSION ($version)"
-            exit 1
-          fi
+          sed -i "s/VERSION = \".*\"/VERSION = \"$tag\"/" lib/customerio/version.rb
+          echo "Version set to $tag"
 
       - name: Publish to RubyGems
         uses: rubygems/release-gem@v1
+
+      - name: Update version on main
+        run: |
+          tag="${GITHUB_REF#refs/tags/v}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout main
+          sed -i "s/VERSION = \".*\"/VERSION = \"$tag\"/" lib/customerio/version.rb
+          git add lib/customerio/version.rb
+          git commit -m "Bump version to $tag [skip ci]"
+          git push origin main
