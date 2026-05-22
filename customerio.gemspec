@@ -5,8 +5,8 @@ require_relative "lib/customerio/version"
 Gem::Specification.new do |gem|
   gem.authors = ["John Allison"]
   gem.email = ["john@customer.io"]
-  gem.description = "A ruby client for the Customer.io event API."
-  gem.summary = "A ruby client for the Customer.io event API."
+  gem.description = "A ruby client for the Customer.io Journeys Track API and Transactional API."
+  gem.summary = "A ruby client for the Customer.io Journeys Track API and Transactional API."
   gem.homepage = "https://customer.io"
   gem.license = "MIT"
 

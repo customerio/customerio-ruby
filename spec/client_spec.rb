@@ -115,7 +115,7 @@ describe Customerio::Client do
     end
 
     it "sends a PUT request to customer.io's customer API using json headers" do
-      client = Customerio::Client.new("SITE_ID", "API_KEY", json: true)
+      client = Customerio::Client.new("SITE_ID", "API_KEY")
       body = { id: 5, name: "Bob" }
 
       stub_request(:put, api_uri('/api/v1/customers/5')).
@@ -390,7 +390,7 @@ describe Customerio::Client do
     end
 
     it "sends a POST request as json using json headers" do
-      client = Customerio::Client.new("SITE_ID", "API_KEY", json: true)
+      client = Customerio::Client.new("SITE_ID", "API_KEY")
       data = { type: "socks", price: "13.99" }
       body = { name: "purchase", data: data }
 
@@ -682,7 +682,7 @@ describe Customerio::Client do
     attr_accessor :client, :attributes
 
     before(:each) do
-      @client = Customerio::Client.new("SITE_ID", "API_KEY", :json => true)
+      @client = Customerio::Client.new("SITE_ID", "API_KEY")
       @attributes = {
         :delivery_id => 'foo',
         :device_id => 'bar',
@@ -761,7 +761,7 @@ describe Customerio::Client do
     attr_accessor :client, :attributes
 
     before(:each) do
-      @client = Customerio::Client.new("SITE_ID", "API_KEY", :json => true)
+      @client = Customerio::Client.new("SITE_ID", "API_KEY")
       @attributes = {
         :delivery_id => "abc123"
       }
@@ -923,7 +923,7 @@ describe Customerio::Client do
 
   describe "#merge_customers" do
     before(:each) do
-      @client = Customerio::Client.new("SITE_ID", "API_KEY", :json => true)
+      @client = Customerio::Client.new("SITE_ID", "API_KEY")
     end
 
     it "should raise validation errors on merge params" do
