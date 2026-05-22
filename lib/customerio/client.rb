@@ -141,6 +141,7 @@ module Customerio
       raise ParamError, "delivery_id must be a non-empty string" if empty?(attributes[:delivery_id])
 
       body = { delivery_id: attributes[:delivery_id], metric: metric_name }
+      validate_timestamp!(attributes[:timestamp])
       body[:timestamp] = attributes[:timestamp] if valid_timestamp?(attributes[:timestamp])
       body[:recipient] = attributes[:recipient] unless empty?(attributes[:recipient])
       body[:reason] = attributes[:reason] unless empty?(attributes[:reason])
@@ -271,8 +272,11 @@ module Customerio
 
     def create_event(url:, event_name:, anonymous_id: nil, event_type: nil, attributes: {}, id: nil, timestamp: nil) # rubocop:disable Metrics/ParameterLists
       body = { name: event_name, data: attributes }
-      body[:timestamp] = timestamp if valid_timestamp?(timestamp)
-      body[:timestamp] = attributes[:timestamp] if body[:timestamp].nil? && valid_timestamp?(attributes[:timestamp])
+      effective_timestamp = timestamp || attributes[:timestamp]
+      if effective_timestamp
+        validate_timestamp!(effective_timestamp)
+        body[:timestamp] = effective_timestamp
+      end
       body[:anonymous_id] = anonymous_id unless empty?(anonymous_id)
       body[:type] = event_type unless empty?(event_type)
       body[:id] = id unless empty?(id)
@@ -282,6 +286,13 @@ module Customerio
 
     def valid_timestamp?(timestamp)
       timestamp.is_a?(Integer) && timestamp > 999_999_999 && timestamp < 100_000_000_000
+    end
+
+    def validate_timestamp!(timestamp)
+      return if timestamp.nil?
+      return if valid_timestamp?(timestamp)
+
+      raise ParamError, "timestamp must be a valid integer (seconds since epoch, 10-digit range)"
     end
 
     def empty?(val)
