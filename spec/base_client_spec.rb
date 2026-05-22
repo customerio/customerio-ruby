@@ -73,7 +73,7 @@ describe Customerio::BaseClient do
         with(headers: api_client_request_headers).
         to_return(status: 400, body: "", headers: {})
 
-      lambda { api_client.request_and_verify_response(:put, '/some/path', "") }.should(
+      expect { api_client.request_and_verify_response(:put, '/some/path', "") }.to(
         raise_error(Customerio::InvalidResponse)
       )
     end
@@ -83,7 +83,7 @@ describe Customerio::BaseClient do
         with(headers: api_client_request_headers).
         to_return(status: 200, body: "Test", headers: {})
 
-      api_client.request_and_verify_response(:put, '/some/path', "").body.should eq("Test")
+      expect(api_client.request_and_verify_response(:put, '/some/path', "").body).to eq("Test")
     end
   end
 end
