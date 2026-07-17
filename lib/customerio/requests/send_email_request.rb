@@ -13,6 +13,7 @@ module Customerio
       preheader
       from
       reply_to
+      cc
       bcc
       subject
       body
