@@ -9,6 +9,7 @@ module Customerio
   require "customerio/requests/send_email_request"
   require "customerio/requests/send_push_request"
   require "customerio/requests/send_sms_request"
+  require "customerio/requests/send_whatsapp_request"
   require "customerio/requests/send_inbox_message_request"
   require "customerio/requests/send_in_app_request"
   require "customerio/requests/trigger_broadcast_request"

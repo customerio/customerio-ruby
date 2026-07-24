@@ -34,6 +34,12 @@ module Customerio
       deliver(send_sms_path, req.message)
     end
 
+    def send_whatsapp(req)
+      validate_request!(req, SendWhatsAppRequest)
+
+      deliver(send_whatsapp_path, req.message)
+    end
+
     def send_inbox_message(req)
       validate_request!(req, SendInboxMessageRequest)
 
@@ -84,6 +90,10 @@ module Customerio
 
     def send_sms_path
       "/v1/send/sms"
+    end
+
+    def send_whatsapp_path
+      "/v1/send/whatsapp"
     end
 
     def send_inbox_message_path

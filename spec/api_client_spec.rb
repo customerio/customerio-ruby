@@ -312,6 +312,68 @@ describe Customerio::APIClient do
     end
   end
 
+  describe "#send_whatsapp" do
+    it "sends a POST request to the /api/send/whatsapp path" do
+      req = Customerio::SendWhatsAppRequest.new(
+        identifiers: {
+          id: 'c1',
+        },
+        transactional_message_id: 1,
+        to: '+15551234567',
+        from: '+15559876543',
+        tracked: true,
+      )
+
+      stub_request(:post, api_uri('/v1/send/whatsapp'))
+        .with(headers: request_headers, body: req.message)
+        .to_return(status: 200, body: { delivery_id: 1 }.to_json, headers: {})
+
+      expect(client.send_whatsapp(req)).to eq({ "delivery_id" => 1 })
+    end
+
+    it "handles validation failures (400)" do
+      req = Customerio::SendWhatsAppRequest.new(
+        identifiers: {
+          id: 'c1',
+        },
+        transactional_message_id: 1,
+      )
+
+      err_json = { meta: { error: "example error" } }.to_json
+
+      stub_request(:post, api_uri('/v1/send/whatsapp'))
+        .with(headers: request_headers, body: req.message)
+        .to_return(status: 400, body: err_json, headers: {})
+
+      expect { client.send_whatsapp(req) }.to(
+        raise_error(Customerio::InvalidResponse) { |error|
+      expect(error.message).to eq("example error")
+      expect(error.code).to eq("400")
+        }
+      )
+    end
+
+    it "handles other failures (5xx)" do
+      req = Customerio::SendWhatsAppRequest.new(
+        identifiers: {
+          id: 'c1',
+        },
+        transactional_message_id: 1,
+      )
+
+      stub_request(:post, api_uri('/v1/send/whatsapp'))
+        .with(headers: request_headers, body: req.message)
+        .to_return(status: 500, body: "Server unavailable", headers: {})
+
+      expect { client.send_whatsapp(req) }.to(
+        raise_error(Customerio::InvalidResponse) { |error|
+      expect(error.message).to eq("Server unavailable")
+      expect(error.code).to eq("500")
+        }
+      )
+    end
+  end
+
   describe "#send_inbox_message" do
     it "sends a POST request to the /api/send/inbox_message path" do
       req = Customerio::SendInboxMessageRequest.new(
