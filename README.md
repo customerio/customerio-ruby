@@ -446,7 +446,7 @@ Create a new `SendWhatsAppRequest` object containing:
 * `transactional_message_id`: the ID or trigger name of the transactional message you want to send.
 * an `identifiers` object containing the `id` or `email` of your recipient. If the profile does not exist, Customer.io creates it.
 
-`to` and `from` are WhatsApp numbers in E.164 format. `from` is optional when the referenced `transactional_message_id` already defines it.
+`to` is the WhatsApp number in E.164 format.
 
 Use `send_whatsapp` referencing your request to send a transactional message. [Learn more about transactional messages and `SendWhatsAppRequest` properties](https://customer.io/docs/transactional-api).
 
@@ -459,7 +459,6 @@ client = Customerio::APIClient.new("your API key", region: Customerio::Regions::
 request = Customerio::SendWhatsAppRequest.new(
   transactional_message_id: "3",
   to: "+15551234567",
-  from: "+15559876543",
   message_data: {
     name: "Person",
   },
