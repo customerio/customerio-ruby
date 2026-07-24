@@ -8,7 +8,6 @@ module Customerio
 
     OPTIONAL_FIELDS = %i[
       message_data
-      from
       to
       disable_message_retention
       send_to_unsubscribed
