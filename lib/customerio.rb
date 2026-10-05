@@ -14,4 +14,5 @@ module Customerio
   require "customerio/requests/send_in_app_request"
   require "customerio/requests/trigger_broadcast_request"
   require "customerio/api"
+  require "customerio/unified_client"
 end
