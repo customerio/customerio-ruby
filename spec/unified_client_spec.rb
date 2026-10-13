@@ -41,6 +41,18 @@ describe Customerio::UnifiedClient do
       expect(Customerio::UnifiedClient.new(legacy_key).region).to eq(Customerio::Regions::US)
       expect(Customerio::UnifiedClient.new(legacy_key, region: Customerio::Regions::EU).region).to eq(Customerio::Regions::EU)
     end
+
+    it "ignores whitespace around the key" do
+      client = Customerio::UnifiedClient.new("  #{eu_key}\n")
+      expect(client.region).to eq(Customerio::Regions::EU)
+
+      stub = stub_request(:put, "https://track-eu.customer.io/api/v1/customers/user_123")
+        .with(headers: bearer(eu_key))
+        .to_return(status: 200, body: "", headers: {})
+
+      client.identify(id: "user_123", email: "a@example.com")
+      expect(stub).to have_been_requested
+    end
   end
 
   describe "tracking" do

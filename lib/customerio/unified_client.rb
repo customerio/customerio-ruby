@@ -41,7 +41,8 @@ module Customerio
     attr_reader :track_client, :region
 
     def initialize(api_key, options = {})
-      raise ArgumentError, "api_key is required" if api_key.nil? || api_key.to_s.strip.empty?
+      api_key = api_key.to_s.strip
+      raise ArgumentError, "api_key is required" if api_key.empty?
 
       match = KEY_PREFIX.match(api_key)
       @key_kind = match ? match[1].to_sym : :legacy
