@@ -50,7 +50,7 @@ You'll be able to integrate **fully** with [Customer.io](https://customer.io) wi
 
 ### Quick start
 
-Create a client with your secret key (`ak_…`). It sends tracking calls to the Track API and transactional messages to the App API, and picks the US or EU region from the key.
+Create a client with your secret key (`sk_…`). It sends tracking calls to the Track API and transactional messages to the App API, and picks the US or EU region from the key.
 
 ```ruby
 cio = Customerio::UnifiedClient.new(ENV["CIO_API_KEY"])
@@ -68,7 +68,7 @@ Pass `region:` to override the region in the key. Legacy App API keys also work 
 
 `identify`, `track`, `track_anonymous`, `pageview`, the `send_*` methods and `trigger_broadcast` are on the client directly. The rest of the Track and App API are on `cio.track_client` and `cio.api_client`.
 
-If the key can't do what you asked, the call raises `Customerio::KeyCapabilityError`. A public key (`wk_…`) raises it before any request when you send a transactional message. A 401 or 403 from the server is re-raised as a `KeyCapabilityError` too, with the original error as `cause`.
+If the key can't do what you asked, the call raises `Customerio::KeyCapabilityError`. A public key (`pk_…`) raises it before any request when you send a transactional message. A 401 or 403 from the server is re-raised as a `KeyCapabilityError` too, with the original error as `cause`.
 
 ```ruby
 begin

@@ -2,9 +2,9 @@ require 'spec_helper'
 require 'json'
 
 describe Customerio::UnifiedClient do
-  let(:us_key) { "ak_us_0123456789ABCDEFGHIJKLMNOPQRSTUV_000000" }
-  let(:eu_key) { "ak_eu_0123456789ABCDEFGHIJKLMNOPQRSTUV_000000" }
-  let(:public_key) { "wk_us_0123456789ABCDEFGHIJKLMNOPQRSTUV_000000" }
+  let(:us_key) { "sk_us_0123456789ABCDEFGHIJKLMNOPQRSTUV_000000" }
+  let(:eu_key) { "sk_eu_0123456789ABCDEFGHIJKLMNOPQRSTUV_000000" }
+  let(:public_key) { "pk_us_0123456789ABCDEFGHIJKLMNOPQRSTUV_000000" }
   let(:legacy_key) { "abc123" }
 
   let(:email_request) do
@@ -122,7 +122,7 @@ describe Customerio::UnifiedClient do
       end
     end
 
-    it "uses EU hosts for an ak_eu_ key" do
+    it "uses EU hosts for an sk_eu_ key" do
       track = stub_request(:put, "https://track-eu.customer.io/api/v1/customers/user_123").to_return(status: 200, body: "")
       api = stub_request(:post, "https://api-eu.customer.io/v1/send/email").to_return(status: 200, body: "{}")
 
@@ -159,7 +159,8 @@ describe Customerio::UnifiedClient do
     end
 
     it "raise KeyCapabilityError from api_client" do
-      expect { client.api_client }.to raise_error(Customerio::KeyCapabilityError)
+      expect { client.api_client }
+        .to raise_error(Customerio::KeyCapabilityError, /public keys \(pk_\).*secret key \(sk_\)/)
     end
   end
 

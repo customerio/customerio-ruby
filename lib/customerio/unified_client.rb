@@ -3,7 +3,7 @@
 module Customerio
   # Raised by UnifiedClient when its key can't do what a method asks.
   #
-  # Raised before the request when the key's type rules it out (a public `wk_`
+  # Raised before the request when the key's type rules it out (a public `pk_`
   # key can't send transactional messages). Otherwise the server's 401 or 403
   # is re-raised as this error, with the original InvalidResponse as `cause`.
   class KeyCapabilityError < StandardError
@@ -24,14 +24,15 @@ module Customerio
   # single key sent as a Bearer token.
   #
   # Tracking methods go to the Track API; send methods go to the App API. For
-  # `ak_us_…` / `ak_eu_…` keys the region comes from the key; an explicit
+  # `sk_us_…` / `sk_eu_…` keys the region comes from the key; an explicit
   # `region` wins, and legacy keys default to Regions::US.
   #
   # Other Track and App API methods are on #track_client and #api_client.
   class UnifiedClient
-    # Keys in the shared format look like `{ak|wk}_{us|eu}_{random}_{checksum}`.
-    # The server checks the checksum; the client only reads the prefix.
-    KEY_PREFIX = /\A(ak|wk)_(us|eu)_/
+    # Keys in the shared format look like `{type}_{us|eu}_{random}_{checksum}`,
+    # where type is `pk` (public) or `sk` (secret). The server checks the
+    # checksum; the client only reads the prefix.
+    KEY_PREFIX = /\A([a-z]{2})_(us|eu)_/
 
     CAPABILITY_ACTIONS = {
       track: "send tracking data",
@@ -52,12 +53,12 @@ module Customerio
       @api_client = APIClient.new(api_key, api_options(options))
     end
 
-    # The App API client. Raises KeyCapabilityError for a public `wk_` key.
+    # The App API client. Raises KeyCapabilityError for a public `pk_` key.
     def api_client
-      if @key_kind == :wk
+      if @key_kind == :pk
         raise KeyCapabilityError.new(
           :transactional,
-          "This key can't use the App API: public keys (wk_) are for tracking only. Use a secret key (ak_)."
+          "This key can't use the App API: public keys (pk_) are for tracking only. Use a secret key (sk_)."
         )
       end
 
