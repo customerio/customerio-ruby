@@ -41,7 +41,8 @@ module Customerio
       uri = URI.join(@base_uri, path)
       request_headers = headers.dup
 
-      session = Net::HTTP.new(uri.host, uri.port)
+      # hostname drops the brackets around an IPv6 address, which host keeps.
+      session = Net::HTTP.new(uri.hostname, uri.port)
       session.use_ssl = uri.scheme == "https"
       session.open_timeout = @timeout
       session.read_timeout = @timeout

@@ -64,7 +64,7 @@ cio.send_email(Customerio::SendEmailRequest.new(
 ))
 ```
 
-A `pk_` or `sk_` key belongs to one region, so passing a `region:` that disagrees with it raises `ArgumentError`. Legacy App API keys also work here for transactional calls; they default to `Customerio::Regions::US` unless you pass `region:`. Tracking calls on Pipelines workspaces need a source-bound `pk_` or `sk_` key.
+A `pk_` or `sk_` key belongs to one region, so passing `Customerio::Regions::US` or `Customerio::Regions::EU` when it disagrees with the key raises `ArgumentError`. A custom `Customerio::Regions::Region` is used as given. Every URL (`track_url`, `api_url` and a custom region's) must start with `https://`. Legacy App API keys also work here for transactional calls; they default to `Customerio::Regions::US` unless you pass `region:`. Tracking calls on Pipelines workspaces need a source-bound `pk_` or `sk_` key.
 
 `identify`, `track`, `track_anonymous`, `pageview`, the `send_*` methods and `trigger_broadcast` are on the client directly. The rest of the Track and App API are on `cio.track_client` and `cio.api_client`.
 

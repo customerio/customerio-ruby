@@ -46,6 +46,30 @@ describe Customerio::UnifiedClient do
       }.to raise_error(ArgumentError, "region eu does not match the us region of this key")
     end
 
+    it "accepts a custom region with a prefixed key" do
+      custom = Customerio::Regions::Region.new("https://track.proxy.test", "https://api.proxy.test")
+      expect(Customerio::UnifiedClient.new(eu_key, region: custom).region).to eq(custom)
+
+      stub = stub_request(:put, "https://track.proxy.test/api/v1/customers/user_123")
+        .with(headers: bearer(eu_key))
+        .to_return(status: 200, body: "")
+
+      Customerio::UnifiedClient.new(eu_key, region: custom).identify(id: "user_123")
+      expect(stub).to have_been_requested
+    end
+
+    it "treats an unknown prefix as a legacy key" do
+      client = Customerio::UnifiedClient.new("xx_us_abc", region: Customerio::Regions::EU)
+      expect(client.region).to eq(Customerio::Regions::EU)
+
+      stub = stub_request(:post, "https://api-eu.customer.io/v1/send/email")
+        .with(headers: bearer("xx_us_abc"))
+        .to_return(status: 200, body: "{}")
+
+      client.send_email(email_request)
+      expect(stub).to have_been_requested
+    end
+
     it "keeps the region option and US default for legacy keys" do
       expect(Customerio::UnifiedClient.new(legacy_key).region).to eq(Customerio::Regions::US)
       expect(Customerio::UnifiedClient.new(legacy_key, region: Customerio::Regions::EU).region).to eq(Customerio::Regions::EU)
@@ -144,15 +168,40 @@ describe Customerio::UnifiedClient do
     end
 
     it "lets custom URLs override the region hosts" do
-      track = stub_request(:put, "http://track.test/api/v1/customers/1").to_return(status: 200, body: "")
-      api = stub_request(:post, "http://api.test/v1/send/email").to_return(status: 200, body: "{}")
+      track = stub_request(:put, "https://track.test/api/v1/customers/1").to_return(status: 200, body: "")
+      api = stub_request(:post, "https://api.test/v1/send/email").to_return(status: 200, body: "{}")
 
-      client = Customerio::UnifiedClient.new(us_key, track_url: "http://track.test", api_url: "http://api.test")
+      client = Customerio::UnifiedClient.new(us_key, track_url: "https://track.test", api_url: "https://api.test")
       client.identify(id: "1")
       client.send_email(email_request)
 
       expect(track).to have_been_requested
       expect(api).to have_been_requested
+    end
+  end
+
+  describe "urls" do
+    it "refuses a track_url or api_url that isn't https" do
+      expect { Customerio::UnifiedClient.new(us_key, track_url: "http://track.test") }
+        .to raise_error(ArgumentError, "track_url must start with https://")
+      expect { Customerio::UnifiedClient.new(us_key, api_url: "http://api.test") }
+        .to raise_error(ArgumentError, "api_url must start with https://")
+    end
+
+    it "refuses a URL it can't parse" do
+      expect { Customerio::UnifiedClient.new(us_key, api_url: "https://api test") }
+        .to raise_error(ArgumentError, "api_url is not a valid URL: https://api test")
+      expect { Customerio::UnifiedClient.new(us_key, track_url: "https://") }
+        .to raise_error(ArgumentError, "track_url is not a valid URL: https://")
+    end
+
+    it "refuses a custom region that isn't https" do
+      custom = Customerio::Regions::Region.new("https://track.proxy.test", "http://api.proxy.test")
+
+      expect { Customerio::UnifiedClient.new(us_key, region: custom) }
+        .to raise_error(ArgumentError, "region api_url must start with https://")
+      expect { Customerio::UnifiedClient.new(legacy_key, region: custom) }
+        .to raise_error(ArgumentError, "region api_url must start with https://")
     end
   end
 
@@ -187,7 +236,7 @@ describe Customerio::UnifiedClient do
 
     [401, 403].each do |status|
       it "re-raises a #{status} from the Track API as KeyCapabilityError" do
-        stub_request(:put, "https://track.customer.io/api/v1/customers/1").to_return(status: status, body: "forbidden")
+        stub_request(:put, "https://track.customer.io/api/v1/customers/1").to_return(status: status, body: '{"meta":{"error":"forbidden"}}')
 
         expect { client.identify(id: "1") }.to raise_error(Customerio::KeyCapabilityError) { |error|
           expect(error.capability).to eq(:track)
@@ -198,26 +247,35 @@ describe Customerio::UnifiedClient do
       end
 
       it "re-raises a #{status} from the App API as KeyCapabilityError" do
-        stub_request(:post, "https://api.customer.io/v1/send/email").to_return(status: status, body: "nope")
+        stub_request(:post, "https://api.customer.io/v1/send/email").to_return(status: status, body: '{"errors":[{"detail":"unauthorized","status":"401"}]}')
 
         expect { client.send_email(email_request) }.to raise_error(Customerio::KeyCapabilityError) { |error|
           expect(error.capability).to eq(:transactional)
           expect(error.code).to eq(status)
-          expect(error.message).to eq("The server refused this request to send transactional messages (#{status}): nope. Check the key type, its IP restrictions and the workspace status.")
+          expect(error.message).to eq("The server refused this request to send transactional messages (#{status}): unauthorized. Check the key type, its IP restrictions and the workspace status.")
           expect(error.cause).to be_a(Customerio::InvalidResponse)
         }
       end
     end
 
     it "re-raises a 403 from a broadcast trigger as a broadcast refusal" do
-      stub_request(:post, "https://api.customer.io/v1/campaigns/12/triggers").to_return(status: 403, body: "nope")
+      stub_request(:post, "https://api.customer.io/v1/campaigns/12/triggers").to_return(status: 403, body: '{"errors":[{"detail":"unauthorized","status":"401"}]}')
 
       expect { client.trigger_broadcast(Customerio::TriggerBroadcastRequest.new(broadcast_id: 12)) }
         .to raise_error(Customerio::KeyCapabilityError) { |error|
           expect(error.capability).to eq(:broadcast)
           expect(error.code).to eq(403)
-          expect(error.message).to eq("The server refused this request to trigger broadcasts (403): nope. Check the key type, its IP restrictions and the workspace status.")
+          expect(error.message).to eq("The server refused this request to trigger broadcasts (403): unauthorized. Check the key type, its IP restrictions and the workspace status.")
         }
+    end
+
+    it "shows a body it can't read as it came" do
+      stub_request(:put, "https://track.customer.io/api/v1/customers/1").to_return(status: 401, body: "nope")
+
+      expect { client.identify(id: "1") }.to raise_error(
+        Customerio::KeyCapabilityError,
+        "The server refused this request to send tracking data (401): nope. Check the key type, its IP restrictions and the workspace status."
+      )
     end
 
     it "leaves other errors alone" do

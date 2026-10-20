@@ -25,16 +25,18 @@ module Customerio
   # single key sent as a Bearer token.
   #
   # Tracking methods go to the Track API; send methods go to the App API. For
-  # `sk_us_…` / `sk_eu_…` keys the region comes from the key, and a `region`
-  # that disagrees with it raises ArgumentError. Legacy keys take any `region`
-  # and default to Regions::US.
+  # `pk_` / `sk_` keys the region comes from the key, and Regions::US or
+  # Regions::EU disagreeing with it raises ArgumentError; a custom Region is
+  # used as given. Legacy keys take any `region` and default to Regions::US.
+  #
+  # Every URL must be https, since the key is sent as a Bearer token.
   #
   # Other Track and App API methods are on #track_client and #api_client.
   class UnifiedClient
     # Keys in the shared format look like `{type}_{us|eu}_{random}_{checksum}`,
     # where type is `pk` (public) or `sk` (secret). The server checks the
     # checksum; the client only reads the prefix.
-    KEY_PREFIX = /\A([a-z]{2})_(us|eu)_/
+    KEY_PREFIX = /\A(pk|sk)_(us|eu)_/
 
     CAPABILITY_ACTIONS = {
       track: "send tracking data",
@@ -54,6 +56,7 @@ module Customerio
       match = KEY_PREFIX.match(api_key)
       @key_kind = match ? match[1].to_sym : :legacy
       @region = resolve_region(match && match[2], options[:region])
+      check_urls(options)
 
       @track_client = BearerTrackClient.new(api_key, track_options(options))
       @api_client = APIClient.new(api_key, api_options(options))
@@ -114,18 +117,41 @@ module Customerio
 
     private
 
-    # A prefixed key belongs to one region, so a different `region` would only
-    # get a redirect or a 401 from the server.
+    # A prefixed key belongs to one region, so the other built-in region would
+    # only get a redirect or a 401 from the server. A custom Region may be a
+    # proxy, so it's trusted.
     def resolve_region(key_region, region)
       return region || Regions::US if key_region.nil?
       return KEY_REGIONS[key_region] if region.nil?
 
-      if region.is_a?(Regions::Region) && region != KEY_REGIONS[key_region]
-        name = KEY_REGIONS.key(region) || region.track_url
+      name = KEY_REGIONS.key(region)
+      if name && name != key_region
         raise ArgumentError, "region #{name} does not match the #{key_region} region of this key"
       end
 
       region
+    end
+
+    # The key goes out as a Bearer token, so never send it over plain http.
+    def check_urls(options)
+      check_https("track_url", options[:track_url])
+      check_https("api_url", options[:api_url])
+      return unless @region.is_a?(Regions::Region)
+
+      check_https("region track_url", @region.track_url)
+      check_https("region api_url", @region.api_url)
+    end
+
+    def check_https(name, url)
+      return if url.nil? || url.to_s.empty?
+
+      uri = begin
+        URI.parse(url.to_s)
+      rescue URI::InvalidURIError
+        raise ArgumentError, "#{name} is not a valid URL: #{url}"
+      end
+      raise ArgumentError, "#{name} must start with https://" unless uri.scheme == "https"
+      raise ArgumentError, "#{name} is not a valid URL: #{url}" if uri.host.to_s.empty?
     end
 
     def refuse_public_key(capability)
@@ -152,12 +178,23 @@ module Customerio
     rescue InvalidResponse => e
       raise unless %w[401 403].include?(e.code.to_s)
 
+      reason = refusal_reason(e.message)
       raise KeyCapabilityError.new(
         capability,
-        "The server refused this request to #{CAPABILITY_ACTIONS[capability]} (#{e.code}): #{e.message}. " \
+        "The server refused this request to #{CAPABILITY_ACTIONS[capability]} (#{e.code}): #{reason}. " \
         "Check the key type, its IP restrictions and the workspace status.",
         e.code.to_i
       )
+    end
+
+    # The App API sends `{"errors":[{"detail":…}]}` and the Track API sends
+    # `{"meta":{"error":…}}`; anything else is shown as it came.
+    def refusal_reason(body)
+      parsed = JSON.parse(body.to_s)
+      reason = parsed.dig("errors", 0, "detail") || parsed.dig("meta", "error") if parsed.is_a?(Hash)
+      reason.is_a?(String) && !reason.empty? ? reason : body
+    rescue JSON::ParserError, TypeError
+      body
     end
 
     # Client only speaks Basic auth, so swap in a Bearer transport.

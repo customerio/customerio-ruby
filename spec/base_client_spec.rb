@@ -45,6 +45,17 @@ describe Customerio::BaseClient do
     end
   end
 
+  describe "with an IPv6 host" do
+    it "connects to the address without brackets" do
+      client = Customerio::BaseClient.new({ app_key: app_key }, { url: "https://[::1]:8443" })
+      stub = stub_request(:get, "https://[::1]:8443/some/path").to_return(status: 200, body: "")
+
+      expect(Net::HTTP).to receive(:new).with("::1", 8443).and_call_original
+      client.request(:get, '/some/path')
+      expect(stub).to have_been_requested
+    end
+  end
+
   describe "GET requests" do
     describe "with a site ID and API key" do
       it "sends a GET request with basic auth" do
