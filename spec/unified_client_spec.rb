@@ -269,13 +269,15 @@ describe Customerio::UnifiedClient do
         }
     end
 
-    it "shows a body it can't read as it came" do
-      stub_request(:put, "https://track.customer.io/api/v1/customers/1").to_return(status: 401, body: "nope")
+    ["nope", '["nope"]', '"nope"', '{"errors":"nope"}'].each do |body|
+      it "shows the body #{body} as it came" do
+        stub_request(:put, "https://track.customer.io/api/v1/customers/1").to_return(status: 401, body: body)
 
-      expect { client.identify(id: "1") }.to raise_error(
-        Customerio::KeyCapabilityError,
-        "The server refused this request to send tracking data (401): nope. Check the key type, its IP restrictions and the workspace status."
-      )
+        expect { client.identify(id: "1") }.to raise_error(
+          Customerio::KeyCapabilityError,
+          "The server refused this request to send tracking data (401): #{body}. Check the key type, its IP restrictions and the workspace status."
+        )
+      end
     end
 
     it "leaves other errors alone" do

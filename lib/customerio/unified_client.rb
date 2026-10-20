@@ -191,7 +191,9 @@ module Customerio
     # `{"meta":{"error":…}}`; anything else is shown as it came.
     def refusal_reason(body)
       parsed = JSON.parse(body.to_s)
-      reason = parsed.dig("errors", 0, "detail") || parsed.dig("meta", "error") if parsed.is_a?(Hash)
+      return body unless parsed.is_a?(Hash)
+
+      reason = parsed.dig("errors", 0, "detail") || parsed.dig("meta", "error")
       reason.is_a?(String) && !reason.empty? ? reason : body
     rescue JSON::ParserError, TypeError
       body
