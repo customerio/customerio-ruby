@@ -64,11 +64,11 @@ cio.send_email(Customerio::SendEmailRequest.new(
 ))
 ```
 
-Pass `region:` to override the region in the key. Legacy App API keys also work here for transactional calls; they default to `Customerio::Regions::US` unless you pass `region:`. Tracking calls on Pipelines workspaces need a source-bound `pk_` or `sk_` key.
+A `pk_` or `sk_` key belongs to one region, so passing a `region:` that disagrees with it raises `ArgumentError`. Legacy App API keys also work here for transactional calls; they default to `Customerio::Regions::US` unless you pass `region:`. Tracking calls on Pipelines workspaces need a source-bound `pk_` or `sk_` key.
 
 `identify`, `track`, `track_anonymous`, `pageview`, the `send_*` methods and `trigger_broadcast` are on the client directly. The rest of the Track and App API are on `cio.track_client` and `cio.api_client`.
 
-If the key can't do what you asked, the call raises `Customerio::KeyCapabilityError`. A public key (`pk_…`) raises it before any request when you send a transactional message. A 401 or 403 from the server is re-raised as a `KeyCapabilityError` too, with the original error as `cause`.
+If the key can't do what you asked, the call raises `Customerio::KeyCapabilityError`. A public key (`pk_…`) raises it before any request when you send a transactional message or trigger a broadcast. A 401 or 403 from the server is re-raised as a `KeyCapabilityError` too, with the original error as `cause`.
 
 ```ruby
 begin

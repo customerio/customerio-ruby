@@ -33,8 +33,17 @@ describe Customerio::UnifiedClient do
       expect(Customerio::UnifiedClient.new(public_key).region).to eq(Customerio::Regions::US)
     end
 
-    it "uses an explicit region over the key" do
-      expect(Customerio::UnifiedClient.new(eu_key, region: Customerio::Regions::US).region).to eq(Customerio::Regions::US)
+    it "accepts an explicit region that matches the key" do
+      expect(Customerio::UnifiedClient.new(eu_key, region: Customerio::Regions::EU).region).to eq(Customerio::Regions::EU)
+    end
+
+    it "raises when an explicit region disagrees with the key" do
+      expect {
+        Customerio::UnifiedClient.new(eu_key, region: Customerio::Regions::US)
+      }.to raise_error(ArgumentError, "region us does not match the eu region of this key")
+      expect {
+        Customerio::UnifiedClient.new(public_key, region: Customerio::Regions::EU)
+      }.to raise_error(ArgumentError, "region eu does not match the us region of this key")
     end
 
     it "keeps the region option and US default for legacy keys" do
@@ -158,6 +167,15 @@ describe Customerio::UnifiedClient do
       expect(a_request(:any, /customer\.io/)).not_to have_been_made
     end
 
+    it "raise KeyCapabilityError before triggering a broadcast" do
+      expect { client.trigger_broadcast(Customerio::TriggerBroadcastRequest.new(broadcast_id: 12)) }
+        .to raise_error(Customerio::KeyCapabilityError) { |error|
+          expect(error.capability).to eq(:broadcast)
+          expect(error.code).to be_nil
+        }
+      expect(a_request(:any, /customer\.io/)).not_to have_been_made
+    end
+
     it "raise KeyCapabilityError from api_client" do
       expect { client.api_client }
         .to raise_error(Customerio::KeyCapabilityError, /public keys \(pk_\).*secret key \(sk_\)/)
@@ -173,7 +191,7 @@ describe Customerio::UnifiedClient do
 
         expect { client.identify(id: "1") }.to raise_error(Customerio::KeyCapabilityError) { |error|
           expect(error.capability).to eq(:track)
-          expect(error.code).to eq(status.to_s)
+          expect(error.code).to eq(status)
           expect(error.message).to eq("The server refused this request to send tracking data (#{status}): forbidden. Check the key type, its IP restrictions and the workspace status.")
           expect(error.cause).to be_a(Customerio::InvalidResponse)
         }
@@ -184,11 +202,22 @@ describe Customerio::UnifiedClient do
 
         expect { client.send_email(email_request) }.to raise_error(Customerio::KeyCapabilityError) { |error|
           expect(error.capability).to eq(:transactional)
-          expect(error.code).to eq(status.to_s)
+          expect(error.code).to eq(status)
           expect(error.message).to eq("The server refused this request to send transactional messages (#{status}): nope. Check the key type, its IP restrictions and the workspace status.")
           expect(error.cause).to be_a(Customerio::InvalidResponse)
         }
       end
+    end
+
+    it "re-raises a 403 from a broadcast trigger as a broadcast refusal" do
+      stub_request(:post, "https://api.customer.io/v1/campaigns/12/triggers").to_return(status: 403, body: "nope")
+
+      expect { client.trigger_broadcast(Customerio::TriggerBroadcastRequest.new(broadcast_id: 12)) }
+        .to raise_error(Customerio::KeyCapabilityError) { |error|
+          expect(error.capability).to eq(:broadcast)
+          expect(error.code).to eq(403)
+          expect(error.message).to eq("The server refused this request to trigger broadcasts (403): nope. Check the key type, its IP restrictions and the workspace status.")
+        }
     end
 
     it "leaves other errors alone" do

@@ -4,12 +4,13 @@ module Customerio
   # Raised by UnifiedClient when its key can't do what a method asks.
   #
   # Raised before the request when the key's type rules it out (a public `pk_`
-  # key can't send transactional messages). Otherwise the server's 401 or 403
-  # is re-raised as this error, with the original InvalidResponse as `cause`.
+  # key can't send transactional messages or trigger broadcasts). Otherwise
+  # the server's 401 or 403 is re-raised as this error, with the original
+  # InvalidResponse as `cause`.
   class KeyCapabilityError < StandardError
-    # What the key can't do: :track or :transactional.
+    # What the key can't do: :track, :transactional or :broadcast.
     attr_reader :capability
-    # The HTTP status code, when the server refused the key.
+    # The HTTP status code as an Integer, when the server refused the key.
     attr_reader :code
 
     def initialize(capability, message, code = nil)
@@ -24,8 +25,9 @@ module Customerio
   # single key sent as a Bearer token.
   #
   # Tracking methods go to the Track API; send methods go to the App API. For
-  # `sk_us_…` / `sk_eu_…` keys the region comes from the key; an explicit
-  # `region` wins, and legacy keys default to Regions::US.
+  # `sk_us_…` / `sk_eu_…` keys the region comes from the key, and a `region`
+  # that disagrees with it raises ArgumentError. Legacy keys take any `region`
+  # and default to Regions::US.
   #
   # Other Track and App API methods are on #track_client and #api_client.
   class UnifiedClient
@@ -36,8 +38,12 @@ module Customerio
 
     CAPABILITY_ACTIONS = {
       track: "send tracking data",
-      transactional: "send transactional messages"
+      transactional: "send transactional messages",
+      broadcast: "trigger broadcasts"
     }.freeze
+
+    KEY_REGIONS = { "us" => Regions::US, "eu" => Regions::EU }.freeze
+    private_constant :KEY_REGIONS
 
     attr_reader :track_client, :region
 
@@ -47,7 +53,7 @@ module Customerio
 
       match = KEY_PREFIX.match(api_key)
       @key_kind = match ? match[1].to_sym : :legacy
-      @region = options[:region] || (match && match[2] == "eu" ? Regions::EU : Regions::US)
+      @region = resolve_region(match && match[2], options[:region])
 
       @track_client = BearerTrackClient.new(api_key, track_options(options))
       @api_client = APIClient.new(api_key, api_options(options))
@@ -55,13 +61,7 @@ module Customerio
 
     # The App API client. Raises KeyCapabilityError for a public `pk_` key.
     def api_client
-      if @key_kind == :pk
-        raise KeyCapabilityError.new(
-          :transactional,
-          "This key can't use the App API: public keys (pk_) are for tracking only. Use a secret key (sk_)."
-        )
-      end
-
+      refuse_public_key(:transactional)
       @api_client
     end
 
@@ -106,10 +106,36 @@ module Customerio
     end
 
     def trigger_broadcast(req)
-      guard(:transactional) { api_client.trigger_broadcast(req) }
+      guard(:broadcast) do
+        refuse_public_key(:broadcast)
+        @api_client.trigger_broadcast(req)
+      end
     end
 
     private
+
+    # A prefixed key belongs to one region, so a different `region` would only
+    # get a redirect or a 401 from the server.
+    def resolve_region(key_region, region)
+      return region || Regions::US if key_region.nil?
+      return KEY_REGIONS[key_region] if region.nil?
+
+      if region.is_a?(Regions::Region) && region != KEY_REGIONS[key_region]
+        name = KEY_REGIONS.key(region) || region.track_url
+        raise ArgumentError, "region #{name} does not match the #{key_region} region of this key"
+      end
+
+      region
+    end
+
+    def refuse_public_key(capability)
+      return unless @key_kind == :pk
+
+      raise KeyCapabilityError.new(
+        capability,
+        "This key can't use the App API: public keys (pk_) are for tracking only. Use a secret key (sk_)."
+      )
+    end
 
     def track_options(options)
       options.except(:api_url).merge(region: @region, url: options[:track_url])
@@ -130,7 +156,7 @@ module Customerio
         capability,
         "The server refused this request to #{CAPABILITY_ACTIONS[capability]} (#{e.code}): #{e.message}. " \
         "Check the key type, its IP restrictions and the workspace status.",
-        e.code
+        e.code.to_i
       )
     end
 
