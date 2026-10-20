@@ -128,7 +128,8 @@ module Customerio
 
       raise KeyCapabilityError.new(
         capability,
-        "This key can't #{CAPABILITY_ACTIONS[capability]} (#{e.code}): #{e.message}",
+        "The server refused this request to #{CAPABILITY_ACTIONS[capability]} (#{e.code}): #{e.message}. " \
+        "Check the key type, its IP restrictions and the workspace status.",
         e.code
       )
     end

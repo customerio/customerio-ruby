@@ -174,7 +174,7 @@ describe Customerio::UnifiedClient do
         expect { client.identify(id: "1") }.to raise_error(Customerio::KeyCapabilityError) { |error|
           expect(error.capability).to eq(:track)
           expect(error.code).to eq(status.to_s)
-          expect(error.message).to eq("This key can't send tracking data (#{status}): forbidden")
+          expect(error.message).to eq("The server refused this request to send tracking data (#{status}): forbidden. Check the key type, its IP restrictions and the workspace status.")
           expect(error.cause).to be_a(Customerio::InvalidResponse)
         }
       end
@@ -185,7 +185,7 @@ describe Customerio::UnifiedClient do
         expect { client.send_email(email_request) }.to raise_error(Customerio::KeyCapabilityError) { |error|
           expect(error.capability).to eq(:transactional)
           expect(error.code).to eq(status.to_s)
-          expect(error.message).to eq("This key can't send transactional messages (#{status}): nope")
+          expect(error.message).to eq("The server refused this request to send transactional messages (#{status}): nope. Check the key type, its IP restrictions and the workspace status.")
           expect(error.cause).to be_a(Customerio::InvalidResponse)
         }
       end
