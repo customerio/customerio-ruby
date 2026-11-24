@@ -66,7 +66,7 @@ jobs:
           payload: |
             {
               "text": "Ruby SDK ${{ steps.check.outputs.version }} is missing from RubyGems",
-              "channel": "#mobile-deployments",
+              "channel": "#server-sdk-deployments",
               "blocks": [
                 {
                   "type": "section",
