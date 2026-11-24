@@ -14,6 +14,10 @@ jobs:
     name: Build and publish
     runs-on: ubuntu-latest
     environment: rubygems
+    env:
+      # Secrets can't be read in step `if`, so the steps below test this copy.
+      # Empty until the org secret exists, which skips the Slack steps.
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTIFY_SERVER_SDK_RELEASES_WEBHOOK_URL }}
 
     steps:
       - uses: actions/checkout@v7
@@ -27,6 +31,7 @@ jobs:
           bundler-cache: true
 
       - name: Verify tag matches gem version
+        id: version
         run: |
           tag="${GITHUB_REF#refs/tags/v}"
           version=$(ruby -r ./lib/customerio/version -e "puts Customerio::VERSION")
@@ -34,6 +39,50 @@ jobs:
             echo "::error::Tag v$tag does not match Customerio::VERSION ($version)"
             exit 1
           fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Publish to RubyGems
+        id: publish
         uses: rubygems/release-gem@v1
+
+      - name: Notify Slack of successful release
+        if: steps.publish.outcome == 'success' && env.SLACK_WEBHOOK_URL != ''
+        uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v2.0.0-rc.3
+        with:
+          webhook: ${{ env.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": "Ruby SDK ${{ steps.version.outputs.version }} published to RubyGems",
+              "channel": "#server-sdk-deployments",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Ruby* SDK ${{ steps.version.outputs.version }} published to RubyGems\n<https://rubygems.org/gems/customerio/versions/${{ steps.version.outputs.version }}|View on RubyGems>"
+                  }
+                }
+              ]
+            }
+
+      - name: Notify Slack of failed release
+        if: failure() && env.SLACK_WEBHOOK_URL != ''
+        uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v2.0.0-rc.3
+        with:
+          webhook: ${{ env.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": "Ruby SDK release failure",
+              "channel": "#server-sdk-deployments",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Ruby* SDK release :warning: failure :warning:\nView <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|CI server logs> to learn why."
+                  }
+                }
+              ]
+            }
