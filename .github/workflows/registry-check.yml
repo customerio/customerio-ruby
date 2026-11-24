@@ -26,7 +26,7 @@ jobs:
       POLL_TIMEOUT_SECONDS: "3000"
       # Secrets can't be read in step `if`, so the alert step tests this copy.
       # Empty until the org secret exists, which skips the alert.
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTIFY_SERVER_SDK_RELEASES_WEBHOOK_URL }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTIFY_RELEASES_WEBHOOK_URL }}
 
     steps:
       - name: Wait for the version to appear on RubyGems
@@ -66,7 +66,7 @@ jobs:
           payload: |
             {
               "text": "Ruby SDK ${{ steps.check.outputs.version }} is missing from RubyGems",
-              "channel": "#server-sdk-deployments",
+              "channel": "#mobile-deployments",
               "blocks": [
                 {
                   "type": "section",
