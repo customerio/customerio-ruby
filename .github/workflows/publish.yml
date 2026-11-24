@@ -17,7 +17,7 @@ jobs:
     env:
       # Secrets can't be read in step `if`, so the steps below test this copy.
       # Empty until the org secret exists, which skips the Slack steps.
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTIFY_SERVER_SDK_RELEASES_WEBHOOK_URL }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTIFY_RELEASES_WEBHOOK_URL }}
 
     steps:
       - uses: actions/checkout@v7
@@ -54,7 +54,7 @@ jobs:
           payload: |
             {
               "text": "Ruby SDK ${{ steps.version.outputs.version }} published to RubyGems",
-              "channel": "#server-sdk-deployments",
+              "channel": "#mobile-deployments",
               "blocks": [
                 {
                   "type": "section",
@@ -75,7 +75,7 @@ jobs:
           payload: |
             {
               "text": "Ruby SDK release failure",
-              "channel": "#server-sdk-deployments",
+              "channel": "#mobile-deployments",
               "blocks": [
                 {
                   "type": "section",
