@@ -1,0 +1,79 @@
+name: Check RubyGems release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Gem version to look for on RubyGems, for example 6.2.0"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Confirm version is on RubyGems
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      GEM_NAME: customerio
+      # Poll every 3 minutes for up to 50 minutes.
+      POLL_INTERVAL_SECONDS: "180"
+      POLL_TIMEOUT_SECONDS: "3000"
+      # Secrets can't be read in step `if`, so the alert step tests this copy.
+      # Empty until the org secret exists, which skips the alert.
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTIFY_SERVER_SDK_RELEASES_WEBHOOK_URL }}
+
+    steps:
+      - name: Wait for the version to appear on RubyGems
+        id: check
+        env:
+          RAW_VERSION: ${{ inputs.version || github.ref_name }}
+        run: |
+          version="${RAW_VERSION#v}"
+          if ! [[ "$version" =~ ^[0-9A-Za-z][0-9A-Za-z.+_-]*$ ]]; then
+            echo "::error::'$RAW_VERSION' is not a valid version"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+          url="https://rubygems.org/api/v2/rubygems/${GEM_NAME}/versions/${version}.json"
+          deadline=$(( $(date +%s) + POLL_TIMEOUT_SECONDS ))
+          while true; do
+            status=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$url" || true)
+            if [ "$status" = "200" ]; then
+              echo "${GEM_NAME} ${version} is on RubyGems"
+              exit 0
+            fi
+            echo "${GEM_NAME} ${version} not found yet (HTTP ${status:-none})"
+            if [ "$(date +%s)" -ge "$deadline" ]; then
+              echo "::error::${GEM_NAME} ${version} was not on RubyGems after ${POLL_TIMEOUT_SECONDS}s"
+              exit 1
+            fi
+            sleep "$POLL_INTERVAL_SECONDS"
+          done
+
+      - name: Alert Slack that the version is missing
+        if: failure() && steps.check.outcome == 'failure' && env.SLACK_WEBHOOK_URL != ''
+        uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v2.0.0-rc.3
+        with:
+          webhook: ${{ env.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": "Ruby SDK ${{ steps.check.outputs.version }} is missing from RubyGems",
+              "channel": "#server-sdk-deployments",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Ruby* SDK ${{ steps.check.outputs.version }} is not on RubyGems :warning: after 50 minutes :warning:\nThe release may not have been published. View <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|CI server logs>."
+                  }
+                }
+              ]
+            }
