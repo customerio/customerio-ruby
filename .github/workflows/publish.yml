@@ -54,7 +54,7 @@ jobs:
           payload: |
             {
               "text": "Ruby SDK ${{ steps.version.outputs.version }} published to RubyGems",
-              "channel": "#mobile-deployments",
+              "channel": "#server-sdk-deployments",
               "blocks": [
                 {
                   "type": "section",
@@ -75,7 +75,7 @@ jobs:
           payload: |
             {
               "text": "Ruby SDK release failure",
-              "channel": "#mobile-deployments",
+              "channel": "#server-sdk-deployments",
               "blocks": [
                 {
                   "type": "section",
