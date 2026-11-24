@@ -66,6 +66,8 @@ jobs:
           payload: |
             {
               "text": "Ruby SDK ${{ steps.check.outputs.version }} is missing from RubyGems",
+              "username": "Ruby deployment bot",
+              "icon_url": "https://raw.githubusercontent.com/github/explore/main/topics/ruby/ruby.png",
               "channel": "#server-sdk-deployments",
               "blocks": [
                 {
