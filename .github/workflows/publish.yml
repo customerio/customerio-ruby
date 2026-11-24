@@ -54,6 +54,8 @@ jobs:
           payload: |
             {
               "text": "Ruby SDK ${{ steps.version.outputs.version }} published to RubyGems",
+              "username": "Ruby deployment bot",
+              "icon_url": "https://raw.githubusercontent.com/github/explore/main/topics/ruby/ruby.png",
               "channel": "#server-sdk-deployments",
               "blocks": [
                 {
@@ -75,6 +77,8 @@ jobs:
           payload: |
             {
               "text": "Ruby SDK release failure",
+              "username": "Ruby deployment bot",
+              "icon_url": "https://raw.githubusercontent.com/github/explore/main/topics/ruby/ruby.png",
               "channel": "#server-sdk-deployments",
               "blocks": [
                 {
