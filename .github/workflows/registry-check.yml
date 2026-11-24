@@ -1,9 +1,11 @@
 name: Check RubyGems release
 
+# The publish job waits for an approval, so the wait starts when that workflow
+# finishes, not when the tag is pushed.
 on:
-  push:
-    tags:
-      - "v*"
+  workflow_run:
+    workflows: [Publish to RubyGems]
+    types: [completed]
   workflow_dispatch:
     inputs:
       version:
@@ -17,6 +19,8 @@ permissions:
 jobs:
   check:
     name: Confirm version is on RubyGems
+    # A cancelled publish run released nothing.
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion != 'cancelled' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
@@ -32,7 +36,8 @@ jobs:
       - name: Wait for the version to appear on RubyGems
         id: check
         env:
-          RAW_VERSION: ${{ inputs.version || github.ref_name }}
+          # For a publish run started by a tag push, head_branch is the tag.
+          RAW_VERSION: ${{ inputs.version || github.event.workflow_run.head_branch }}
         run: |
           version="${RAW_VERSION#v}"
           if ! [[ "$version" =~ ^[0-9A-Za-z][0-9A-Za-z.+_-]*$ ]]; then
@@ -75,7 +80,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "*Ruby* SDK ${{ steps.check.outputs.version }} is not on RubyGems :warning: after 50 minutes :warning:\nThe release may not have been published. View <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|CI server logs>."
+                    "text": "*Ruby* SDK ${{ steps.check.outputs.version }} is not on RubyGems 50 minutes after the publish workflow finished :warning:\nThe release may not have been published. View <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|CI server logs>."
                   }
                 }
               ]
