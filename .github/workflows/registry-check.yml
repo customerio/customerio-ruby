@@ -19,8 +19,9 @@ permissions:
 jobs:
   check:
     name: Confirm version is on RubyGems
-    # A cancelled publish run released nothing.
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion != 'cancelled' }}
+    # A publish run that failed, was cancelled or had its approval rejected
+    # uploaded nothing, and the run itself already shows that.
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
