@@ -19,9 +19,9 @@ permissions:
 jobs:
   check:
     name: Confirm version is on RubyGems
-    # A publish run that failed, was cancelled or had its approval rejected
-    # uploaded nothing, and the run itself already shows that.
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    # Runs after every publish run, failed and cancelled ones too. The tag
+    # already exists by then, and a failed publish can still have uploaded the
+    # package, so the registry is the only way to tell.
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
@@ -81,7 +81,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "*Ruby* SDK ${{ steps.check.outputs.version }} is not on RubyGems 50 minutes after the publish workflow finished :warning:\nThe release may not have been published. View <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|CI server logs>."
+                    "text": "*Ruby* SDK ${{ steps.check.outputs.version }} is not on RubyGems 50 minutes after the publish workflow finished :warning:\nThe publish workflow ended as ${{ github.event.workflow_run.conclusion || 'not run' }}. View <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|CI server logs>."
                   }
                 }
               ]
