@@ -14,6 +14,10 @@ jobs:
     name: Build and publish
     runs-on: ubuntu-latest
     environment: rubygems
+    env:
+      # Secrets can't be read in step `if`, so the steps below test this copy.
+      # Empty until the org secret exists, which skips the Slack steps.
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTIFY_RELEASES_WEBHOOK_URL }}
 
     steps:
       - uses: actions/checkout@v7
@@ -27,6 +31,7 @@ jobs:
           bundler-cache: true
 
       - name: Verify tag matches gem version
+        id: version
         run: |
           tag="${GITHUB_REF#refs/tags/v}"
           version=$(ruby -r ./lib/customerio/version -e "puts Customerio::VERSION")
@@ -34,6 +39,73 @@ jobs:
             echo "::error::Tag v$tag does not match Customerio::VERSION ($version)"
             exit 1
           fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Publish to RubyGems
+        id: publish
         uses: rubygems/release-gem@v1
+
+      - name: Notify Slack of successful release
+        if: steps.publish.outcome == 'success' && env.SLACK_WEBHOOK_URL != ''
+        uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0
+        continue-on-error: true
+        with:
+          webhook: ${{ env.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": "Ruby SDK ${{ steps.version.outputs.version }} published to RubyGems",
+              "username": "Ruby deployment bot",
+              "icon_url": "https://raw.githubusercontent.com/github/explore/main/topics/ruby/ruby.png",
+              "channel": "#server-sdk-deployments",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Ruby* SDK ${{ steps.version.outputs.version }} published to RubyGems\n<https://rubygems.org/gems/customerio/versions/${{ steps.version.outputs.version }}|View on RubyGems>"
+                  }
+                }
+              ]
+            }
+
+      # The publish step also waits up to 5 minutes for RubyGems to serve the
+      # gem, so it can fail after the upload worked. One lookup tells the two apart.
+      - name: Check whether the gem reached RubyGems
+        id: uploaded
+        if: failure() && steps.publish.outcome == 'failure'
+        continue-on-error: true
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          url="https://rubygems.org/api/v2/rubygems/customerio/versions/${VERSION}.json"
+          status=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$url" || true)
+          if [ "$status" = "200" ]; then
+            echo "detail=The gem was uploaded, but RubyGems did not finish serving it within 5 minutes." >> "$GITHUB_OUTPUT"
+          else
+            echo "detail=RubyGems does not list the gem yet." >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Notify Slack of failed release
+        if: failure() && env.SLACK_WEBHOOK_URL != ''
+        uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0
+        continue-on-error: true
+        with:
+          webhook: ${{ env.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": "Ruby SDK release failure",
+              "username": "Ruby deployment bot",
+              "icon_url": "https://raw.githubusercontent.com/github/explore/main/topics/ruby/ruby.png",
+              "channel": "#server-sdk-deployments",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Ruby* SDK release :warning: failure :warning:\n${{ steps.uploaded.outputs.detail || 'It failed before the publish step.' }}\nView <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|CI server logs> to learn why."
+                  }
+                }
+              ]
+            }
