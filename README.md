@@ -544,6 +544,10 @@ You can target the broadcast audience in several ways. Only one audience option 
 
 If you omit the audience option, the broadcast uses its default audience configured in the UI.
 
+## Support
+
+For help or to report a bug, [contact Customer.io Support](https://fly.customer.io/?support=true). We don't track issues in this repository.
+
 ## Contributing
 
 1. Fork it
