@@ -58,10 +58,23 @@ module Customerio
       deliver(trigger_broadcast_path(req.broadcast_id), req.message)
     end
 
+    def create_import(req)
+      validate_request!(req, CreateImportRequest)
+
+      deliver(imports_path, { import: req.message })
+    end
+
+    def get_import(import_id)
+      whole_number = (import_id.is_a?(Integer) || import_id.is_a?(String)) && import_id.to_s.match?(/\A\d+\z/)
+      raise ArgumentError, "import_id must be a whole number" unless whole_number
+
+      deliver(import_path(import_id), nil, :get)
+    end
+
     private
 
-    def deliver(path, message)
-      response = @client.request(:post, path, message)
+    def deliver(path, message, method = :post)
+      response = @client.request(method, path, message)
 
       case response
       when Net::HTTPSuccess
@@ -106,6 +119,14 @@ module Customerio
 
     def trigger_broadcast_path(broadcast_id)
       "/v1/campaigns/#{broadcast_id}/triggers"
+    end
+
+    def imports_path
+      "/v1/imports"
+    end
+
+    def import_path(import_id)
+      "/v1/imports/#{import_id}"
     end
   end
 end

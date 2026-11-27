@@ -544,6 +544,54 @@ You can target the broadcast audience in several ways. Only one audience option 
 
 If you omit the audience option, the broadcast uses its default audience configured in the UI.
 
+### Import data from a CSV
+
+You can start a CSV import and read its result using the `APIClient`. Create a `CreateImportRequest` containing:
+
+* `name`: a name for the import.
+* `data_file_url`: the public URL of your CSV file.
+* `type`: what the file holds: `people`, `event`, `object`, `relationship` or `device`.
+* `identifier`: the column that identifies each person, `id` or `email`. Every type except `object` needs it.
+* `description`: optional notes about the import.
+
+Use `create_import` to start the import, then `get_import` with the returned `id` to check on it. This example adds push tokens to people who already exist:
+
+```ruby
+require "customerio"
+
+client = Customerio::APIClient.new("your API key", region: Customerio::Regions::US)
+
+request = Customerio::CreateImportRequest.new(
+  name: "Push tokens",
+  data_file_url: "https://example.com/devices.csv",
+  type: "device",
+  identifier: "id",
+)
+
+begin
+  import = client.create_import(request)["import"]
+  puts import["id"], import["state"]
+
+  import = client.get_import(import["id"])["import"]
+  puts import["state"], import["rows_imported"], import["error_download_url"]
+rescue Customerio::InvalidResponse => e
+  puts e.code, e.message
+end
+```
+
+A `device` file needs these columns:
+
+* `id` or `email`, matching the `identifier` you set
+* `token`: the device's push token
+* `platform`: `ios` or `android`
+* `last_used` (optional): when the device was last used, in unix seconds
+
+Any other column is saved as a device attribute.
+
+A device import only adds devices to people who already exist. It skips rows for people it can't find and tokens that repeat for another person. The skipped rows and the reason for each are in the file at `error_download_url`, which can be set even when the import succeeds.
+
+With the one-key client, these calls are on `cio.api_client`, like `cio.api_client.create_import(request)`.
+
 ## Contributing
 
 1. Fork it

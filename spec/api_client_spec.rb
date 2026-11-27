@@ -614,4 +614,182 @@ describe Customerio::APIClient do
       )
     end
   end
+
+  describe "#create_import" do
+    let(:import_body) do
+      {
+        import: {
+          id: "15",
+          type: "device",
+          state: "preparing",
+          name: "Push tokens",
+          description: "",
+          identifier: "id",
+          error: "",
+          created_at: 1511315635,
+          updated_at: 1511315635,
+        },
+      }
+    end
+
+    it "sends a POST request to the imports path" do
+      req = Customerio::CreateImportRequest.new(
+        name: "Push tokens",
+        data_file_url: "https://example.com/devices.csv",
+        type: "device",
+        identifier: "id",
+      )
+
+      stub_request(:post, api_uri('/v1/imports'))
+        .with(headers: request_headers, body: { import: req.message })
+        .to_return(status: 200, body: import_body.to_json, headers: {})
+
+      expect(client.create_import(req)).to eq(JSON.parse(import_body.to_json))
+    end
+
+    it "raises an error when data_file_url is missing" do
+      expect {
+        Customerio::CreateImportRequest.new(name: "Push tokens", type: "device", identifier: "id")
+      }.to raise_error(ArgumentError, "data_file_url is required")
+
+      expect {
+        Customerio::CreateImportRequest.new(data_file_url: "", type: "device")
+      }.to raise_error(ArgumentError, "data_file_url is required")
+    end
+
+    it "raises an error when type is missing" do
+      expect {
+        Customerio::CreateImportRequest.new(name: "Push tokens", data_file_url: "https://example.com/devices.csv")
+      }.to raise_error(ArgumentError, "type is required")
+
+      expect {
+        Customerio::CreateImportRequest.new(data_file_url: "https://example.com/devices.csv", type: "")
+      }.to raise_error(ArgumentError, "type is required")
+    end
+
+    it "drops unknown fields from the message" do
+      req = Customerio::CreateImportRequest.new(
+        name: "Push tokens",
+        data_file_url: "https://example.com/devices.csv",
+        type: "device",
+        identifier: "email",
+        description: "Tokens from the old provider",
+        unknown_field: "ignored",
+      )
+
+      expect(req.message).to eq(
+        name: "Push tokens",
+        data_file_url: "https://example.com/devices.csv",
+        type: "device",
+        identifier: "email",
+        description: "Tokens from the old provider",
+      )
+    end
+
+    it "raises an error when request is not a CreateImportRequest" do
+      expect {
+        client.create_import("not a request")
+      }.to raise_error(ArgumentError, /must be an instance of/)
+    end
+
+    it "handles validation failures (422)" do
+      req = Customerio::CreateImportRequest.new(
+        name: "Push tokens",
+        data_file_url: "https://example.com/devices.csv",
+        type: "device",
+        identifier: "id",
+        people_to_process: "all",
+      )
+
+      err_json = {
+        errors: [
+          {
+            detail: "example error",
+            source: { pointer: "/example" },
+            status: "422",
+          },
+        ],
+      }.to_json
+
+      stub_request(:post, api_uri('/v1/imports'))
+        .with(headers: request_headers, body: { import: req.message })
+        .to_return(status: 422, body: err_json, headers: {})
+
+      expect { client.create_import(req) }.to(
+        raise_error(Customerio::InvalidResponse) { |error|
+          expect(error.message).to eq(err_json)
+          expect(error.code).to eq("422")
+        }
+      )
+    end
+  end
+
+  describe "#get_import" do
+    def get_request_headers
+      { 'Authorization': "Bearer #{app_key}", 'User-Agent': 'Customer.io Ruby Client/' + Customerio::VERSION }
+    end
+
+    let(:import_body) do
+      {
+        import: {
+          id: "15",
+          type: "device",
+          state: "imported",
+          name: "Push tokens",
+          description: "",
+          identifier: "id",
+          rows_to_import: 3,
+          rows_imported: 2,
+          error: "",
+          error_download_url: "https://example.com/errors.csv",
+          created_at: 1511315635,
+          updated_at: 1511315700,
+        },
+      }
+    end
+
+    it "sends a GET request to the import path" do
+      stub = stub_request(:get, api_uri('/v1/imports/15'))
+        .with(headers: get_request_headers)
+        .to_return(status: 200, body: import_body.to_json, headers: {})
+
+      expect(client.get_import(15)).to eq(JSON.parse(import_body.to_json))
+      expect(client.get_import("15")).to eq(JSON.parse(import_body.to_json))
+      expect(stub).to have_been_requested.twice
+    end
+
+    it "sends no body and no Content-Type" do
+      stub_request(:get, api_uri('/v1/imports/15'))
+        .to_return(status: 200, body: import_body.to_json, headers: {})
+
+      client.get_import(15)
+
+      expect(
+        a_request(:get, api_uri('/v1/imports/15')).with { |request|
+          request.body.nil? && !request.headers.key?("Content-Type")
+        }
+      ).to have_been_made
+    end
+
+    it "raises an error when the import id is not a whole number" do
+      [nil, "", "abc", "15/../1", "1.5", 1.5, -15, "15\n"].each do |import_id|
+        expect {
+          client.get_import(import_id)
+        }.to raise_error(ArgumentError, "import_id must be a whole number")
+      end
+    end
+
+    it "handles failures (404)" do
+      stub_request(:get, api_uri('/v1/imports/15'))
+        .with(headers: get_request_headers)
+        .to_return(status: 404, body: "not found", headers: {})
+
+      expect { client.get_import(15) }.to(
+        raise_error(Customerio::InvalidResponse) { |error|
+          expect(error.message).to eq("not found")
+          expect(error.code).to eq("404")
+        }
+      )
+    end
+  end
 end
